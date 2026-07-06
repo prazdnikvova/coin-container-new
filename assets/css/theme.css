@@ -220,3 +220,22 @@ ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{
 .woocommerce form .form-row input,.woocommerce form .form-row textarea,.woocommerce form .form-row select{width:100%;padding:.6rem;border:1px solid var(--ccn-color-light);border-radius:4px}
 .woocommerce .woocommerce-message,.woocommerce .woocommerce-info,.woocommerce .woocommerce-error{padding:1rem;border-radius:4px;background:var(--ccn-color-light);margin-bottom:1rem;list-style:none}
 .woocommerce .woocommerce-error{background:#fde8e8}
+
+/* --------------------------------------------------------------------------
+ * Blog: single post + archive
+ * ------------------------------------------------------------------------ */
+.site-main > article,.site-main > .page-header,.blog .site-main > *,.archive .site-main > *,.search .site-main > *{max-width:820px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}
+.site-main{padding:2.5rem 0}
+.entry-header{margin-bottom:1.5rem}
+.entry-title{font-size:2rem;line-height:1.15}
+.entry-content{max-width:820px}
+.entry-content h2{font-size:1.5rem;margin:1.75rem 0 .75rem}
+.entry-content h3{font-size:1.25rem;margin:1.5rem 0 .5rem}
+.entry-content p{margin-bottom:1rem}
+.entry-content ul,.entry-content ol{margin:0 0 1rem 1.25rem}
+.entry-content ul{list-style:disc}.entry-content ol{list-style:decimal}
+.entry-content li{margin-bottom:.35rem}
+.entry-content a{color:var(--ccn-color-accent);text-decoration:underline}
+.entry-content img{max-width:100%;height:auto;border-radius:6px;margin:1rem 0}
+.entry-content blockquote{border-left:3px solid var(--ccn-color-primary);padding-left:1rem;margin:1rem 0;color:var(--ccn-color-secondary)}
+.archive .site-main article,.blog .site-main article{border-bottom:1px solid var(--ccn-color-light);padding-bottom:1.5rem;margin-bottom:1.5rem}
