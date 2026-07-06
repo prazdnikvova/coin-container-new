@@ -3,7 +3,8 @@
  * Section: hero. LCP image — eager, high priority, no lazy.
  */
 $ccn_img_id = get_sub_field( 'image' );
-$ccn_bg     = $ccn_img_id ? wp_get_attachment_image_url( $ccn_img_id, 'full' ) : '';
+// Bounded size, never the raw original — hero backgrounds must stay lean.
+$ccn_bg     = $ccn_img_id ? wp_get_attachment_image_url( $ccn_img_id, 'large' ) : '';
 ?>
 <section class="section section-hero"<?php echo $ccn_bg ? ' style="background-image:url(' . esc_url( $ccn_bg ) . ')"' : ''; ?>>
 	<div class="section-inner hero-inner">

@@ -126,6 +126,9 @@
         ],
         [
             { "param": "page_type", "operator": "==", "value": "front_page" }
+        ],
+        [
+            { "param": "page_template", "operator": "==", "value": "template-sections.php" }
         ]
     ],
     "menu_order": 0,

@@ -93,7 +93,7 @@ function ccn_preload_hero() {
 			the_row();
 			if ( 'hero' === get_row_layout() ) {
 				$img = get_sub_field( 'image' );
-				$url = $img ? wp_get_attachment_image_url( $img, 'full' ) : '';
+				$url = $img ? wp_get_attachment_image_url( $img, 'large' ) : '';
 				if ( $url ) {
 					printf(
 						'<link rel="preload" href="%s" as="image" fetchpriority="high">' . "\n",

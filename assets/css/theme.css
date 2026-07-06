@@ -257,3 +257,9 @@ ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{
 .catalog-filter-link:hover{border-color:var(--ccn-color-primary)}
 .catalog-filter-link.is-active{background:var(--ccn-color-primary);border-color:var(--ccn-color-primary);color:var(--ccn-color-text)}
 .catalog-filter-child{font-weight:400;font-size:.85rem;color:var(--ccn-color-secondary)}
+
+/* Landing pages: alternate section backgrounds for visual rhythm */
+.page-template-template-sections .section-text:nth-of-type(even){background:var(--ccn-color-light)}
+.page-template-template-sections .section-text .section-inner-narrow{max-width:900px}
+.page-template-template-sections .section-text .rich-text h3{font-size:1.2rem;margin:1.25rem 0 .5rem}
+.page-template-template-sections .section-hero .hero-inner{min-height:340px}
