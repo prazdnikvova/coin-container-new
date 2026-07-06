@@ -85,6 +85,14 @@ ok('Single product 200', respSingle.status() === 200, String(respSingle.status()
 ok('Single has title', (await page.locator('.product_title').count()) === 1);
 ok('Single has add-to-cart', (await page.locator('button.single_add_to_cart_button, a.add_to_cart_button').count()) >= 1);
 
+// Landing pages rebuilt as sections: hero + content + CTA, all images WebP
+const respLanding = await page.goto(BASE + '/container-kaufen/', { waitUntil: 'domcontentloaded' });
+ok('Landing 200', respLanding.status() === 200, String(respLanding.status()));
+ok('Landing has hero section', (await page.locator('.section-hero .hero-title').count()) === 1);
+ok('Landing has CTA section', (await page.locator('.section-cta').count()) >= 1);
+ok('No PNG/JPEG images in content', await page.evaluate(() =>
+	![...document.images].some((i) => /\.(png|jpe?g)(\?|$)/i.test(i.currentSrc || i.src))));
+
 // Contact form renders on the contact page; CF7 assets are page-scoped
 const respKontakt = await page.goto(BASE + '/kontakt-beratung/', { waitUntil: 'domcontentloaded' });
 ok('Contact page 200', respKontakt.status() === 200, String(respKontakt.status()));
