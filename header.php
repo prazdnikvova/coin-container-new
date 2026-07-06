@@ -10,7 +10,7 @@
 <header id="header" class="site-header">
 	<div class="header-inner">
 		<a class="site-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
-			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png' ); ?>" width="106" height="80" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="106" height="80" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 		</a>
 
 		<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">

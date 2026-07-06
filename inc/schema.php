@@ -32,7 +32,7 @@ function ccn_local_business_schema() {
 		'@id'       => home_url( '/#localbusiness' ),
 		'name'      => ccn_setting( 'company_name', get_bloginfo( 'name' ) ),
 		'url'       => home_url( '/' ),
-		'image'     => get_template_directory_uri() . '/assets/img/logo.png',
+		'image'     => get_template_directory_uri() . '/assets/img/logo.webp',
 		'telephone' => ccn_setting( 'phone' ),
 		'email'     => ccn_setting( 'email' ),
 		'address'   => array(
