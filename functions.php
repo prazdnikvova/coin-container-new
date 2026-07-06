@@ -80,6 +80,33 @@ function ccn_preload_fonts() {
 }
 
 /**
+ * Preload the front-page hero background (it's a CSS background-image, so the
+ * browser discovers it late — preloading it high-priority fixes the LCP).
+ */
+add_action( 'wp_head', 'ccn_preload_hero', 3 );
+function ccn_preload_hero() {
+	if ( ! is_front_page() || ! function_exists( 'have_rows' ) ) {
+		return;
+	}
+	if ( have_rows( 'page_sections' ) ) {
+		while ( have_rows( 'page_sections' ) ) {
+			the_row();
+			if ( 'hero' === get_row_layout() ) {
+				$img = get_sub_field( 'image' );
+				$url = $img ? wp_get_attachment_image_url( $img, 'full' ) : '';
+				if ( $url ) {
+					printf(
+						'<link rel="preload" href="%s" as="image" fetchpriority="high">' . "\n",
+						esc_url( $url )
+					);
+				}
+				break;
+			}
+		}
+	}
+}
+
+/**
  * Accessibility: skip link straight after <body>.
  */
 add_action( 'wp_body_open', 'ccn_skip_link', 5 );
