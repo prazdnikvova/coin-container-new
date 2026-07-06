@@ -58,6 +58,26 @@ function ccn_enqueue_assets() {
 }
 
 /**
+ * Preload the two fonts used above the fold (body regular + heading bold).
+ * Keep this list at 1-2 files: preloading more delays the LCP instead of
+ * helping it. The other weights load on demand via @font-face.
+ */
+add_action( 'wp_head', 'ccn_preload_fonts', 2 );
+function ccn_preload_fonts() {
+	$dir   = get_template_directory_uri();
+	$fonts = array(
+		'/assets/fonts/nunito-sans-v19-latin-regular.woff2',
+		'/assets/fonts/dm-sans-v17-latin-700.woff2',
+	);
+	foreach ( $fonts as $font ) {
+		printf(
+			'<link rel="preload" href="%s" as="font" type="font/woff2" crossorigin>' . "\n",
+			esc_url( $dir . $font )
+		);
+	}
+}
+
+/**
  * Accessibility: skip link straight after <body>.
  */
 add_action( 'wp_body_open', 'ccn_skip_link', 5 );
