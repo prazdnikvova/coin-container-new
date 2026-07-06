@@ -1,6 +1,7 @@
 <?php
 /**
- * Section: featured products. Renders nothing until products exist (T-08).
+ * Section: featured products. Uses the standard WooCommerce product loop so the
+ * cards match the shop. Renders nothing until products exist (T-08).
  */
 if ( ! class_exists( 'WooCommerce' ) ) {
 	return;
@@ -43,14 +44,14 @@ if ( ! $ccn_q->have_posts() ) {
 		<?php if ( $ccn_h = get_sub_field( 'heading' ) ) : ?>
 			<h2 class="section-heading"><?php echo esc_html( $ccn_h ); ?></h2>
 		<?php endif; ?>
-		<ul class="products-grid">
+		<?php woocommerce_product_loop_start(); ?>
 			<?php
 			while ( $ccn_q->have_posts() ) :
 				$ccn_q->the_post();
-				wc_get_template_part( 'content', 'product-card' );
+				wc_get_template_part( 'content', 'product' );
 			endwhile;
 			?>
-		</ul>
+		<?php woocommerce_product_loop_end(); ?>
 	</div>
 </section>
 <?php

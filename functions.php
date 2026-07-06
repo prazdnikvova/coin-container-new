@@ -138,3 +138,6 @@ function ccn_excerpt_read_more_link( $more ) {
 require_once get_template_directory() . '/inc/security.php';
 require_once get_template_directory() . '/inc/assets-cleanup.php';
 require_once get_template_directory() . '/inc/site-settings.php';
+if ( class_exists( 'WooCommerce' ) ) {
+	require_once get_template_directory() . '/inc/woocommerce.php';
+}

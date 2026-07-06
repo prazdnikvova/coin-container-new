@@ -65,6 +65,26 @@ ok('Escape closes nav', (await burger.getAttribute('aria-expanded')) === 'false'
 ok('Zero JS errors on mobile home', mobErrors.length === 0, mobErrors.join(' | '));
 await mob.close();
 
+// Homepage: featured products render (WooCommerce loop)
+ok('Featured products on home', await page.locator('.section-featured ul.products li.product').count() >= 3);
+
+// Shop: product grid renders, jQuery still absent on a catalog page
+const respShop = await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });
+ok('Shop responds 200', respShop.status() === 200, String(respShop.status()));
+ok('Shop lists products', await page.locator('ul.products li.product').count() >= 6);
+ok('jQuery absent on shop', await page.evaluate(() => typeof window.jQuery === 'undefined'));
+
+// Category archive renders products
+const respCat = await page.goto(BASE + '/product-category/cointainer/standardcontainer/', { waitUntil: 'domcontentloaded' });
+ok('Category responds 200', respCat.status() === 200, String(respCat.status()));
+ok('Category lists products', await page.locator('ul.products li.product').count() >= 3);
+
+// Single product: title, price area, add-to-cart button
+const respSingle = await page.goto(BASE + '/product/20-fuss-container-one-way/', { waitUntil: 'domcontentloaded' });
+ok('Single product 200', respSingle.status() === 200, String(respSingle.status()));
+ok('Single has title', (await page.locator('.product_title').count()) === 1);
+ok('Single has add-to-cart', (await page.locator('button.single_add_to_cart_button, a.add_to_cart_button').count()) >= 1);
+
 // 404 status for a missing page
 const resp404 = await page.goto(BASE + '/there-is-no-such-page-xyz/', { waitUntil: 'domcontentloaded' });
 ok('Missing page returns 404', resp404.status() === 404, String(resp404.status()));
