@@ -42,11 +42,21 @@ function ccn_drop_jquery_migrate( $scripts ) {
 }
 
 /**
- * Contact Form 7 assets stay off until a page actually renders a form —
- * re-enabled selectively when the form pages are built (task T-19).
+ * Contact Form 7 assets load only on pages that actually contain a form, so the
+ * ~40KB of CF7 CSS/JS never touches the other 30+ pages.
  */
-add_filter( 'wpcf7_load_js', '__return_false' );
-add_filter( 'wpcf7_load_css', '__return_false' );
+function ccn_page_has_form() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+	$post = get_post();
+	return $post && has_shortcode( $post->post_content, 'contact-form-7' );
+}
+add_filter( 'wpcf7_load_js', 'ccn_maybe_load_cf7' );
+add_filter( 'wpcf7_load_css', 'ccn_maybe_load_cf7' );
+function ccn_maybe_load_cf7( $load ) {
+	return ccn_page_has_form();
+}
 
 /**
  * Late dequeues. Cart fragments are disabled everywhere (the header cart count

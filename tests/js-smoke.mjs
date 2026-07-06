@@ -85,6 +85,16 @@ ok('Single product 200', respSingle.status() === 200, String(respSingle.status()
 ok('Single has title', (await page.locator('.product_title').count()) === 1);
 ok('Single has add-to-cart', (await page.locator('button.single_add_to_cart_button, a.add_to_cart_button').count()) >= 1);
 
+// Contact form renders on the contact page; CF7 assets are page-scoped
+const respKontakt = await page.goto(BASE + '/kontakt-beratung/', { waitUntil: 'domcontentloaded' });
+ok('Contact page 200', respKontakt.status() === 200, String(respKontakt.status()));
+ok('Contact form renders', (await page.locator('form.wpcf7-form input[name="your-name"]').count()) === 1);
+ok('Submit button present', (await page.locator('form.wpcf7-form .wpcf7-submit').count()) === 1);
+
+// CF7 JS must NOT load on pages without a form (home)
+await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' });
+ok('No CF7 JS on home', (await page.locator('script[src*="contact-form-7"]').count()) === 0);
+
 // 404 status for a missing page
 const resp404 = await page.goto(BASE + '/there-is-no-such-page-xyz/', { waitUntil: 'domcontentloaded' });
 ok('Missing page returns 404', resp404.status() === 404, String(resp404.status()));
