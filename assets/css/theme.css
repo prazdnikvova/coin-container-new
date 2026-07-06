@@ -250,3 +250,10 @@ ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{
 .wpcf7 .wpcf7-submit:hover{background:var(--ccn-color-text);color:var(--ccn-color-white)}
 .wpcf7-acceptance{font-weight:400}
 .wpcf7 .wpcf7-response-output{margin:1rem 0 0;padding:.75rem 1rem;border-radius:4px}
+
+/* Catalog filter bar */
+.catalog-filter{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.catalog-filter-link{display:inline-block;padding:.4rem .9rem;border:1px solid var(--ccn-color-light);border-radius:999px;font-size:.9rem;font-weight:700;background:var(--ccn-color-white)}
+.catalog-filter-link:hover{border-color:var(--ccn-color-primary)}
+.catalog-filter-link.is-active{background:var(--ccn-color-primary);border-color:var(--ccn-color-primary);color:var(--ccn-color-text)}
+.catalog-filter-child{font-weight:400;font-size:.85rem;color:var(--ccn-color-secondary)}
