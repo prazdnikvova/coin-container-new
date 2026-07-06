@@ -1,0 +1,122 @@
+{
+    "key": "group_ccn_site_settings",
+    "title": "Site Settings",
+    "fields": [
+        {
+            "key": "field_ccn_tab_contacts",
+            "label": "Contacts",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_company_name",
+            "label": "Company name",
+            "name": "company_name",
+            "type": "text",
+            "instructions": "Legal company name shown in the footer.",
+            "required": 0
+        },
+        {
+            "key": "field_ccn_phone",
+            "label": "Phone",
+            "name": "phone",
+            "type": "text",
+            "instructions": "Displayed in header and footer. Digits, +, spaces.",
+            "required": 0
+        },
+        {
+            "key": "field_ccn_email",
+            "label": "Email",
+            "name": "email",
+            "type": "email",
+            "required": 0
+        },
+        {
+            "key": "field_ccn_address",
+            "label": "Address",
+            "name": "address",
+            "type": "text",
+            "instructions": "Street, postal code, city — one line.",
+            "required": 0
+        },
+        {
+            "key": "field_ccn_tab_footer",
+            "label": "Footer",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_footer_tagline",
+            "label": "Footer tagline",
+            "name": "footer_tagline",
+            "type": "textarea",
+            "instructions": "Short text under the logo in the footer.",
+            "rows": 3,
+            "new_lines": ""
+        },
+        {
+            "key": "field_ccn_tab_social",
+            "label": "Social",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_social_facebook",
+            "label": "Facebook URL",
+            "name": "social_facebook",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_social_instagram",
+            "label": "Instagram URL",
+            "name": "social_instagram",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_social_linkedin",
+            "label": "LinkedIn URL",
+            "name": "social_linkedin",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_social_ebay",
+            "label": "eBay store URL",
+            "name": "social_ebay",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_social_pinterest",
+            "label": "Pinterest URL",
+            "name": "social_pinterest",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_social_xing",
+            "label": "Xing URL",
+            "name": "social_xing",
+            "type": "url"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "options_page",
+                "operator": "==",
+                "value": "ccn-site-settings"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "active": true,
+    "show_in_rest": 0
+}

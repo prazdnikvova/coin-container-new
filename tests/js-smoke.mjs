@@ -36,6 +36,35 @@ ok('main.js enqueued with defer', await mainScript.count() === 1 && (await mainS
 
 ok('Zero JS errors on home', errors.length === 0, errors.join(' | '));
 
+// Vanilla-JS policy: jQuery must not load outside Woo cart/checkout/account
+ok('jQuery absent on home', await page.evaluate(() => typeof window.jQuery === 'undefined'));
+
+// Header: primary nav with dropdown structure, phone link
+ok('Primary nav rendered', await page.locator('#site-nav .site-menu > li').count() >= 5);
+ok('Nav has dropdowns', await page.locator('#site-nav .sub-menu').count() >= 2);
+ok('Header phone link', await page.locator('.header-phone[href^="tel:"]').count() === 1);
+
+// Footer: contacts from Site Settings + legal menu
+ok('Footer address rendered', (await page.locator('.footer-address').textContent() || '').includes('Hamburg'));
+ok('Footer legal menu', await page.locator('.footer-menu li').count() >= 4);
+ok('Footer social links', await page.locator('.footer-social-list a[href^="https://"]').count() >= 4);
+
+// Mobile: burger opens/closes the nav, Escape closes it, zero JS errors
+const mob = await browser.newPage({ viewport: { width: 375, height: 720 } });
+const mobErrors = [];
+mob.on('pageerror', (e) => mobErrors.push('pageerror: ' + e.message));
+mob.on('console', (m) => { if (m.type() === 'error') mobErrors.push('console: ' + m.text()); });
+await mob.goto(BASE + '/', { waitUntil: 'load' });
+const burger = mob.locator('.nav-toggle');
+ok('Burger visible on mobile', await burger.isVisible());
+ok('Nav hidden before toggle', !(await mob.locator('#site-nav').isVisible()));
+await burger.click();
+ok('Burger opens nav', (await burger.getAttribute('aria-expanded')) === 'true' && (await mob.locator('#site-nav').isVisible()));
+await mob.keyboard.press('Escape');
+ok('Escape closes nav', (await burger.getAttribute('aria-expanded')) === 'false' && !(await mob.locator('#site-nav').isVisible()));
+ok('Zero JS errors on mobile home', mobErrors.length === 0, mobErrors.join(' | '));
+await mob.close();
+
 // 404 status for a missing page
 const resp404 = await page.goto(BASE + '/there-is-no-such-page-xyz/', { waitUntil: 'domcontentloaded' });
 ok('Missing page returns 404', resp404.status() === 404, String(resp404.status()));

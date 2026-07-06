@@ -13,9 +13,11 @@ function ccn_setup() {
 	add_theme_support( 'html5', array( 'search-form', 'comment-list', 'comment-form', 'gallery', 'caption', 'style', 'script', 'navigation-widgets' ) );
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'align-wide' );
+	add_theme_support( 'woocommerce' );
 	register_nav_menus(
 		array(
 			'primary' => esc_html__( 'Primary Menu', 'coin-container' ),
+			'footer'  => esc_html__( 'Footer Menu', 'coin-container' ),
 		)
 	);
 }
@@ -107,3 +109,5 @@ function ccn_excerpt_read_more_link( $more ) {
 }
 
 require_once get_template_directory() . '/inc/security.php';
+require_once get_template_directory() . '/inc/assets-cleanup.php';
+require_once get_template_directory() . '/inc/site-settings.php';
