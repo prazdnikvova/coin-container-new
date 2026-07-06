@@ -1,0 +1,11 @@
+{
+  "name": "coin-container-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node js-smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.60.0"
+  }
+}

@@ -1,0 +1,109 @@
+# Copyright (C) 2026 Volodymyr Prazdnikov
+# This file is distributed under the GNU General Public License v3 or Later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Coin Container 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/coin-container\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-07-05T21:57:22+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: coin-container\n"
+
+#. Theme Name of the theme
+#: style.css
+msgid "Coin Container"
+msgstr ""
+
+#. Theme URI of the theme
+#: style.css
+msgid "https://github.com/prazdnikvova/coin-container"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "A lean, opinionated WordPress starter theme: clean template hierarchy, deferred JS with filemtime cache busting, security hardening out of the box, i18n-ready, with PHPCS + CI + a Playwright smoke test included. Based on BlankSlate (GPL)."
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Volodymyr Prazdnikov"
+msgstr ""
+
+#. Author URI of the theme
+#: style.css
+msgid "https://www.linkedin.com/in/volodymyr-prazdnikov-2516451ab/"
+msgstr ""
+
+#: 404.php:5
+msgid "Page Not Found"
+msgstr ""
+
+#: 404.php:8
+msgid "Nothing found for the requested page. Try a search instead?"
+msgstr ""
+
+#. translators: %s: number of comments
+#: comments.php:12
+#, php-format
+msgid "%s comment"
+msgid_plural "%s comments"
+msgstr[0] ""
+msgstr[1] ""
+
+#: comments.php:23
+msgid "Comments are closed."
+msgstr ""
+
+#: entry-footer.php:3
+msgid "Categories: "
+msgstr ""
+
+#: functions.php:18
+msgid "Primary Menu"
+msgstr ""
+
+#: functions.php:65
+msgid "Skip to the content"
+msgstr ""
+
+#. translators: %s: post title, visually hidden
+#: functions.php:77
+#: functions.php:86
+#, php-format
+msgid "&hellip;%s"
+msgstr ""
+
+#: header.php:26
+msgid "Primary Navigation"
+msgstr ""
+
+#. translators: %s: arrow
+#: nav-below.php:5
+#, php-format
+msgid "%s older"
+msgstr ""
+
+#. translators: %s: arrow
+#: nav-below.php:7
+#, php-format
+msgid "newer %s"
+msgstr ""
+
+#. translators: %s: search query
+#: search.php:8
+#, php-format
+msgid "Search Results for: %s"
+msgstr ""
+
+#: search.php:22
+msgid "Nothing Found"
+msgstr ""
+
+#: search.php:25
+msgid "Sorry, nothing matched your search. Please try again."
+msgstr ""

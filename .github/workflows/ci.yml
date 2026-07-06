@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  php-lint:
+    name: PHP syntax (php -l)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Lint all PHP files
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -not -path './tests/*' -print0 \
+            | xargs -0 -n1 -P4 php -l > /dev/null
+          echo "All PHP files pass php -l on PHP ${{ matrix.php }}"
+
+  phpcs:
+    name: PHPCS (security + i18n ruleset)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+      - name: Run PHPCS
+        run: vendor/bin/phpcs
