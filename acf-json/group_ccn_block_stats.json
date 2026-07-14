@@ -1,0 +1,65 @@
+{
+    "key": "group_ccn_block_stats",
+    "title": "Block: Stats",
+    "fields": [
+        {
+            "key": "field_ccn_st_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_st_heading_accent",
+            "label": "Heading accent (yellow tail)",
+            "name": "heading_accent",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_st_subtitle",
+            "label": "Subtitle",
+            "name": "subtitle",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
+            "key": "field_ccn_st_items",
+            "label": "Counters",
+            "name": "items",
+            "type": "repeater",
+            "layout": "table",
+            "button_label": "Add counter",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_st_item_number",
+                    "label": "Number",
+                    "name": "number",
+                    "type": "number"
+                },
+                {
+                    "key": "field_ccn_st_item_suffix",
+                    "label": "Suffix",
+                    "name": "suffix",
+                    "type": "text",
+                    "instructions": "e.g. +"
+                },
+                {
+                    "key": "field_ccn_st_item_label",
+                    "label": "Label",
+                    "name": "label",
+                    "type": "text"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/stats"
+            }
+        ]
+    ],
+    "active": true
+}

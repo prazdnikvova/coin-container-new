@@ -1,0 +1,52 @@
+{
+    "key": "group_ccn_block_cta_banner",
+    "title": "Block: CTA banner",
+    "fields": [
+        {
+            "key": "field_ccn_cb_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_cb_btn_text",
+            "label": "Button text",
+            "name": "button_text",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_cb_btn_url",
+            "label": "Button URL",
+            "name": "button_url",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_cb_image",
+            "label": "Background photo",
+            "name": "image",
+            "type": "image",
+            "return_format": "id",
+            "preview_size": "medium",
+            "instructions": "WebP around 1920px, lazy-loaded."
+        },
+        {
+            "key": "field_ccn_cb_show_logo",
+            "label": "Show site logo above the heading",
+            "name": "show_logo",
+            "type": "true_false",
+            "default_value": 1,
+            "ui": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/cta-banner"
+            }
+        ]
+    ],
+    "active": true
+}

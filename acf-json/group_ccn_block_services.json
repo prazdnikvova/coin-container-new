@@ -1,0 +1,77 @@
+{
+    "key": "group_ccn_block_services",
+    "title": "Block: Services strip",
+    "fields": [
+        {
+            "key": "field_ccn_sv_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_sv_heading_accent",
+            "label": "Heading accent (yellow tail)",
+            "name": "heading_accent",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_sv_intro",
+            "label": "Intro",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 3
+        },
+        {
+            "key": "field_ccn_sv_image",
+            "label": "Strip background photo",
+            "name": "image",
+            "type": "image",
+            "return_format": "id",
+            "preview_size": "medium",
+            "instructions": "WebP around 1920px, lazy-loaded."
+        },
+        {
+            "key": "field_ccn_sv_items",
+            "label": "Services",
+            "name": "items",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add service",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_sv_item_number",
+                    "label": "Number",
+                    "name": "number",
+                    "type": "text",
+                    "wrapper": { "width": "20" }
+                },
+                {
+                    "key": "field_ccn_sv_item_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text",
+                    "wrapper": { "width": "35" }
+                },
+                {
+                    "key": "field_ccn_sv_item_text",
+                    "label": "Text (shown on hover)",
+                    "name": "text",
+                    "type": "textarea",
+                    "rows": 3,
+                    "wrapper": { "width": "45" }
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/services"
+            }
+        ]
+    ],
+    "active": true
+}

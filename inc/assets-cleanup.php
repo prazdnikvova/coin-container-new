@@ -68,6 +68,7 @@ function ccn_cleanup_assets() {
 	// No jQuery-powered AJAX cart on any page.
 	wp_dequeue_script( 'wc-cart-fragments' );
 
+
 	if ( ccn_is_wc_transactional() ) {
 		return;
 	}
@@ -87,4 +88,17 @@ function ccn_cleanup_assets() {
 	// With the Woo scripts gone nothing on the page needs jQuery.
 	wp_dequeue_script( 'jquery' );
 	wp_deregister_script( 'jquery' );
+}
+
+/**
+ * The theme uses ACF blocks styled by theme.css only. WooCommerce enqueues
+ * its blocks stylesheet (wc-blocks.css) as soon as post content contains any
+ * block — the theme ships no WC blocks, so it is dead weight. Late hook:
+ * Woo enqueues it after the wp_enqueue_scripts cleanup pass.
+ */
+add_action( 'wp_enqueue_scripts', 'ccn_drop_wc_blocks_style', 9999 );
+add_action( 'wp_print_styles', 'ccn_drop_wc_blocks_style', 99 );
+function ccn_drop_wc_blocks_style() {
+	wp_dequeue_style( 'wc-blocks-style' );
+	wp_deregister_style( 'wc-blocks-style' );
 }

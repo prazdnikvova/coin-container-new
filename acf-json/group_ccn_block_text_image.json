@@ -1,0 +1,66 @@
+{
+    "key": "group_ccn_block_text_image",
+    "title": "Block: Text + image",
+    "fields": [
+        {
+            "key": "field_ccn_ti_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_ti_text",
+            "label": "Text",
+            "name": "text",
+            "type": "wysiwyg",
+            "media_upload": 0,
+            "toolbar": "basic"
+        },
+        {
+            "key": "field_ccn_ti_highlight",
+            "label": "Highlight line (bold)",
+            "name": "highlight",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
+            "key": "field_ccn_ti_btn_text",
+            "label": "Button text",
+            "name": "button_text",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_ti_btn_url",
+            "label": "Button URL",
+            "name": "button_url",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_ti_image_1",
+            "label": "Photo 1 (big)",
+            "name": "image_1",
+            "type": "image",
+            "return_format": "id",
+            "preview_size": "medium"
+        },
+        {
+            "key": "field_ccn_ti_image_2",
+            "label": "Photo 2 (overlapping)",
+            "name": "image_2",
+            "type": "image",
+            "return_format": "id",
+            "preview_size": "medium"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/text-image"
+            }
+        ]
+    ],
+    "active": true
+}

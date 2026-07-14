@@ -1,0 +1,32 @@
+{
+    "key": "group_ccn_block_news",
+    "title": "Block: News",
+    "fields": [
+        {
+            "key": "field_ccn_nw_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "default_value": "Nachrichten"
+        },
+        {
+            "key": "field_ccn_nw_count",
+            "label": "Posts",
+            "name": "count",
+            "type": "number",
+            "default_value": 4,
+            "min": 1,
+            "max": 8
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/news"
+            }
+        ]
+    ],
+    "active": true
+}

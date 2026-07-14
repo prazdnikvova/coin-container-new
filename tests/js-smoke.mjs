@@ -111,6 +111,17 @@ ok('Sale badge styled (Angebot!)', await page.evaluate(() => {
 	return !!b && /angebot/i.test(b.textContent) && getComputedStyle(b).position === 'absolute';
 }));
 
+// Homepage: middle + bottom blocks (text-image, services, stats, CTA, news)
+ok('Text-image block with collage', await page.locator('.ccn-text-image .ccn-text-image-photo').count() === 2);
+ok('Services strip with 4 items', await page.locator('.ccn-services .ccn-service').count() === 4);
+ok('Services strip photo is lazy', (await page.locator('.ccn-services-bg').getAttribute('loading')) === 'lazy');
+ok('Stats has 3 counters', await page.locator('.ccn-stats .ccn-stat-number[data-target]').count() === 3);
+ok('CTA banner heading + button', await page.locator('.ccn-cta .ccn-cta-heading').count() === 1
+	&& await page.locator('.ccn-cta .btn-primary').count() === 1);
+ok('News grid with 4 cards', await page.locator('.ccn-news .ccn-news-card').count() === 4);
+ok('News cards have category badges', await page.locator('.ccn-news .ccn-news-badge').count() >= 3);
+ok('Home is fully block-based (no flexible sections)', await page.locator('main .section-hero, main .section-cta, main .section-featured').count() === 0);
+
 // Shop: product grid renders, jQuery still absent on a catalog page
 const respShop = await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });
 ok('Shop responds 200', respShop.status() === 200, String(respShop.status()));

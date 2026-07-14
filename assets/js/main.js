@@ -77,4 +77,32 @@ document.addEventListener('DOMContentLoaded', () => {
 		onScroll();
 		window.addEventListener('scroll', onScroll, { passive: true });
 	}
+
+	// Stats block: count numbers up once the block scrolls into view.
+	const counters = document.querySelectorAll('.ccn-stat-number[data-target]');
+	if (counters.length && 'IntersectionObserver' in window) {
+		const animate = (el) => {
+			const target = parseInt(el.dataset.target, 10) || 0;
+			const suffix = el.dataset.suffix || '';
+			const duration = 1200;
+			const start = performance.now();
+			const tick = (now) => {
+				const p = Math.min((now - start) / duration, 1);
+				el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+				if (p < 1) requestAnimationFrame(tick);
+			};
+			requestAnimationFrame(tick);
+		};
+		const seen = new WeakSet();
+		const io = new IntersectionObserver((entries) => {
+			entries.forEach((e) => {
+				if (e.isIntersecting && !seen.has(e.target)) {
+					seen.add(e.target);
+					animate(e.target);
+					io.unobserve(e.target);
+				}
+			});
+		}, { threshold: 0.4 });
+		counters.forEach((c) => io.observe(c));
+	}
 });
