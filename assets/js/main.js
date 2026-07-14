@@ -36,4 +36,45 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 		});
 	}
+
+	// Header search toggle.
+	const searchToggle = document.querySelector('.search-toggle');
+	const searchForm = document.getElementById('header-search-form');
+
+	if (searchToggle && searchForm) {
+		const closeSearch = () => {
+			searchToggle.setAttribute('aria-expanded', 'false');
+			searchForm.hidden = true;
+		};
+
+		searchToggle.addEventListener('click', () => {
+			const open = searchToggle.getAttribute('aria-expanded') === 'true';
+			searchToggle.setAttribute('aria-expanded', String(!open));
+			searchForm.hidden = open;
+			if (!open) {
+				searchForm.querySelector('input[type="search"]').focus();
+			}
+		});
+
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && !searchForm.hidden) {
+				closeSearch();
+				searchToggle.focus();
+			}
+		});
+
+		document.addEventListener('click', (e) => {
+			if (!searchForm.hidden && !searchForm.contains(e.target) && !searchToggle.contains(e.target)) {
+				closeSearch();
+			}
+		});
+	}
+
+	// Sticky header shadow once the page scrolls.
+	const header = document.getElementById('header');
+	if (header) {
+		const onScroll = () => header.classList.toggle('is-stuck', window.scrollY > 8);
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
+	}
 });

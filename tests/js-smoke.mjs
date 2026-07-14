@@ -44,6 +44,27 @@ ok('Primary nav rendered', await page.locator('#site-nav .site-menu > li').count
 ok('Nav has dropdowns', await page.locator('#site-nav .sub-menu').count() >= 2);
 ok('Header phone link', await page.locator('.header-phone[href^="tel:"]').count() === 1);
 
+// Top bar (desktop): contacts + social; sticky header
+ok('Topbar visible on desktop', await page.locator('.ccn-topbar').isVisible());
+ok('Topbar email link', await page.locator('.ccn-topbar-email[href^="mailto:"]').count() === 1);
+ok('Topbar social icons', await page.locator('.ccn-topbar-social a[href^="https://"]').count() >= 3);
+ok('Header is sticky', await page.evaluate(() =>
+	getComputedStyle(document.querySelector('.site-header')).position === 'sticky'));
+
+// Cart icon with count badge
+ok('Cart icon with count', await page.locator('.header-cart svg').count() === 1
+	&& /^\d+$/.test((await page.locator('.header-cart-count').textContent() || '').trim()));
+
+// Search: toggle opens the form, Escape closes it
+const searchToggle = page.locator('.search-toggle');
+ok('Search form hidden initially', !(await page.locator('#header-search-form').isVisible()));
+await searchToggle.click();
+ok('Search toggle opens form', (await searchToggle.getAttribute('aria-expanded')) === 'true'
+	&& await page.locator('#header-search-form input[name="s"]').isVisible());
+await page.keyboard.press('Escape');
+ok('Escape closes search', (await searchToggle.getAttribute('aria-expanded')) === 'false'
+	&& !(await page.locator('#header-search-form').isVisible()));
+
 // Footer: contacts from Site Settings + legal menu
 ok('Footer address rendered', (await page.locator('.footer-address').textContent() || '').includes('Hamburg'));
 ok('Footer legal menu', await page.locator('.footer-menu li').count() >= 4);
