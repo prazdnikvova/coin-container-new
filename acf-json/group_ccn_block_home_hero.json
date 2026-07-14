@@ -1,0 +1,53 @@
+{
+    "key": "group_ccn_block_home_hero",
+    "title": "Block: Home hero",
+    "fields": [
+        {
+            "key": "field_ccn_hh_image",
+            "label": "Background image",
+            "name": "image",
+            "type": "image",
+            "required": 1,
+            "return_format": "id",
+            "preview_size": "medium",
+            "instructions": "WebP around 1920px wide, up to ~200 KB — this is the LCP image."
+        },
+        {
+            "key": "field_ccn_hh_title",
+            "label": "Title",
+            "name": "title",
+            "type": "text",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_hh_subtitle",
+            "label": "Subtitle",
+            "name": "subtitle",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
+            "key": "field_ccn_hh_btn_text",
+            "label": "Button text",
+            "name": "button_text",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_hh_btn_url",
+            "label": "Button URL",
+            "name": "button_url",
+            "type": "text"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/home-hero"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Home hero block (blocks\/banners\/home-hero.php)."
+}

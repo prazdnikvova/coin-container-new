@@ -1,9 +1,16 @@
 <?php
 /**
- * Front page — renders the ACF flexible-content sections.
+ * Front page. Blocks render first (the page is being migrated to ACF blocks,
+ * decision 2026-07-14), then any flexible-content sections that have not
+ * been migrated yet. Once all sections are blocks, the sections loop goes.
  */
 
 get_header();
+
+while ( have_posts() ) {
+	the_post();
+	the_content();
+}
 
 if ( function_exists( 'have_rows' ) && have_rows( 'page_sections' ) ) {
 	while ( have_rows( 'page_sections' ) ) {
@@ -13,11 +20,6 @@ if ( function_exists( 'have_rows' ) && have_rows( 'page_sections' ) ) {
 		if ( $ccn_part ) {
 			include $ccn_part;
 		}
-	}
-} else {
-	while ( have_posts() ) {
-		the_post();
-		the_content();
 	}
 }
 

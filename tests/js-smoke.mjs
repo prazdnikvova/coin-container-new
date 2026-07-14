@@ -65,6 +65,18 @@ ok('Escape closes nav', (await burger.getAttribute('aria-expanded')) === 'false'
 ok('Zero JS errors on mobile home', mobErrors.length === 0, mobErrors.join(' | '));
 await mob.close();
 
+// Homepage: hero block (acf/home-hero) — H1 + responsive LCP image
+ok('Hero block on home', await page.locator('.ccn-hero').count() === 1);
+ok('Hero has H1', await page.locator('.ccn-hero h1.ccn-hero-title').count() === 1);
+ok('Hero image loads with high priority', await page.evaluate(() => {
+	const img = document.querySelector('.ccn-hero img.ccn-hero-img');
+	return !!img && img.getAttribute('fetchpriority') === 'high' && !!img.currentSrc;
+}));
+ok('Hero image is responsive (srcset)', await page.evaluate(() => {
+	const img = document.querySelector('.ccn-hero img.ccn-hero-img');
+	return !!img && (img.getAttribute('srcset') || '').split(',').length >= 2;
+}));
+
 // Homepage: featured products render (WooCommerce loop)
 ok('Featured products on home', await page.locator('.section-featured ul.products li.product').count() >= 3);
 

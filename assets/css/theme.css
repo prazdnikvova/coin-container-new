@@ -126,6 +126,17 @@ em,i{font-style:italic}
 .rich-text ul{list-style:disc;margin:0 0 1rem 1.25rem}
 
 /* Hero */
+/* Block: home hero (acf/home-hero) — full-screen photo, dark gradient, big left-aligned heading */
+.ccn-hero{position:relative;overflow:hidden;color:var(--ccn-color-white)}
+.ccn-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ccn-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(20,20,20,.6) 0%,rgba(20,20,20,.25) 60%,rgba(20,20,20,.15) 100%)}
+.ccn-hero-inner{z-index:2}
+.ccn-hero-inner{position:relative;max-width:1200px;margin:0 auto;padding:5rem 1rem;min-height:calc(100svh - 4.5rem);display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.ccn-hero-title{color:var(--ccn-color-white);font-size:clamp(2rem,3.4vw,3rem);line-height:1.3;max-width:56rem}
+.ccn-hero-subtitle{font-size:1.125rem;max-width:38rem;margin-top:1.25rem}
+.ccn-hero-btn{margin-top:1.75rem}
+@media (max-width:48rem){.ccn-hero-inner{min-height:70svh;padding:4rem 1rem}}
+
 .section-hero{position:relative;background-size:cover;background-position:center;color:var(--ccn-color-white);padding:0}
 .section-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,20,20,.72) 0%,rgba(20,20,20,.35) 100%)}
 .hero-inner{position:relative;max-width:1200px;margin:0 auto;padding:6rem 1rem;min-height:520px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}

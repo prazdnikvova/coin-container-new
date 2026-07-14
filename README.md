@@ -28,8 +28,14 @@ mobile emulation) and the numbers go into the commit body.
 
 ## Stack & conventions
 
-- WordPress + WooCommerce, ACF Pro (flexible-content sections, one "Site Settings"
-  options page with tabs), Contact Form 7, Yoast SEO.
+- WordPress + WooCommerce, ACF Pro (content as ACF blocks in the block editor,
+  one "Site Settings" options page with tabs), Contact Form 7, Yoast SEO.
+- Content blocks are ACF blocks registered in `blocks/acf-blocks.php` under
+  custom inserter categories (COIN Banners / Lists / Products / Text); each
+  block template lives in `blocks/<category>/<name>.php`, its fields in
+  `acf-json/`, and per-block assets are enqueued only where the block is used.
+  Legacy flexible-content sections (`sections/`) remain on the Sections
+  template landings until they are migrated to blocks.
 - Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
   no jQuery.
 - All strings wrapped in gettext with the `coin-container` text domain

@@ -14,6 +14,8 @@ function ccn_setup() {
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'woocommerce' );
+	// Hero background: full-screen photo, capped so originals never ship raw.
+	add_image_size( 'ccn-hero', 1920, 1080, true );
 	register_nav_menus(
 		array(
 			'primary' => esc_html__( 'Primary Menu', 'coin-container' ),
@@ -80,12 +82,37 @@ function ccn_preload_fonts() {
 }
 
 /**
- * Preload the front-page hero background (it's a CSS background-image, so the
- * browser discovers it late — preloading it high-priority fixes the LCP).
+ * Preload the front-page hero image. The acf/home-hero block renders a
+ * responsive <img>, so the preload uses imagesrcset/imagesizes — the browser
+ * picks the same candidate as the <img> and the requests dedupe. The legacy
+ * flexible-content hero is a CSS background (discovered late), preloaded by
+ * plain URL.
  */
 add_action( 'wp_head', 'ccn_preload_hero', 3 );
 function ccn_preload_hero() {
 	if ( ! is_front_page() || ! function_exists( 'have_rows' ) ) {
+		return;
+	}
+	$post = get_post();
+	if ( $post && has_block( 'acf/home-hero', $post ) ) {
+		foreach ( parse_blocks( $post->post_content ) as $parsed ) {
+			if ( 'acf/home-hero' === $parsed['blockName'] ) {
+				$data = $parsed['attrs']['data'] ?? array();
+				$img  = (int) ( $data['image'] ?? $data['field_ccn_hh_image'] ?? 0 );
+				if ( $img ) {
+					$srcset = wp_get_attachment_image_srcset( $img, 'ccn-hero' );
+					$src    = wp_get_attachment_image_url( $img, 'ccn-hero' );
+					if ( $srcset && $src ) {
+						printf(
+							'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",
+							esc_url( $src ),
+							esc_attr( $srcset )
+						);
+					}
+				}
+				break;
+			}
+		}
 		return;
 	}
 	if ( have_rows( 'page_sections' ) ) {
@@ -135,6 +162,7 @@ function ccn_excerpt_read_more_link( $more ) {
 	return ' <a href="' . esc_url( get_permalink() ) . '" class="more-link">' . sprintf( __( '&hellip;%s', 'coin-container' ), '<span class="screen-reader-text"> ' . esc_html( get_the_title() ) . '</span>' ) . '</a>';
 }
 
+require_once get_template_directory() . '/blocks/acf-blocks.php';
 require_once get_template_directory() . '/inc/security.php';
 require_once get_template_directory() . '/inc/assets-cleanup.php';
 require_once get_template_directory() . '/inc/site-settings.php';
