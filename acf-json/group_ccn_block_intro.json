@@ -1,0 +1,57 @@
+{
+    "key": "group_ccn_block_intro",
+    "title": "Block: Intro",
+    "fields": [
+        {
+            "key": "field_ccn_in_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_in_heading_accent",
+            "label": "Heading accent (yellow line)",
+            "name": "heading_accent",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_in_subheading",
+            "label": "Subheading (bold)",
+            "name": "subheading",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
+            "key": "field_ccn_in_text",
+            "label": "Text",
+            "name": "text",
+            "type": "wysiwyg",
+            "media_upload": 0,
+            "toolbar": "basic"
+        },
+        {
+            "key": "field_ccn_in_btn_text",
+            "label": "Button text",
+            "name": "button_text",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_in_btn_url",
+            "label": "Button URL",
+            "name": "button_url",
+            "type": "text"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/intro"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Intro block (blocks\/text\/intro.php)."
+}

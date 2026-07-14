@@ -98,8 +98,18 @@ ok('Hero image is responsive (srcset)', await page.evaluate(() => {
 	return !!img && (img.getAttribute('srcset') || '').split(',').length >= 2;
 }));
 
-// Homepage: featured products render (WooCommerce loop)
-ok('Featured products on home', await page.locator('.section-featured ul.products li.product').count() >= 3);
+// Homepage: contact cards + intro blocks (top of the page, original design)
+ok('Contact cards render', await page.locator('.ccn-contact-cards .ccn-contact-card').count() === 3);
+ok('Contact phone card is dark', await page.locator('.ccn-contact-card.is-dark a[href^="tel:"]').count() === 1);
+ok('Intro heading with accent', await page.locator('.ccn-intro-heading .ccn-accent').count() === 1);
+ok('Intro CTA button', await page.locator('.ccn-intro .btn-dark[href*="container-shop"]').count() === 1);
+
+// Homepage: featured products block (WooCommerce loop)
+ok('Featured products on home', await page.locator('.ccn-featured ul.products li.product').count() >= 3);
+ok('Sale badge styled (Angebot!)', await page.evaluate(() => {
+	const b = document.querySelector('.ccn-featured .onsale');
+	return !!b && /angebot/i.test(b.textContent) && getComputedStyle(b).position === 'absolute';
+}));
 
 // Shop: product grid renders, jQuery still absent on a catalog page
 const respShop = await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });

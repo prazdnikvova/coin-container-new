@@ -166,6 +166,35 @@ em,i{font-style:italic}
 .ccn-hero-btn{margin-top:1.75rem}
 @media (max-width:48rem){.ccn-hero-inner{min-height:70svh;padding:4rem 1rem}}
 
+/* Block: contact cards — email / phone / address strip overlapping the hero */
+.ccn-contact-cards{position:relative;z-index:3;margin-top:-3rem}
+.ccn-contact-cards-inner{max-width:1200px;margin:0 auto;padding:0 1rem;display:grid;grid-template-columns:1fr}
+@media (min-width:48rem){.ccn-contact-cards-inner{grid-template-columns:repeat(3,1fr)}}
+.ccn-contact-card{position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;gap:.4rem;background:var(--ccn-color-white);box-shadow:0 10px 30px rgba(0,0,0,.08);padding:2rem 1.5rem;text-align:center}
+.ccn-contact-card .ccn-icon{color:var(--ccn-color-primary)}
+.ccn-contact-card-label{font-family:var(--ccn-font-heading);font-weight:700}
+.ccn-contact-card.is-dark{background:var(--ccn-color-secondary);color:var(--ccn-color-white)}
+.ccn-contact-card.is-dark a{color:var(--ccn-color-white)}
+.ccn-contact-card.is-dark a:hover{color:var(--ccn-color-primary)}
+.ccn-contact-card.is-dark::after{content:'';position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 3rem 3rem;border-color:transparent transparent var(--ccn-color-primary) transparent}
+
+/* Block: intro — accent heading left, dark CTA button right */
+.ccn-intro{padding:4.5rem 0 1.5rem}
+.ccn-intro-inner{max-width:1200px;margin:0 auto;padding:0 1rem;display:flex;flex-wrap:wrap;gap:2rem;align-items:flex-start;justify-content:space-between}
+.ccn-intro-body{max-width:44rem}
+.ccn-intro-heading{font-size:clamp(1.75rem,2.6vw,2.375rem);margin-bottom:1.25rem}
+.ccn-intro-heading .ccn-accent{display:block;color:var(--ccn-color-primary)}
+.ccn-intro-subheading{font-weight:700;margin-bottom:1rem}
+.ccn-intro-text{color:var(--ccn-color-secondary)}
+
+/* Block: featured products — original-style cards with the yellow sale badge */
+.ccn-featured{padding-top:1.5rem}
+.ccn-featured ul.products li.product{position:relative;background:var(--ccn-color-white);box-shadow:0 6px 24px rgba(0,0,0,.07);padding:1rem 1rem 1.25rem}
+.ccn-featured ul.products li.product .onsale{position:absolute;top:1rem;left:1rem;z-index:2}
+
+.btn-dark{background:var(--ccn-color-secondary);color:var(--ccn-color-white);text-transform:uppercase;font-size:.875rem;letter-spacing:.04em}
+.btn-dark:hover{background:var(--ccn-color-primary);color:var(--ccn-color-text)}
+
 .section-hero{position:relative;background-size:cover;background-position:center;color:var(--ccn-color-white);padding:0}
 .section-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,20,20,.72) 0%,rgba(20,20,20,.35) 100%)}
 .hero-inner{position:relative;max-width:1200px;margin:0 auto;padding:6rem 1rem;min-height:520px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
@@ -235,7 +264,7 @@ ul.products li.product .price{display:block;color:var(--ccn-color-text);font-wei
 ul.products li.product .price del{color:var(--ccn-color-secondary);font-weight:400;margin-right:.35rem}
 ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{display:inline-block;background:var(--ccn-color-primary);color:var(--ccn-color-text);font-family:var(--ccn-font-heading);font-weight:700;padding:.6rem 1.1rem;border:0;border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
 .woocommerce a.button:hover,.woocommerce button.button:hover,ul.products li.product .button:hover{background:var(--ccn-color-text);color:var(--ccn-color-white)}
-.woocommerce .onsale{display:inline-block;background:var(--ccn-color-accent);color:#fff;padding:.15rem .6rem;border-radius:3px;font-size:.8rem;font-weight:700}
+.onsale{display:inline-block;background:var(--ccn-color-primary);color:var(--ccn-color-text);padding:.2rem .6rem;border-radius:2px;font-size:.75rem;font-weight:700;text-transform:uppercase}
 .woocommerce-result-count{color:var(--ccn-color-secondary)}
 .woocommerce-ordering{margin-bottom:1.5rem}
 

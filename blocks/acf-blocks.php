@@ -54,6 +54,33 @@ function ccn_register_blocks() {
 			'keywords'    => array( 'hero', 'banner', 'cover' ),
 			'template'    => 'blocks/banners/home-hero.php',
 		),
+		array(
+			'name'        => 'contact-cards',
+			'title'       => __( 'Contact cards', 'coin-container' ),
+			'description' => __( 'Email / phone / address cards fed by Site Settings (no own fields).', 'coin-container' ),
+			'category'    => 'ccn-banners',
+			'icon'        => 'id-alt',
+			'keywords'    => array( 'contact', 'cards', 'email', 'phone' ),
+			'template'    => 'blocks/banners/contact-cards.php',
+		),
+		array(
+			'name'        => 'intro',
+			'title'       => __( 'Intro', 'coin-container' ),
+			'description' => __( 'Heading with a yellow accent line, bold subheading, text and a CTA button.', 'coin-container' ),
+			'category'    => 'ccn-text',
+			'icon'        => 'text-page',
+			'keywords'    => array( 'intro', 'text', 'heading' ),
+			'template'    => 'blocks/text/intro.php',
+		),
+		array(
+			'name'        => 'featured-products',
+			'title'       => __( 'Featured products', 'coin-container' ),
+			'description' => __( 'WooCommerce product grid: featured products or a chosen category.', 'coin-container' ),
+			'category'    => 'ccn-products',
+			'icon'        => 'products',
+			'keywords'    => array( 'products', 'woocommerce', 'grid' ),
+			'template'    => 'blocks/products/featured-products.php',
+		),
 	);
 
 	foreach ( $blocks as $block ) {

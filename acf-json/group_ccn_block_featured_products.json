@@ -1,0 +1,40 @@
+{
+    "key": "group_ccn_block_featured_products",
+    "title": "Block: Featured products",
+    "fields": [
+        {
+            "key": "field_ccn_fp_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional — the original homepage shows the grid without a heading."
+        },
+        {
+            "key": "field_ccn_fp_count",
+            "label": "Products",
+            "name": "count",
+            "type": "number",
+            "default_value": 4,
+            "min": 1,
+            "max": 12
+        },
+        {
+            "key": "field_ccn_fp_category",
+            "label": "Category slug",
+            "name": "category",
+            "type": "text",
+            "instructions": "Optional product_cat slug. Empty = featured products."
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/featured-products"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Featured products block (blocks\/products\/featured-products.php)."
+}

@@ -24,6 +24,12 @@ function ccn_woocommerce_support() {
 add_filter( 'loop_shop_columns', function () { return 4; } );
 add_filter( 'loop_shop_per_page', function () { return 12; } );
 
+// Sale badge wording as on the original site ("Angebot!", uppercased via CSS).
+add_filter( 'woocommerce_sale_flash', 'ccn_sale_flash' );
+function ccn_sale_flash() {
+	return '<span class="onsale">' . esc_html__( 'Angebot!', 'coin-container' ) . '</span>';
+}
+
 // Full-width shop: drop the default sidebar.
 remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
