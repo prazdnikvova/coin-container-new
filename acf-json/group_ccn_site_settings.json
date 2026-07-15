@@ -101,6 +101,56 @@
             "label": "Xing URL",
             "name": "social_xing",
             "type": "url"
+        },
+        {
+            "key": "field_ccn_tab_landing",
+            "label": "Landing sidebar",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_landing_services",
+            "label": "Service links",
+            "name": "landing_services",
+            "type": "repeater",
+            "instructions": "\"Unsere Dienstleistungen\" list on landing pages. The link matching the current page is hidden automatically.",
+            "layout": "table",
+            "button_label": "Add link",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_landing_service_label",
+                    "label": "Label",
+                    "name": "label",
+                    "type": "text"
+                },
+                {
+                    "key": "field_ccn_landing_service_url",
+                    "label": "URL",
+                    "name": "url",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "key": "field_ccn_landing_card_title",
+            "label": "Card title",
+            "name": "landing_card_title",
+            "type": "text",
+            "instructions": "\"Ihr Containerprojekt beginnt hier\" card under the service links."
+        },
+        {
+            "key": "field_ccn_landing_card_button_text",
+            "label": "Card button text",
+            "name": "landing_card_button_text",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_landing_card_button_url",
+            "label": "Card button URL",
+            "name": "landing_card_button_url",
+            "type": "text"
         }
     ],
     "location": [

@@ -73,6 +73,15 @@ function ccn_register_blocks() {
 			'template'    => 'blocks/text/intro.php',
 		),
 		array(
+			'name'        => 'text-section',
+			'title'       => __( 'Text section', 'coin-container' ),
+			'description' => __( 'Optional photo, heading with an inline yellow accent, rich text — landing content section.', 'coin-container' ),
+			'category'    => 'ccn-text',
+			'icon'        => 'editor-alignleft',
+			'keywords'    => array( 'text', 'section', 'landing' ),
+			'template'    => 'blocks/text/text-section.php',
+		),
+		array(
 			'name'        => 'featured-products',
 			'title'       => __( 'Featured products', 'coin-container' ),
 			'description' => __( 'WooCommerce product grid: featured products or a chosen category.', 'coin-container' ),

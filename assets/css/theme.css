@@ -250,6 +250,31 @@ em,i{font-style:italic}
 .ccn-cta-heading{color:var(--ccn-color-white);font-size:clamp(1.6rem,2.6vw,2.25rem)}
 .ccn-cta-btn{text-transform:uppercase;font-size:.875rem;letter-spacing:.04em}
 
+/* Landing template: full-width hero band from the featured image + content/sidebar columns */
+.ccn-page-hero{position:relative;overflow:hidden;display:flex;align-items:flex-end;min-height:20rem;background:var(--ccn-color-dark)}
+.ccn-page-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ccn-page-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,20,20,.35) 0%,rgba(20,20,20,.55) 100%)}
+.ccn-page-hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:2.5rem 1rem;width:100%}
+.ccn-page-hero-title{color:var(--ccn-color-white);font-size:clamp(1.9rem,3.2vw,2.75rem)}
+@media (max-width:48rem){.ccn-page-hero{min-height:14rem}}
+.ccn-landing{max-width:1200px;margin:0 auto;padding:3rem 1rem 3.5rem;display:grid;gap:2.5rem;grid-template-columns:1fr}
+@media (min-width:64rem){.ccn-landing{grid-template-columns:minmax(0,1fr) 19rem;gap:3.5rem;align-items:start}}
+.ccn-landing-main>*+*{margin-top:2rem}
+.ccn-landing-sidebar{display:flex;flex-direction:column;gap:2.25rem}
+.ccn-sidebar-heading{font-size:1.35rem;padding-bottom:.75rem;border-bottom:1px solid #e5e5e5;margin-bottom:.75rem}
+.ccn-sidebar-services-list li a{display:flex;align-items:center;gap:.55rem;padding:.4rem 0;font-weight:600}
+.ccn-sidebar-services-list li a::before{content:'';border-left:.42rem solid var(--ccn-color-primary);border-top:.32rem solid transparent;border-bottom:.32rem solid transparent}
+.ccn-sidebar-card{background:var(--ccn-color-white);box-shadow:0 10px 30px rgba(0,0,0,.1);padding:2.5rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem;text-align:center}
+.ccn-sidebar-card-title{font-family:var(--ccn-font-heading);font-weight:700;font-size:1.125rem}
+.ccn-form-card{background:var(--ccn-color-light);padding:2rem 1.75rem;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+.ccn-form-card h2{font-size:1.6rem;margin-bottom:1.25rem}
+
+/* Block: text section — optional photo, heading with inline accent, rich text */
+.ccn-text-section-img{display:block;width:100%;height:auto;margin-bottom:2rem}
+.ccn-text-section-heading{font-size:clamp(1.6rem,2.4vw,2.125rem);margin-bottom:1.25rem}
+.ccn-text-section .rich-text ul li::marker{color:var(--ccn-color-primary)}
+.ccn-text-section .rich-text hr{border:0;border-top:1px solid #dcdcdc;width:14rem;margin:2rem auto}
+
 /* Block: news — post cards with category badges */
 .ccn-news{padding:3.5rem 0}
 .ccn-news-inner{max-width:1200px;margin:0 auto;padding:0 1rem}

@@ -1,0 +1,51 @@
+{
+    "key": "group_ccn_block_text_section",
+    "title": "Block: Text section",
+    "fields": [
+        {
+            "key": "field_ccn_ts_image",
+            "label": "Photo (optional, above the heading)",
+            "name": "image",
+            "type": "image",
+            "return_format": "id",
+            "preview_size": "medium"
+        },
+        {
+            "key": "field_ccn_ts_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_ts_heading_accent",
+            "label": "Heading accent (yellow words inside the heading)",
+            "name": "heading_accent",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_ts_heading_after",
+            "label": "Heading, after the accent",
+            "name": "heading_after",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_ts_text",
+            "label": "Text",
+            "name": "text",
+            "type": "wysiwyg",
+            "media_upload": 0,
+            "toolbar": "basic"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/text-section"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Text section block (blocks\/text\/text-section.php)."
+}

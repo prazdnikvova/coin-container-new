@@ -90,6 +90,20 @@ function ccn_preload_fonts() {
  */
 add_action( 'wp_head', 'ccn_preload_hero', 3 );
 function ccn_preload_hero() {
+	// Landing template: the hero band is the featured image (LCP element).
+	if ( is_page_template( 'template-landing.php' ) && has_post_thumbnail() ) {
+		$img    = get_post_thumbnail_id();
+		$srcset = wp_get_attachment_image_srcset( $img, 'ccn-hero' );
+		$src    = wp_get_attachment_image_url( $img, 'ccn-hero' );
+		if ( $srcset && $src ) {
+			printf(
+				'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",
+				esc_url( $src ),
+				esc_attr( $srcset )
+			);
+		}
+		return;
+	}
 	if ( ! is_front_page() || ! function_exists( 'have_rows' ) ) {
 		return;
 	}

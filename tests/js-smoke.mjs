@@ -166,6 +166,24 @@ ok('Landing has CTA section', (await page.locator('.section-cta').count()) >= 1)
 ok('No PNG/JPEG images in content', await page.evaluate(() =>
 	![...document.images].some((i) => /\.(png|jpe?g)(\?|$)/i.test(i.currentSrc || i.src))));
 
+// Pilot landing migrated to blocks (T-30a): hero band, sidebar, form card
+const respMieten = await page.goto(BASE + '/container-mieten/', { waitUntil: 'domcontentloaded' });
+ok('Mieten landing 200', respMieten.status() === 200, String(respMieten.status()));
+ok('Mieten hero band from featured image', await page.evaluate(() => {
+	const img = document.querySelector('.ccn-page-hero img.ccn-page-hero-img');
+	return !!img && img.getAttribute('fetchpriority') === 'high'
+		&& document.querySelectorAll('.ccn-page-hero h1.ccn-page-hero-title').length === 1;
+}));
+ok('Mieten sidebar links exclude current page', await page.evaluate(() => {
+	const links = [...document.querySelectorAll('.ccn-sidebar-services-list a')];
+	return links.length >= 3 && !links.some((a) => (a.getAttribute('href') || '').includes('/container-mieten/'));
+}));
+ok('Mieten anfrage card + inline form', await page.locator('.ccn-sidebar-card .btn-dark').count() === 1
+	&& await page.locator('.ccn-form-card form.wpcf7-form').count() === 1);
+ok('Mieten text-section with accent', await page.locator('.ccn-text-section .ccn-accent-inline').count() === 1);
+ok('Mieten has no flexible sections', await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
+ok('Mieten no raw shortcode leak', await page.evaluate(() => !document.body.textContent.includes('[/acceptance]') && !document.body.textContent.includes('u003c')));
+
 // Contact form renders on the contact page; CF7 assets are page-scoped
 const respKontakt = await page.goto(BASE + '/kontakt-beratung/', { waitUntil: 'domcontentloaded' });
 ok('Contact page 200', respKontakt.status() === 200, String(respKontakt.status()));

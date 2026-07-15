@@ -102,3 +102,27 @@ function ccn_drop_wc_blocks_style() {
 	wp_dequeue_style( 'wc-blocks-style' );
 	wp_deregister_style( 'wc-blocks-style' );
 }
+
+/**
+ * WooCommerce stylesheets (general/layout/smallscreen, 3 requests) load only
+ * where products can actually render: Woo pages and pages embedding the
+ * featured-products block or a products shortcode. Landings, blog and legal
+ * pages carry no product markup — dropping the styles there keeps them
+ * within the request budget.
+ */
+add_action( 'wp_enqueue_scripts', 'ccn_scope_wc_styles', 9998 );
+function ccn_scope_wc_styles() {
+	if ( ! class_exists( 'WooCommerce' ) ) {
+		return;
+	}
+	if ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() ) {
+		return;
+	}
+	$post = get_post();
+	if ( $post && ( has_block( 'acf/featured-products', $post ) || has_shortcode( $post->post_content, 'products' ) ) ) {
+		return;
+	}
+	foreach ( array( 'woocommerce-general', 'woocommerce-layout', 'woocommerce-smallscreen' ) as $ccn_handle ) {
+		wp_dequeue_style( $ccn_handle );
+	}
+}
