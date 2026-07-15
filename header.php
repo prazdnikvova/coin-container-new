@@ -84,7 +84,8 @@
 		<div class="header-actions">
 			<?php if ( class_exists( 'WooCommerce' ) && function_exists( 'wc_get_cart_url' ) ) : ?>
 				<?php $ccn_cart_count = ( WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0; ?>
-				<a class="header-cart" href="<?php echo esc_url( wc_get_cart_url() ); ?>" aria-label="<?php esc_attr_e( 'Warenkorb', 'coin-container' ); ?>">
+				<?php // No aria-label here: it would override the content and hide the visible count from the accessible name (axe label-content-name-mismatch); the screen-reader-text span below names the link. ?>
+				<a class="header-cart" href="<?php echo esc_url( wc_get_cart_url() ); ?>">
 					<svg class="ccn-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7V6a6 6 0 1 1 12 0v1"/><path d="M3.3 7h17.4l-1.2 13a2 2 0 0 1-2 1.8H6.5a2 2 0 0 1-2-1.8L3.3 7Z"/></svg>
 					<span class="header-cart-count" aria-hidden="true"><?php echo esc_html( (string) $ccn_cart_count ); ?></span>
 					<span class="screen-reader-text"><?php echo esc_html( sprintf( /* translators: %d: items in cart */ __( 'Warenkorb, %d Artikel', 'coin-container' ), $ccn_cart_count ) ); ?></span>

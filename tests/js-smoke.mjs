@@ -122,6 +122,25 @@ ok('News grid with 4 cards', await page.locator('.ccn-news .ccn-news-card').coun
 ok('News cards have category badges', await page.locator('.ccn-news .ccn-news-badge').count() >= 3);
 ok('Home is fully block-based (no flexible sections)', await page.locator('main .section-hero, main .section-cta, main .section-featured').count() === 0);
 
+// A11y guards (rules 11–16 of the anti-old-prod checklist, added with T-34)
+ok('All links/buttons have accessible names', await page.evaluate(() => {
+	return [...document.querySelectorAll('a, button')].every((el) =>
+		(el.textContent || '').trim() !== ''
+		|| (el.getAttribute('aria-label') || '').trim() !== ''
+		|| el.hasAttribute('aria-labelledby')
+		|| [...el.querySelectorAll('img[alt]')].some((i) => i.alt.trim() !== ''));
+}));
+ok('Accent text is not raw brand yellow (contrast)', await page.evaluate(() => {
+	const els = document.querySelectorAll('.ccn-accent, .ccn-accent-inline, .ccn-news-heading');
+	return els.length >= 3 && [...els].every((el) => getComputedStyle(el).color !== 'rgb(247, 198, 0)');
+}));
+ok('Cart accessible name includes visible count', await page.evaluate(() => {
+	const a = document.querySelector('.header-cart');
+	if (!a || a.hasAttribute('aria-label')) return false; // aria-label would hide the visible count from the name
+	const count = ((a.querySelector('.header-cart-count') || {}).textContent || '').trim();
+	return /^\d+$/.test(count) && (a.textContent || '').includes(count);
+}));
+
 // Shop: product grid renders, jQuery still absent on a catalog page
 const respShop = await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });
 ok('Shop responds 200', respShop.status() === 200, String(respShop.status()));
