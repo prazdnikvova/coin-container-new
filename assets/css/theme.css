@@ -61,18 +61,27 @@ em,i{font-style:italic}
  * sticky white main row (logo, menu, cart, search).
  * ------------------------------------------------------------------------ */
 :root{--ccn-topbar-h:2.5rem;--ccn-header-h:5rem}
-.site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000}
+.site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000;transition:background-color .25s ease,box-shadow .25s ease}
 .site-header a{text-decoration:none}
 .site-header.is-stuck{box-shadow:0 2px 12px rgba(0,0,0,.08)}
 
-.ccn-topbar{display:none;background:var(--ccn-color-dark);color:var(--ccn-color-white);font-size:.8125rem}
+/* Over a hero the header starts as translucent glass (original: rgba(255,255,255,.46)
+ * + backdrop blur) and turns solid white as soon as the page scrolls (.is-stuck). */
+body.ccn-transparent-header .site-header:not(.is-stuck){background:rgba(255,255,255,.46);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom-color:transparent}
+body.ccn-transparent-header .ccn-hero,body.ccn-transparent-header .ccn-page-hero{margin-top:calc(-1 * var(--ccn-header-h))}
+body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-header-h))}
+@media (max-width:48rem){body.ccn-transparent-header .ccn-page-hero{min-height:calc(14rem + var(--ccn-header-h))}}
+
+.ccn-topbar{display:none;background:var(--ccn-color-secondary);color:var(--ccn-color-white);font-size:.8125rem}
 .ccn-topbar a{display:inline-flex;align-items:center;gap:.4rem;color:var(--ccn-color-white)}
 .ccn-topbar a:hover{color:var(--ccn-color-primary)}
 .ccn-topbar-inner{max-width:1200px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;justify-content:flex-end;gap:2rem;min-height:var(--ccn-topbar-h)}
 .ccn-topbar-contacts{display:flex;align-items:center;gap:1.5rem}
-.ccn-topbar-social{display:flex;align-items:center;gap:.5rem}
-.ccn-topbar-social a{display:flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;background:var(--ccn-color-primary);color:var(--ccn-color-dark);border-radius:2px}
-.ccn-topbar-social a:hover{background:var(--ccn-color-accent);color:var(--ccn-color-dark)}
+.ccn-topbar-social{display:flex;align-items:stretch}
+.ccn-topbar-social li{display:flex;border-left:1px solid rgba(255,255,255,.18)}
+.ccn-topbar-social li:last-child{border-right:1px solid rgba(255,255,255,.18)}
+.ccn-topbar-social a{display:flex;align-items:center;justify-content:center;width:2.5rem;min-height:var(--ccn-topbar-h);color:var(--ccn-color-primary)}
+.ccn-topbar-social a:hover{color:var(--ccn-color-white)}
 .ccn-icon{flex-shrink:0}
 
 .header-inner{display:flex;align-items:center;gap:1rem;min-height:var(--ccn-header-h)}

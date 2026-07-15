@@ -88,6 +88,19 @@ function ccn_preload_fonts() {
  * flexible-content hero is a CSS background (discovered late), preloaded by
  * plain URL.
  */
+/**
+ * Pages that open with a full-width hero get a translucent glass header at
+ * the top of the page (solid white once scrolled); everywhere else the
+ * header stays solid so content never sits under glass.
+ */
+add_filter( 'body_class', 'ccn_transparent_header_class' );
+function ccn_transparent_header_class( $classes ) {
+	if ( is_front_page() || is_page_template( array( 'template-landing.php', 'template-landing-full.php' ) ) ) {
+		$classes[] = 'ccn-transparent-header';
+	}
+	return $classes;
+}
+
 add_action( 'wp_head', 'ccn_preload_hero', 3 );
 function ccn_preload_hero() {
 	// Landing templates: the hero band is the featured image (LCP element).

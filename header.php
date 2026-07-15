@@ -14,14 +14,14 @@
 				<?php $ccn_phone = ccn_setting( 'phone' ); ?>
 				<?php if ( $ccn_phone ) : ?>
 					<a class="header-phone" href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $ccn_phone ) ); ?>">
-						<svg class="ccn-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.24 11.36 11.36 0 0 0 3.57.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1.02l-2.2 2.2Z"/></svg>
+						<svg class="ccn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.9 1.9 0 0 1-2.1 1.9 19 19 0 0 1-8.3-3 18.7 18.7 0 0 1-5.7-5.7 19 19 0 0 1-3-8.3A1.9 1.9 0 0 1 3.8 2h2.6a1.9 1.9 0 0 1 1.9 1.6c.12.92.34 1.83.65 2.7a1.9 1.9 0 0 1-.43 2L7.4 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.12a1.9 1.9 0 0 1 2-.43c.87.31 1.78.53 2.7.65a1.9 1.9 0 0 1 1.6 1.9Z"/></svg>
 						<?php echo esc_html( $ccn_phone ); ?>
 					</a>
 				<?php endif; ?>
 				<?php $ccn_email = ccn_setting( 'email' ); ?>
 				<?php if ( $ccn_email ) : ?>
 					<a class="ccn-topbar-email" href="mailto:<?php echo esc_attr( $ccn_email ); ?>">
-						<svg class="ccn-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>
+						<svg class="ccn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>
 						<?php echo esc_html( $ccn_email ); ?>
 					</a>
 				<?php endif; ?>
@@ -86,7 +86,7 @@
 				<?php $ccn_cart_count = ( WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0; ?>
 				<?php // No aria-label here: it would override the content and hide the visible count from the accessible name (axe label-content-name-mismatch); the screen-reader-text span below names the link. ?>
 				<a class="header-cart" href="<?php echo esc_url( wc_get_cart_url() ); ?>">
-					<svg class="ccn-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7V6a6 6 0 1 1 12 0v1"/><path d="M3.3 7h17.4l-1.2 13a2 2 0 0 1-2 1.8H6.5a2 2 0 0 1-2-1.8L3.3 7Z"/></svg>
+					<svg class="ccn-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18l-1.7 9.6a2 2 0 0 1-2 1.6H6.7a2 2 0 0 1-2-1.6L3 9Z"/><path d="m8.6 9 3.4-6 3.4 6"/><path d="M9.5 13v3.5M14.5 13v3.5"/></svg>
 					<span class="header-cart-count" aria-hidden="true"><?php echo esc_html( (string) $ccn_cart_count ); ?></span>
 					<span class="screen-reader-text"><?php echo esc_html( sprintf( /* translators: %d: items in cart */ __( 'Warenkorb, %d Artikel', 'coin-container' ), $ccn_cart_count ) ); ?></span>
 				</a>

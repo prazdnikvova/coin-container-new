@@ -50,6 +50,20 @@ ok('Topbar email link', await page.locator('.ccn-topbar-email[href^="mailto:"]')
 ok('Topbar social icons', await page.locator('.ccn-topbar-social a[href^="https://"]').count() >= 3);
 ok('Header is sticky', await page.evaluate(() =>
 	getComputedStyle(document.querySelector('.site-header')).position === 'sticky'));
+ok('Topbar is grey (secondary)', await page.evaluate(() =>
+	getComputedStyle(document.querySelector('.ccn-topbar')).backgroundColor === 'rgb(96, 94, 94)'));
+ok('Header glass over hero, white after scroll', await page.evaluate(async () => {
+	const header = document.getElementById('header');
+	window.scrollTo(0, 0);
+	await new Promise((r) => setTimeout(r, 350));
+	const atTop = getComputedStyle(header).backgroundColor;
+	window.scrollTo(0, 500);
+	await new Promise((r) => setTimeout(r, 350));
+	const scrolled = getComputedStyle(header).backgroundColor;
+	window.scrollTo(0, 0);
+	await new Promise((r) => setTimeout(r, 350));
+	return atTop.includes('0.46') && scrolled === 'rgb(255, 255, 255)';
+}));
 
 // Cart icon with count badge
 ok('Cart icon with count', await page.locator('.header-cart svg').count() === 1
