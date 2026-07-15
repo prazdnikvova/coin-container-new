@@ -7,6 +7,7 @@
  */
 
 $ccn_heading = get_field( 'heading' );
+$ccn_text    = get_field( 'text' );
 $ccn_btn_t   = get_field( 'button_text' );
 $ccn_btn_u   = get_field( 'button_url' );
 $ccn_img     = (int) get_field( 'image' );
@@ -29,6 +30,9 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 		<?php endif; ?>
 		<?php if ( $ccn_heading ) : ?>
 			<h2 class="ccn-cta-heading"><?php echo esc_html( $ccn_heading ); ?></h2>
+		<?php endif; ?>
+		<?php if ( $ccn_text ) : ?>
+			<p class="ccn-cta-text"><?php echo esc_html( $ccn_text ); ?></p>
 		<?php endif; ?>
 		<?php if ( $ccn_btn_t && $ccn_btn_u ) : ?>
 			<a class="btn btn-primary ccn-cta-btn" href="<?php echo esc_url( $ccn_btn_u ); ?>"><?php echo esc_html( $ccn_btn_t ); ?></a>

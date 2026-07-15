@@ -24,6 +24,13 @@
             "name": "category",
             "type": "text",
             "instructions": "Optional product_cat slug. Empty = featured products."
+        },
+        {
+            "key": "field_ccn_fp_include",
+            "label": "Specific products (comma-separated slugs)",
+            "name": "include",
+            "type": "text",
+            "instructions": "Optional. Overrides category/featured; products render in the given order."
         }
     ],
     "location": [

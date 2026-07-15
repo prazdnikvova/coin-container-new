@@ -158,13 +158,28 @@ ok('Single product 200', respSingle.status() === 200, String(respSingle.status()
 ok('Single has title', (await page.locator('.product_title').count()) === 1);
 ok('Single has add-to-cart', (await page.locator('button.single_add_to_cart_button, a.add_to_cart_button').count()) >= 1);
 
-// Landing pages rebuilt as sections: hero + content + CTA, all images WebP
+// Landing on blocks with sidebar (T-30b): kaufen — product grid, shop button, form
 const respLanding = await page.goto(BASE + '/container-kaufen/', { waitUntil: 'domcontentloaded' });
-ok('Landing 200', respLanding.status() === 200, String(respLanding.status()));
-ok('Landing has hero section', (await page.locator('.section-hero .hero-title').count()) === 1);
-ok('Landing has CTA section', (await page.locator('.section-cta').count()) >= 1);
+ok('Kaufen landing 200', respLanding.status() === 200, String(respLanding.status()));
+ok('Kaufen hero band with H1', await page.locator('.ccn-page-hero h1.ccn-page-hero-title').count() === 1);
+ok('Kaufen hand-picked product grid', await page.locator('.ccn-featured li.product').count() === 4);
+ok('Kaufen shop button', await page.locator('.ccn-landing-main a.btn-dark[href*="container-shop"]').count() === 1);
+ok('Kaufen sidebar + inline form', await page.locator('.ccn-landing-sidebar').count() === 1
+	&& await page.locator('.ccn-form-card form.wpcf7-form').count() === 1);
+ok('Kaufen has no flexible sections', await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
 ok('No PNG/JPEG images in content', await page.evaluate(() =>
 	![...document.images].some((i) => /\.(png|jpe?g)(\?|$)/i.test(i.currentSrc || i.src))));
+
+// Landing on blocks, full width (T-30b): zubehoer — info cards, numbered list, CTA
+const respZub = await page.goto(BASE + '/containerzubehoer/', { waitUntil: 'domcontentloaded' });
+ok('Zubehoer landing 200', respZub.status() === 200, String(respZub.status()));
+ok('Zubehoer is full width (no sidebar)', await page.locator('.ccn-landing-full').count() === 1
+	&& await page.locator('.ccn-landing-sidebar').count() === 0);
+ok('Zubehoer product grid', await page.locator('.ccn-featured li.product').count() === 4);
+ok('Zubehoer info cards', await page.locator('.ccn-info-card').count() === 3);
+ok('Zubehoer numbered list', await page.locator('.ccn-numbered-item').count() === 4);
+ok('Zubehoer CTA banner with button', await page.locator('.ccn-cta .btn').count() === 1);
+ok('Zubehoer has no flexible sections', await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
 
 // Pilot landing migrated to blocks (T-30a): hero band, sidebar, form card
 const respMieten = await page.goto(BASE + '/container-mieten/', { waitUntil: 'domcontentloaded' });

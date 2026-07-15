@@ -1,0 +1,49 @@
+{
+    "key": "group_ccn_block_info_cards",
+    "title": "Block: Info cards",
+    "fields": [
+        {
+            "key": "field_ccn_ic_cards",
+            "label": "Cards",
+            "name": "cards",
+            "type": "repeater",
+            "layout": "block",
+            "button_label": "Add card",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_ic_image",
+                    "label": "Photo",
+                    "name": "image",
+                    "type": "image",
+                    "return_format": "id",
+                    "preview_size": "medium"
+                },
+                {
+                    "key": "field_ccn_ic_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text"
+                },
+                {
+                    "key": "field_ccn_ic_text",
+                    "label": "Text",
+                    "name": "text",
+                    "type": "wysiwyg",
+                    "media_upload": 0,
+                    "toolbar": "basic"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/info-cards"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Info cards block (blocks\/lists\/info-cards.php)."
+}

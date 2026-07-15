@@ -1,0 +1,58 @@
+{
+    "key": "group_ccn_block_numbered_list",
+    "title": "Block: Numbered list",
+    "fields": [
+        {
+            "key": "field_ccn_nl_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_nl_heading_accent",
+            "label": "Heading accent (yellow words)",
+            "name": "heading_accent",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_nl_intro",
+            "label": "Intro line",
+            "name": "intro",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
+            "key": "field_ccn_nl_items",
+            "label": "Items",
+            "name": "items",
+            "type": "repeater",
+            "layout": "table",
+            "button_label": "Add item",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_nl_item_title",
+                    "label": "Title",
+                    "name": "title",
+                    "type": "text"
+                },
+                {
+                    "key": "field_ccn_nl_item_text",
+                    "label": "Small text (optional)",
+                    "name": "text",
+                    "type": "text"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/numbered-list"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Numbered list block (blocks\/lists\/numbered-list.php)."
+}

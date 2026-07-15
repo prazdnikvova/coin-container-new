@@ -90,11 +90,12 @@ function ccn_preload_fonts() {
  */
 add_action( 'wp_head', 'ccn_preload_hero', 3 );
 function ccn_preload_hero() {
-	// Landing template: the hero band is the featured image (LCP element).
-	if ( is_page_template( 'template-landing.php' ) && has_post_thumbnail() ) {
+	// Landing templates: the hero band is the featured image (LCP element).
+	// Same soft size as template-parts/page-hero.php so the preload dedupes.
+	if ( is_page_template( array( 'template-landing.php', 'template-landing-full.php' ) ) && has_post_thumbnail() ) {
 		$img    = get_post_thumbnail_id();
-		$srcset = wp_get_attachment_image_srcset( $img, 'ccn-hero' );
-		$src    = wp_get_attachment_image_url( $img, 'ccn-hero' );
+		$srcset = wp_get_attachment_image_srcset( $img, '1536x1536' );
+		$src    = wp_get_attachment_image_url( $img, '1536x1536' );
 		if ( $srcset && $src ) {
 			printf(
 				'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",

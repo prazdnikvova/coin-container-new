@@ -12,9 +12,10 @@ if ( ! class_exists( 'WooCommerce' ) ) {
 	return;
 }
 
-$ccn_count = (int) get_field( 'count' );
-$ccn_count = $ccn_count > 0 ? $ccn_count : 4;
-$ccn_cat   = get_field( 'category' );
+$ccn_count   = (int) get_field( 'count' );
+$ccn_count   = $ccn_count > 0 ? $ccn_count : 4;
+$ccn_cat     = get_field( 'category' );
+$ccn_include = (string) get_field( 'include' );
 
 $ccn_args = array(
 	'post_type'      => 'product',
@@ -22,7 +23,13 @@ $ccn_args = array(
 	'post_status'    => 'publish',
 	'no_found_rows'  => true,
 );
-if ( $ccn_cat ) {
+if ( $ccn_include ) {
+	// Hand-picked products (landing grids mirror specific originals).
+	$ccn_slugs                  = array_filter( array_map( 'trim', explode( ',', $ccn_include ) ) );
+	$ccn_args['post_name__in']  = $ccn_slugs;
+	$ccn_args['orderby']        = 'post_name__in';
+	$ccn_args['posts_per_page'] = count( $ccn_slugs );
+} elseif ( $ccn_cat ) {
 	$ccn_args['tax_query'] = array(
 		array(
 			'taxonomy' => 'product_cat',

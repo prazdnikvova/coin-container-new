@@ -13,27 +13,8 @@ get_header();
 
 while ( have_posts() ) :
 	the_post();
+	get_template_part( 'template-parts/page-hero' );
 	?>
-	<section class="ccn-page-hero">
-		<?php
-		if ( has_post_thumbnail() ) {
-			// LCP element of the page: eager + high priority, like the home hero.
-			the_post_thumbnail(
-				'ccn-hero',
-				array(
-					'class'         => 'ccn-page-hero-img',
-					'sizes'         => '100vw',
-					'loading'       => 'eager',
-					'fetchpriority' => 'high',
-				)
-			);
-		}
-		?>
-		<div class="ccn-page-hero-inner">
-			<h1 class="ccn-page-hero-title"><?php the_title(); ?></h1>
-		</div>
-	</section>
-
 	<div class="ccn-landing">
 		<div class="ccn-landing-main">
 			<?php the_content(); ?>

@@ -10,6 +10,13 @@
             "required": 1
         },
         {
+            "key": "field_ccn_cb_text",
+            "label": "Text (optional line under the heading)",
+            "name": "text",
+            "type": "textarea",
+            "rows": 2
+        },
+        {
             "key": "field_ccn_cb_btn_text",
             "label": "Button text",
             "name": "button_text",
