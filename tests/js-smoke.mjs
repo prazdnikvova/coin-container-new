@@ -213,6 +213,36 @@ ok('Mieten text-section with accent', await page.locator('.ccn-text-section .ccn
 ok('Mieten has no flexible sections', await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
 ok('Mieten no raw shortcode leak', await page.evaluate(() => !document.body.textContent.includes('[/acceptance]') && !document.body.textContent.includes('u003c')));
 
+// Text landings migrated to blocks (T-30c): full width, hero band, CTA,
+// zero flexible-content markup anywhere. After this batch NO page uses
+// template-sections.php — the .section-hero guard below proves it per page.
+const textLandings = [
+	'/sanitaercontainer-alles-was-sie-wissen-muessen/',
+	'/container-services/',
+	'/nachhaltige-containerloesungen-ihr-partner-fuer-umweltfreundliche-container/',
+	'/container-inspiration-ideen/',
+	'/ueber-uns/',
+];
+for (const slug of textLandings) {
+	const resp = await page.goto(BASE + slug, { waitUntil: 'domcontentloaded' });
+	const name = slug.split('-')[0].replace('/', '');
+	ok(`Landing ${slug} 200`, resp.status() === 200, String(resp.status()));
+	ok(`Landing ${slug} full width with hero`, await page.locator('.ccn-landing-full').count() === 1
+		&& await page.locator('.ccn-page-hero h1.ccn-page-hero-title').count() === 1
+		&& await page.locator('.ccn-landing-sidebar').count() === 0);
+	ok(`Landing ${slug} CTA banner`, await page.locator('.ccn-cta .btn').count() === 1);
+	ok(`Landing ${slug} no flexible sections`, await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
+	ok(`Landing ${slug} no raw markup leak`, await page.evaluate(() => !document.body.textContent.includes('u003c') && !document.body.textContent.includes('<p>')));
+}
+ok('Sanitaer type cards', (await (async () => {
+	await page.goto(BASE + '/sanitaercontainer-alles-was-sie-wissen-muessen/', { waitUntil: 'domcontentloaded' });
+	return page.locator('.ccn-info-card').count();
+})()) === 4);
+ok('Inspiration stats + idea cards', (await (async () => {
+	await page.goto(BASE + '/container-inspiration-ideen/', { waitUntil: 'domcontentloaded' });
+	return (await page.locator('.ccn-stats').count()) === 1 && (await page.locator('.ccn-info-card').count()) === 7;
+})()));
+
 // Contact form renders on the contact page; CF7 assets are page-scoped
 const respKontakt = await page.goto(BASE + '/kontakt-beratung/', { waitUntil: 'domcontentloaded' });
 ok('Contact page 200', respKontakt.status() === 200, String(respKontakt.status()));
