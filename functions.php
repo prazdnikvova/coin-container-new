@@ -118,7 +118,7 @@ function ccn_preload_hero() {
 		}
 		return;
 	}
-	if ( ! is_front_page() || ! function_exists( 'have_rows' ) ) {
+	if ( ! is_front_page() ) {
 		return;
 	}
 	$post = get_post();
@@ -137,23 +137,6 @@ function ccn_preload_hero() {
 							esc_attr( $srcset )
 						);
 					}
-				}
-				break;
-			}
-		}
-		return;
-	}
-	if ( have_rows( 'page_sections' ) ) {
-		while ( have_rows( 'page_sections' ) ) {
-			the_row();
-			if ( 'hero' === get_row_layout() ) {
-				$img = get_sub_field( 'image' );
-				$url = $img ? wp_get_attachment_image_url( $img, 'large' ) : '';
-				if ( $url ) {
-					printf(
-						'<link rel="preload" href="%s" as="image" fetchpriority="high">' . "\n",
-						esc_url( $url )
-					);
 				}
 				break;
 			}
@@ -195,7 +178,6 @@ require_once get_template_directory() . '/inc/security.php';
 require_once get_template_directory() . '/inc/assets-cleanup.php';
 require_once get_template_directory() . '/inc/site-settings.php';
 require_once get_template_directory() . '/inc/schema.php';
-require_once get_template_directory() . '/inc/editor.php';
 if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
 }
