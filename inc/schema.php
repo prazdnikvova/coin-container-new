@@ -58,6 +58,7 @@ function ccn_local_business_schema() {
 			ccn_setting( 'social_ebay' ),
 			ccn_setting( 'social_pinterest' ),
 			ccn_setting( 'social_xing' ),
+			ccn_setting( 'social_kleinanzeigen' ),
 		)
 	);
 	if ( $sameas ) {

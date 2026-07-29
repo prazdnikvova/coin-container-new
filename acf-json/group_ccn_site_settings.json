@@ -103,6 +103,12 @@
             "type": "url"
         },
         {
+            "key": "field_ccn_social_kleinanzeigen",
+            "label": "Kleinanzeigen URL",
+            "name": "social_kleinanzeigen",
+            "type": "url"
+        },
+        {
             "key": "field_ccn_tab_landing",
             "label": "Landing sidebar",
             "name": "",

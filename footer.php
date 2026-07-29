@@ -49,12 +49,13 @@
 			<ul class="footer-social-list">
 				<?php
 				$ccn_socials = array(
-					'social_facebook'  => 'Facebook',
-					'social_instagram' => 'Instagram',
-					'social_linkedin'  => 'LinkedIn',
-					'social_ebay'      => 'eBay',
-					'social_pinterest' => 'Pinterest',
-					'social_xing'      => 'Xing',
+					'social_facebook'      => 'Facebook',
+					'social_instagram'     => 'Instagram',
+					'social_linkedin'      => 'LinkedIn',
+					'social_ebay'          => 'eBay',
+					'social_pinterest'     => 'Pinterest',
+					'social_xing'          => 'Xing',
+					'social_kleinanzeigen' => 'Kleinanzeigen',
 				);
 				foreach ( $ccn_socials as $ccn_key => $ccn_label ) :
 					$ccn_url = ccn_setting( $ccn_key );
