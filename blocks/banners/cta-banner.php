@@ -21,7 +21,9 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 <section class="ccn-cta">
 	<?php
 	if ( $ccn_img ) {
-		echo wp_get_attachment_image( $ccn_img, 'ccn-hero', false, array( 'class' => 'ccn-cta-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
+		// Soft size, not a hard crop: keeps srcset populated so phones pull a
+		// small variant. Cropping is done by object-fit: cover on .ccn-cta-bg.
+		echo wp_get_attachment_image( $ccn_img, '1536x1536', false, array( 'class' => 'ccn-cta-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
 	}
 	?>
 	<div class="ccn-cta-inner">

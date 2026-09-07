@@ -34,7 +34,9 @@ if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
 		<div class="ccn-services-strip">
 			<?php
 			if ( $ccn_img ) {
-				echo wp_get_attachment_image( $ccn_img, 'ccn-hero', false, array( 'class' => 'ccn-services-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
+				// Soft size, not a hard crop: keeps srcset populated. Cropping
+				// is done by object-fit: cover on .ccn-services-bg.
+				echo wp_get_attachment_image( $ccn_img, '1536x1536', false, array( 'class' => 'ccn-services-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
 			}
 			?>
 			<div class="ccn-services-grid">

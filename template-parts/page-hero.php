@@ -8,9 +8,10 @@
 <section class="ccn-page-hero">
 	<?php
 	if ( has_post_thumbnail() ) {
-		// Soft (scaled) size, NOT the hard ccn-hero crop: cropping changes the
-		// aspect ratio, so WP drops every scaled variant from the srcset and
-		// mobile gets the full 1920px file. The band crops via object-fit.
+		// Soft (scaled) size, never a hard crop: cropping changes the aspect
+		// ratio, so WP drops every scaled variant from the srcset and mobile
+		// gets the full file. The band crops via object-fit. Every hero in
+		// this theme uses this size — see the note in functions.php.
 		the_post_thumbnail(
 			'1536x1536',
 			array(

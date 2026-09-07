@@ -14,8 +14,10 @@ function ccn_setup() {
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'woocommerce' );
-	// Hero background: full-screen photo, capped so originals never ship raw.
-	add_image_size( 'ccn-hero', 1920, 1080, true );
+	// No custom hero size on purpose. A hard crop (1920x1080, true) empties
+	// srcset: wp_calculate_image_srcset() only keeps sizes with a matching
+	// aspect ratio, and every stock WP size is a square box. Heroes use the
+	// soft '1536x1536' instead and are cropped by object-fit: cover in CSS.
 	register_nav_menus(
 		array(
 			'primary' => esc_html__( 'Primary Menu', 'coin-container' ),
@@ -128,8 +130,8 @@ function ccn_preload_hero() {
 				$data = $parsed['attrs']['data'] ?? array();
 				$img  = (int) ( $data['image'] ?? $data['field_ccn_hh_image'] ?? 0 );
 				if ( $img ) {
-					$srcset = wp_get_attachment_image_srcset( $img, 'ccn-hero' );
-					$src    = wp_get_attachment_image_url( $img, 'ccn-hero' );
+					$srcset = wp_get_attachment_image_srcset( $img, '1536x1536' );
+					$src    = wp_get_attachment_image_url( $img, '1536x1536' );
 					if ( $srcset && $src ) {
 						printf(
 							'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",

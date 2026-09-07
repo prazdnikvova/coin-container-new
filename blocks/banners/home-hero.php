@@ -2,8 +2,8 @@
 /**
  * Block: Home hero. Full-viewport background photo, dark gradient overlay,
  * big left-aligned heading — mirrors the original coin-container.de hero.
- * This is the LCP element: the background is preloaded in ccn_preload_hero(),
- * never lazy-load anything here.
+ * This is the LCP element: preloaded in ccn_preload_hero() and marked
+ * fetchpriority=high here. Never lazy-load anything in this block.
  *
  * @var array $block      Block settings (anchor, etc.).
  * @var bool  $is_preview True when rendered inside the editor.
@@ -26,11 +26,14 @@ endif;
 <section class="ccn-hero"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<?php
 	// Responsive <img> instead of a CSS background: srcset lets mobile pull a
-	// small variant, fetchpriority=high makes it the LCP without a preload.
+	// small variant. Soft '1536x1536' on purpose — a hard-cropped size would
+	// leave srcset empty and ship the full file to phones. fetchpriority=high
+	// backs up the preload in ccn_preload_hero(); the two point at the same
+	// size so the browser reuses one request.
 	if ( $ccn_img_id ) {
 		echo wp_get_attachment_image(
 			$ccn_img_id,
-			'ccn-hero',
+			'1536x1536',
 			false,
 			array(
 				'class'         => 'ccn-hero-img',
