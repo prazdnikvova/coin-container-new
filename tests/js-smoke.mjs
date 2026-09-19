@@ -268,6 +268,28 @@ const restStatus = await page.evaluate(async (base) => {
 }, BASE);
 ok('REST /wp/v2/users closed (404)', restStatus === 404, String(restStatus));
 
+// Shop sorting is the only catalogue "filter" control on this site (no attribute
+// filters): a server-side ?orderby= must change the order, not just return 200.
+// Added 19.09.2026 together with the forms block below (user request: filters +
+// forms on every site).
+const idsOf = () => page.$$eval('li.product', (els) => els.map((e) => (e.className.match(/post-(\d+)/) || [])[1]).filter(Boolean));
+await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });
+const idsDefault = await idsOf();
+const respSorted = await page.goto(BASE + '/container-shop/?orderby=price-desc', { waitUntil: 'domcontentloaded' });
+const idsSorted = await idsOf();
+ok('Shop sorting control present', await page.locator('form.woocommerce-ordering select[name="orderby"]').count() === 1);
+ok('Shop ?orderby=price-desc changes order', respSorted.status() === 200 && idsSorted.length > 0 && idsSorted[0] !== idsDefault[0],
+	`default first=${idsDefault[0]}, sorted first=${idsSorted[0]}`);
+
+// Forms: render-level only, no submissions. CF7 6.x posts through
+// /wp-json/contact-form-7/v1/ — a missing route (404) kills every form silently,
+// so the anonymous GET must answer 401/403.
+await page.goto(BASE + '/kontakt-beratung/', { waitUntil: 'domcontentloaded' });
+ok('Kontakt: CF7 form visible', await page.locator('form.wpcf7-form').first().isVisible());
+ok('Kontakt: submit control', await page.locator('form.wpcf7-form .wpcf7-submit').count() >= 1);
+const cf7Rest = await fetch(BASE + '/wp-json/contact-form-7/v1/contact-forms');
+ok('CF7 REST route exists (401/403, not 404)', [401, 403].includes(cf7Rest.status), String(cf7Rest.status));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
