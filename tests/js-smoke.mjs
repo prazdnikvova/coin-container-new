@@ -302,6 +302,23 @@ ok('Post: no comment form or comments area', postResp.status === 200
 const commentsRest = await fetch(BASE + '/wp-json/wp/v2/comments');
 ok('REST /wp/v2/comments closed (not 200)', commentsRest.status !== 200, String(commentsRest.status));
 
+// XML-RPC off (inc/security.php): methods that need a login answer fault 405
+// before any password check. system.listMethods is not a usable probe: the
+// introspection methods stay listed even with XML-RPC disabled.
+const xmlrpc = await fetch(BASE + '/xmlrpc.php', {
+	method: 'POST',
+	headers: { 'Content-Type': 'text/xml' },
+	body: '<?xml version="1.0"?><methodCall><methodName>wp.getUsersBlogs</methodName><params>'
+		+ '<param><value><string>smoke-probe</string></value></param>'
+		+ '<param><value><string>x</string></value></param></params></methodCall>',
+});
+const xmlrpcBody = await xmlrpc.text();
+ok('XML-RPC POST answers faultCode 405 (disabled)', xmlrpcBody.includes('faultCode') && /<int>405<\/int>/.test(xmlrpcBody),
+	(xmlrpcBody.match(/<int>(-?\d+)<\/int>/) || [])[1] || 'no faultCode');
+
+// oEmbed discovery links removed from wp_head (checked on the post: singular only).
+ok('wp_head without json+oembed link', !postHtml.includes('json+oembed'));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

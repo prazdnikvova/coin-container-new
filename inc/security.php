@@ -1,6 +1,7 @@
 <?php
 /**
- * Security hardening: user enumeration, headers, version leak.
+ * Security hardening: user enumeration, headers, version leak, XML-RPC,
+ * oEmbed discovery.
  *
  * Note: if the site serves cached HTML past PHP (e.g. Apache + a page cache
  * rewriting via .htaccess), these headers will not cover cached hits —
@@ -77,3 +78,24 @@ function ccn_security_headers() {
  */
 remove_action( 'wp_head', 'wp_generator' );
 add_filter( 'the_generator', '__return_empty_string' );
+
+/**
+ * 5. XML-RPC off (parity with production): the site uses neither pingbacks
+ * nor remote publishing. Every method call now gets a faultCode; the
+ * X-Pingback header and the RSD <link> (EditURI) are gone.
+ * xmlrpc.php itself still answers; block it at the server level if needed.
+ */
+add_filter( 'xmlrpc_enabled', '__return_false' );
+remove_action( 'wp_head', 'rsd_link' );
+
+add_filter( 'wp_headers', 'ccn_remove_pingback_header' );
+function ccn_remove_pingback_header( $headers ) {
+	unset( $headers['X-Pingback'] );
+	return $headers;
+}
+
+/**
+ * 6. oEmbed discovery off: no <link rel="alternate" ...+oembed> tags in
+ * <head>. Embedding other sites into our content still works.
+ */
+remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
