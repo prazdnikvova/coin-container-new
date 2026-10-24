@@ -290,6 +290,18 @@ ok('Kontakt: submit control', await page.locator('form.wpcf7-form .wpcf7-submit'
 const cf7Rest = await fetch(BASE + '/wp-json/contact-form-7/v1/contact-forms');
 ok('CF7 REST route exists (401/403, not 404)', [401, 403].includes(cf7Rest.status), String(cf7Rest.status));
 
+// Comments off site-wide (inc/disable-comments.php, parity with production K40).
+// The newest published post is picked via REST so the check survives content changes.
+const latestPost = await (await fetch(BASE + '/wp-json/wp/v2/posts?per_page=1&_fields=link')).json();
+const postUrl = (Array.isArray(latestPost) && latestPost[0] && latestPost[0].link) || BASE + '/gebrauchte-seecontainer-in-cuxhaven/';
+const postResp = await fetch(postUrl);
+const postHtml = await postResp.text();
+ok('Post: no comment form or comments area', postResp.status === 200
+	&& !postHtml.includes('comment-respond') && !postHtml.includes('comments-area'),
+	`${postResp.status} ${postUrl}`);
+const commentsRest = await fetch(BASE + '/wp-json/wp/v2/comments');
+ok('REST /wp/v2/comments closed (not 200)', commentsRest.status !== 200, String(commentsRest.status));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
