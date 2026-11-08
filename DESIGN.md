@@ -728,3 +728,19 @@ for reviewing content:
   (overflow, focus, cards, sections, taps, hover, spacing),
   `t48_cta_photo.cjs` (white text over the photo CTA, sampled pixels);
   button states: `reports/2026-11-08-t48-shots/t48_states.cjs`.
+- Smoke test, "Product & catalog (T-49)": jQuery only on the WooCommerce
+  pages (deferred on shop pages); WooCommerce's stylesheets only on the shop,
+  categories and cart; card title links without underline; on the product
+  page theme.css is the only render-blocking stylesheet and every script
+  defers; the gallery at 360 (visible, slider with arrows and no thumbnail
+  strip, first photo eager/high, photos 2..N not requested, the next arrow
+  loads photo 2), the lightbox by keyboard, thumbnails at 1280, the gallery
+  without JS; the first screen of a product at 360 (h1 ≤ 560, price ≤ 640,
+  add to cart ≤ 760 above the action bar, the order), badge and request
+  button, every colour of `<main>` a token, CLS ≤ 0.01; breadcrumbs on seven
+  page types; discounted products first; one 16px gutter at 360. Library
+  probes: `reports/2026-11-08-data/t49_probe.cjs` (first screen of three
+  products, colours with the cart notice, layout shifts, breadcrumbs and
+  jQuery per page, lightbox, catalogue order), `t49_wccss_diff.cjs`
+  (computed styles with and without WooCommerce's stylesheets),
+  `t49_gutter.cjs`, `t49_lh.py` (Lighthouse summary and request list).
