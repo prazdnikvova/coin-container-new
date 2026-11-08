@@ -597,13 +597,14 @@ await page.waitForTimeout(1500);
 const countersDone = await counterTexts();
 await jump(page, 0);
 await page.waitForTimeout(100);
-await page.evaluate(() => document.querySelector('.ccn-stats-grid').scrollIntoView({ block: 'center', behavior: 'instant' }));
+// Null-safe (T-49): a missing grid fails this check with the page URL instead of aborting the run (flake seen in T-47, T-49).
+await page.evaluate(() => { const g = document.querySelector('.ccn-stats-grid'); if (g) g.scrollIntoView({ block: 'center', behavior: 'instant' }); });
 await page.waitForTimeout(150);
 const countersAgain = await counterTexts();
 ok('Motion: counters count up once, hidden while they drop to 0, and land on the HTML value', countersAtLoad.length >= 3
 	&& !!counterStart && counterStart.opacity < 0.5
 	&& countersDone.join('|') === countersAtLoad.join('|') && countersAgain.join('|') === countersAtLoad.join('|'),
-	`${countersAtLoad} -> first change ${JSON.stringify(counterStart)} -> ${countersDone} -> ${countersAgain}`);
+	`${countersAtLoad} -> first change ${JSON.stringify(counterStart)} -> ${countersDone} -> ${countersAgain} (url ${page.url()})`);
 // (c) Scroll the whole page in 600px steps: reveal animations run, afterwards every block is
 // .is-in and fully visible (A6 probe: nothing left below opacity 0.05).
 await page.goto(BASE + '/', { waitUntil: 'load' });
