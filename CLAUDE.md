@@ -38,6 +38,9 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 - Markup: one `<header>`, `<main>`, `<footer>` and `<h1>` per page, every
   `<nav>` named, no skipped heading levels — README "Markup standard",
   enforced by the smoke test ("Structure invariants").
+- Motion: only `opacity`/`transform`, content visible without JS, reduced
+  motion switches it off, a new block root gets `data-motion="reveal"` —
+  `DESIGN.md` "Motion", smoke "Motion invariants".
 
 ## Tests
 

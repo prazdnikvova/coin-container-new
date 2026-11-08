@@ -55,13 +55,17 @@ if ( ! $ccn_q->have_posts() ) {
 	return;
 }
 ?>
-<section class="section ccn-featured"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="section ccn-featured" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="section-inner ccn-container">
 		<?php $ccn_h = get_field( 'heading' ); ?>
 		<?php if ( $ccn_h ) : ?>
 			<h2 class="section-heading"><?php echo esc_html( $ccn_h ); ?></h2>
 		<?php endif; ?>
-		<?php woocommerce_product_loop_start(); ?>
+		<?php
+		// The cards stagger in (T-46): data-motion-stagger on WooCommerce's
+		// <ul class="products">, here only — the shop loop stays untouched.
+		echo preg_replace( '/<ul\b/', '<ul data-motion-stagger', woocommerce_product_loop_start( false ), 1 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WooCommerce loop-start template markup.
+		?>
 			<?php
 			// Under this block's own h2 the card titles drop to h3 (here only:
 			// the shop keeps WooCommerce's h2 under its h1). Without a heading

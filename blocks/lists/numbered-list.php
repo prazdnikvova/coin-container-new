@@ -17,7 +17,7 @@ if ( empty( $ccn_items ) ) {
 	return;
 }
 ?>
-<section class="ccn-numbered"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-numbered" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-numbered-inner ccn-container">
 		<?php if ( $ccn_heading || $ccn_accent ) : ?>
 			<h2 class="ccn-numbered-heading">
@@ -30,7 +30,7 @@ if ( empty( $ccn_items ) ) {
 		<?php if ( $ccn_intro ) : ?>
 			<p class="ccn-numbered-intro"><?php echo esc_html( $ccn_intro ); ?></p>
 		<?php endif; ?>
-		<ol class="ccn-numbered-list">
+		<ol class="ccn-numbered-list" data-motion-stagger>
 			<?php foreach ( $ccn_items as $ccn_item ) : ?>
 				<li class="ccn-numbered-item">
 					<span class="ccn-numbered-title"><?php echo esc_html( $ccn_item['title'] ?? '' ); ?></span>

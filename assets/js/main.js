@@ -79,31 +79,47 @@ document.addEventListener('DOMContentLoaded', () => {
 		new IntersectionObserver((es) => header.classList.toggle('is-stuck', !es[es.length - 1].isIntersecting)).observe(sentinel);
 	}
 
-	// Stats block: count numbers up once the block scrolls into view.
-	const counters = document.querySelectorAll('.ccn-stat-number[data-target]');
-	if (counters.length && 'IntersectionObserver' in window) {
-		const animate = (el) => {
-			const target = parseInt(el.dataset.target, 10) || 0;
-			const suffix = el.dataset.suffix || '';
-			const duration = 1200;
-			const start = performance.now();
+	// Motion (T-46, DESIGN.md "Motion"): one IntersectionObserver reveals the
+	// [data-motion] blocks and [data-motion-stagger] grids below the fold and
+	// starts the stats counters. html.ccn-motion, the class behind every hidden
+	// state in theme.css, is set only here: without JS, without IO or with
+	// prefers-reduced-motion nothing is hidden and no observer or rAF runs.
+	if ('IntersectionObserver' in window && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
+		// 0 -> final value in 1200 ms (easeOutCubic, de-DE format, decimals kept).
+		// Runs only with the reveal of its grid, which still sits at opacity 0, so
+		// the final number printed in the HTML never visibly drops to 0.
+		const count = (el) => {
+			const to = parseFloat(el.dataset.target) || 0;
+			const dec = (el.dataset.target.split('.')[1] || '').length;
+			const t0 = performance.now();
 			const tick = (now) => {
-				const p = Math.min((now - start) / duration, 1);
-				el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + suffix;
+				const p = Math.min((now - t0) / 1200, 1);
+				el.textContent = (to * (1 - Math.pow(1 - p, 3))).toLocaleString('de-DE', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + (el.dataset.suffix || '');
 				if (p < 1) requestAnimationFrame(tick);
 			};
 			requestAnimationFrame(tick);
 		};
-		const seen = new WeakSet();
-		const io = new IntersectionObserver((entries) => {
-			entries.forEach((e) => {
-				if (e.isIntersecting && !seen.has(e.target)) {
-					seen.add(e.target);
-					animate(e.target);
-					io.unobserve(e.target);
-				}
+		const show = (el) => {
+			el.classList.add('is-in', 'is-anim');
+			if (el.hasAttribute('data-motion-stagger')) {
+				[...el.children].forEach((c, i) => { c.style.animationDelay = Math.min(i * 80, 400) + 'ms'; });
+			}
+			el.querySelectorAll('.ccn-stat-number[data-target]').forEach((c) => {
+				if (c.closest('[data-motion],[data-motion-stagger]') === el) count(c);
 			});
-		}, { threshold: 0.4 });
-		counters.forEach((c) => io.observe(c));
+		};
+		const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+			// 10 % visible, or simply entered when taller than the viewport.
+			if (e.isIntersecting && (e.intersectionRatio >= 0.1 || e.boundingClientRect.height > window.innerHeight)) {
+				io.unobserve(e.target);
+				show(e.target);
+			}
+		}), { threshold: [0, 0.1], rootMargin: '0px 0px -5% 0px' });
+		// Read all positions first, then write: whatever is in (or above) the
+		// viewport now stays visible and never animates.
+		const targets = [...document.querySelectorAll('[data-motion],[data-motion-stagger]')];
+		const tops = targets.map((el) => el.getBoundingClientRect().top);
+		targets.forEach((el, i) => (tops[i] < window.innerHeight ? el.classList.add('is-in') : io.observe(el)));
+		document.documentElement.classList.add('ccn-motion');
 	}
 });

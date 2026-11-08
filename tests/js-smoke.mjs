@@ -506,7 +506,51 @@ ok('html5 theme support without the dead "style" argument (WP 7.0)', /add_theme_
 // scrolling (no-preference) would still be moving when the check runs.
 const mainJs = themeFile('assets/js/main.js');
 const jump = (p, y) => p.evaluate((yy) => window.scrollTo({ top: yy, behavior: 'instant' }), y);
+const motionTargets = '[data-motion], [data-motion-stagger] > *';
+const motionState = (p) => p.evaluate((sel) => {
+	const op = (e) => parseFloat(getComputedStyle(e).opacity);
+	const t = [...document.querySelectorAll(sel)];
+	return {
+		motionClass: document.documentElement.classList.contains('ccn-motion'), total: t.length,
+		withoutIsIn: document.querySelectorAll('[data-motion]:not(.is-in), [data-motion-stagger]:not(.is-in)').length,
+		belowOne: t.filter((e) => op(e) < 1).length, faint: t.filter((e) => op(e) < 0.05).length,
+		counters: [...document.querySelectorAll('.ccn-stat-number[data-target]')].map((e) => {
+			const dec = (e.dataset.target.split('.')[1] || '').length;
+			const want = parseFloat(e.dataset.target).toLocaleString('de-DE', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + (e.dataset.suffix || '');
+			return { text: e.textContent.trim(), want, zero: !(parseFloat(e.dataset.target) > 0) };
+		}),
+	};
+}, motionTargets);
+const countersFinal = (s) => s.counters.length >= 3 && s.counters.every((c) => c.text === c.want && !c.zero);
+// Classify at load (first block of a landing sits in the first viewport, every block of the
+// front page below it): blocks in view are .is-in and fully visible, blocks below are hidden.
+const loadSplit = (p) => p.evaluate(() => {
+	const vh = window.innerHeight;
+	const op = (e) => parseFloat(getComputedStyle(e).opacity);
+	const kids = (el) => (el.hasAttribute('data-motion-stagger') ? [...el.children] : [el]);
+	const targets = [...document.querySelectorAll('[data-motion], [data-motion-stagger]')];
+	const above = targets.filter((e) => e.getBoundingClientRect().top < vh);
+	const below = targets.filter((e) => e.getBoundingClientRect().top >= vh);
+	return {
+		above: above.length, below: below.length,
+		aboveHidden: above.filter((e) => !e.classList.contains('is-in') || kids(e).some((k) => op(k) < 1)).length,
+		belowShown: below.filter((e) => e.classList.contains('is-in') || kids(e).some((k) => op(k) > 0)).length,
+	};
+});
+await page.goto(BASE + '/container-kaufen/', { waitUntil: 'load' });
+const splitKaufen = await loadSplit(page);
 await page.goto(BASE + '/', { waitUntil: 'load' });
+const splitHome = await loadSplit(page);
+ok('Motion: at load blocks in view stay visible (.is-in), blocks below the fold start hidden',
+	splitKaufen.above >= 1 && splitKaufen.aboveHidden === 0 && splitHome.below >= 7 && splitHome.belowShown === 0
+	&& (await motionState(page)).motionClass, `kaufen ${JSON.stringify(splitKaufen)}, home ${JSON.stringify(splitHome)}`);
+const lcpMoving = await page.evaluate(() => {
+	const els = [...document.querySelectorAll('.ccn-hero, .ccn-hero img, .ccn-contact-cards, #header')];
+	return { n: els.length, bad: els.filter((e) => e.closest('[data-motion], [data-motion-stagger] > *') || getComputedStyle(e).opacity !== '1')
+		.map((e) => e.className || e.tagName) };
+});
+ok('Motion: hero, hero image, contact cards and header carry no data-motion, opacity 1 after load', lcpMoving.n >= 4 && lcpMoving.bad.length === 0,
+	lcpMoving.bad.join(', ') || `${lcpMoving.n} elements`);
 await jump(page, 300);
 await page.waitForTimeout(200);
 const stuckAt300 = await page.evaluate(() => document.getElementById('header').classList.contains('is-stuck'));
@@ -516,6 +560,74 @@ const stuckAt0 = await page.evaluate(() => document.getElementById('header').cla
 ok('Motion: #header.is-stuck after scrollTo(0, 300), gone at 0 (sentinel)', stuckAt300 && !stuckAt0
 	&& await page.locator('body > .ccn-header-sentinel[aria-hidden="true"]').count() === 1, `300: ${stuckAt300}, 0: ${stuckAt0}`);
 ok('Motion: main.js has no scroll listener', mainJs.length > 0 && !/addEventListener\(\s*['"]scroll['"]/.test(mainJs));
+// Counters: the HTML carries the final number; on reveal it counts up from 0 and lands on
+// the same text, once (scrolling away and back does not restart it).
+const counterTexts = () => page.evaluate(() => [...document.querySelectorAll('.ccn-stat-number')].map((e) => e.textContent.trim()));
+const countersAtLoad = await counterTexts();
+await page.evaluate(() => document.querySelector('.ccn-stats-grid').scrollIntoView({ block: 'center', behavior: 'instant' }));
+await page.waitForTimeout(250);
+const countersRunning = await counterTexts();
+await page.waitForTimeout(1500);
+const countersDone = await counterTexts();
+await jump(page, 0);
+await page.waitForTimeout(100);
+await page.evaluate(() => document.querySelector('.ccn-stats-grid').scrollIntoView({ block: 'center', behavior: 'instant' }));
+await page.waitForTimeout(150);
+const countersAgain = await counterTexts();
+ok('Motion: counters count up once and land on the HTML value', countersAtLoad.length >= 3 && countersRunning.some((t, i) => t !== countersAtLoad[i])
+	&& countersDone.join('|') === countersAtLoad.join('|') && countersAgain.join('|') === countersAtLoad.join('|'),
+	`${countersAtLoad} -> ${countersRunning} -> ${countersDone} -> ${countersAgain}`);
+// (c) Scroll the whole page in 600px steps: reveal animations run, afterwards every block is
+// .is-in and fully visible (A6 probe: nothing left below opacity 0.05).
+await page.goto(BASE + '/', { waitUntil: 'load' });
+const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
+let revealsPlaying = 0;
+for (let y = 600; y < pageHeight + 600; y += 600) {
+	await jump(page, y);
+	await page.waitForTimeout(150);
+	revealsPlaying = Math.max(revealsPlaying, await page.evaluate(() => document.getAnimations().filter((a) => a.animationName === 'ccn-reveal').length));
+}
+await jump(page, 0);
+await page.waitForTimeout(1200);
+const afterScroll = await motionState(page);
+ok('Motion: reveal animations play while scrolling (ccn-reveal)', revealsPlaying > 0, `max ${revealsPlaying} at once`);
+ok('Motion: after a full scroll every block is .is-in and fully visible', afterScroll.total >= 20 && afterScroll.withoutIsIn === 0
+	&& afterScroll.belowOne === 0 && afterScroll.faint === 0, JSON.stringify({ ...afterScroll, counters: undefined }));
+// (a) prefers-reduced-motion: no motion class, nothing hidden, counters static, transitions cut.
+const rmPage = await browser.newPage({ reducedMotion: 'reduce' });
+await rmPage.goto(BASE + '/', { waitUntil: 'load' });
+const rmLoad = await motionState(rmPage);
+await jump(rmPage, pageHeight);
+await rmPage.waitForTimeout(300);
+const rmBottom = await motionState(rmPage);
+const rmTransition = await rmPage.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.btn')).transitionDuration));
+ok('Motion (reduced motion): no html.ccn-motion, nothing hidden, counters show final values', !rmLoad.motionClass && rmLoad.total >= 20
+	&& rmLoad.belowOne === 0 && rmBottom.belowOne === 0 && countersFinal(rmBottom), JSON.stringify({ ...rmBottom, counters: rmBottom.counters.map((c) => c.text) }));
+ok('Motion (reduced motion): transitions cut to 0.01ms', rmTransition < 0.001, `${rmTransition}s`);
+await rmPage.close();
+// (b) main.js blocked: content is visible and the counters show the final numbers, not 0.
+const noJs = await browser.newPage();
+await noJs.route('**/assets/js/main.js*', (r) => r.abort());
+await noJs.goto(BASE + '/', { waitUntil: 'load' });
+const noJsState = await motionState(noJs);
+ok('Motion (main.js blocked): nothing hidden, counters show final numbers', !noJsState.motionClass && noJsState.total >= 20
+	&& noJsState.belowOne === 0 && countersFinal(noJsState), JSON.stringify({ ...noJsState, counters: noJsState.counters.map((c) => c.text) }));
+await noJs.close();
+// Code level: every block below the hero reveals, the first-screen blocks never do; grids stagger.
+const motionNever = ['home-hero', 'contact-cards'];
+const motionStagger = ['featured-products', 'services', 'stats', 'info-cards', 'numbered-list', 'news'];
+const blockName = (t) => t.split('/').pop().replace('.php', '');
+const badMotionRoots = blockTemplates.filter((t) => {
+	const root = themeFile(t).split('\n').find((l) => l.includes('<section')) || '';
+	return motionNever.includes(blockName(t)) ? root.includes('data-motion') : !root.includes('data-motion="reveal"');
+});
+const missingStagger = motionStagger.filter((n) => !themeFile(blockTemplates.find((t) => blockName(t) === n) || '').includes('data-motion-stagger'));
+const staticMotion = ['template-parts/page-hero.php', 'header.php', 'footer.php'].filter((f) => themeFile(f).includes('data-motion'));
+ok('Motion: data-motion="reveal" on every block root except home-hero/contact-cards; grids stagger',
+	blockTemplates.length >= 12 && badMotionRoots.length === 0 && missingStagger.length === 0 && staticMotion.length === 0,
+	[...badMotionRoots, ...missingStagger, ...staticMotion].join(', ') || `${blockTemplates.length - motionNever.length} reveal, ${motionStagger.length} stagger`);
+ok('Motion: prefers-reduced-motion handled in theme.css and main.js', /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\*,\s*\*::before,\s*\*::after\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important;\s*animation-duration:\s*0\.01ms\s*!important/.test(themeCss)
+	&& /matchMedia\(\s*'\(prefers-reduced-motion: no-preference\)'\s*\)/.test(mainJs));
 
 await browser.close();
 console.log(results.join('\n'));

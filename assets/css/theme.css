@@ -291,7 +291,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-stats-subtitle{max-width:40rem;margin:0 auto 2.5rem;color:var(--ccn-color-secondary)}
 .ccn-stats-grid{display:grid;gap:2rem;grid-template-columns:1fr}
 @media (min-width:48rem){.ccn-stats-grid{grid-template-columns:repeat(3,1fr)}}
-.ccn-stat-number{display:block;font-family:var(--ccn-font-heading);font-weight:700;font-size:clamp(2.25rem,4vw,3.25rem);color:var(--ccn-color-secondary)}
+.ccn-stat-number{display:block;font-family:var(--ccn-font-heading);font-weight:700;font-size:clamp(2.25rem,4vw,3.25rem);color:var(--ccn-color-secondary);font-variant-numeric:tabular-nums}
 .ccn-stat-label{color:var(--ccn-color-secondary)}
 
 /* Block: CTA banner — lazy photo, dark overlay, logo + heading + button */
@@ -511,3 +511,11 @@ body .is-layout-flex{display:flex}.is-layout-flex{flex-wrap:wrap;align-items:cen
 :where(.is-layout-flex),:where(.is-layout-grid){gap:.5em}.is-layout-flex>:is(*,div),.is-layout-grid>:is(*,div){margin:0}
 .is-layout-constrained>:where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width:var(--ccn-container-prose);margin-left:auto!important;margin-right:auto!important}.is-layout-constrained>.alignwide{max-width:var(--ccn-container)}
 :root :where(.wp-element-button,.wp-block-button__link){background-color:var(--ccn-color-text);border-width:0;color:var(--ccn-color-white);font:inherit;letter-spacing:inherit;text-transform:inherit;padding:calc(.667em + 2px) calc(1.333em + 2px);text-decoration:none}
+
+/* Motion (T-46, DESIGN.md "Motion"): hidden only under html.ccn-motion, which main.js sets */
+@media (prefers-reduced-motion:no-preference){
+.ccn-motion [data-motion]:not(.is-in),.ccn-motion [data-motion-stagger]:not(.is-in)>*{opacity:0}
+.ccn-motion .is-anim[data-motion],.ccn-motion .is-anim[data-motion-stagger]>*{animation:ccn-reveal var(--ccn-dur-reveal) var(--ccn-ease-out) backwards}
+@keyframes ccn-reveal{from{opacity:0;transform:translateY(20px)}}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}

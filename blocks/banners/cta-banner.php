@@ -18,7 +18,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 	return;
 }
 ?>
-<section class="ccn-cta"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-cta" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<?php
 	if ( $ccn_img ) {
 		// Soft size, not a hard crop: keeps srcset populated so phones pull a

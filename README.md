@@ -45,6 +45,11 @@ mobile emulation) and the numbers go into the commit body.
   that contain the block.
 - Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
   no jQuery.
+- Motion: blocks opt in with `data-motion="reveal"` / `data-motion-stagger`;
+  one IntersectionObserver in `main.js` and the "Motion" block at the end of
+  `theme.css` do the rest. Content is visible without JS and with
+  `prefers-reduced-motion`; hero, contact cards and header never move
+  ([`DESIGN.md`](DESIGN.md) "Motion").
 - Design values are tokens in `assets/css/theme.css` (`:root`) — colours with
   measured contrast, one type scale, spacing, containers, radius, shadows,
   motion — documented in [`DESIGN.md`](DESIGN.md); `tests/contrast.cjs` is the

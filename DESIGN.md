@@ -182,31 +182,84 @@ replaces its "planned" line with the implemented spec.
 | C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | planned |
 | C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | planned |
 | C6 | Section heading + eyebrow | eyebrow only where it carries information (category), 13px uppercase, `--ccn-color-primary-text-strong`; otherwise the accent tail of the heading | T-48 | planned |
-| C7 | Stats | real figures only, dark surface with yellow numbers, `tabular-nums`, count once, final values with reduced motion | T-48 | planned |
+| C7 | Stats | real figures only, dark surface with yellow numbers; `tabular-nums`, count once and final values with reduced motion are in place (T-46, see Motion) | T-48 | planned |
 | C8 | Trust block | rating with count (live widgets as on production), quotes, partner logos, years/volume line; before the final CTA | T-50 | planned |
 | C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | planned |
 | C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
 | C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | planned |
 | C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | planned |
 
-## Motion tokens
+## Motion
 
-Values from the inventory of the old site (A5 §4). The tokens marked in CSS
-exist in `:root`; the motion code itself (reveal, counters, sticky sentinel)
-is T-46.
+Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the
+inventory of the old site (A5 §4), principles from the design brief (A6
+§6.6). No libraries, no extra files or requests; only `opacity` and
+`transform` move.
 
-| Effect | Value | Token |
+### Tokens and timings
+
+| Effect | Value | Where |
 |---|---|---|
-| Hover/focus feedback (colour, background, shadow, transform) | 200ms ease-out | `--ccn-dur-fast`, `--ccn-ease-out` |
-| Sticky header compact/shadow | 250ms ease-out, threshold 80px | `--ccn-dur-base` |
-| Section reveal | 500ms ease-out, offset 16–24px, threshold 10 %, max delay 400ms | `--ccn-dur-reveal` |
-| Reveal stagger | 80ms per item | (T-46) |
-| Counters | 1200ms easeOutCubic, start at 40 % visibility, final number in the HTML | (T-46; `main.js` already uses 1200ms) |
-| Quick panel / slide | 160ms / 280ms ease | (T-46) |
-| Carousel arrow scroll | native `scroll-behavior` (~300ms), no autoplay | — |
+| Hover/focus feedback (colour, background, border, shadow, transform) | 200ms ease-out | `--ccn-dur-fast`, `--ccn-ease-out` |
+| Sticky header background and shadow | 250ms ease-out, after 8px of scroll | `--ccn-dur-base`; compact height: T-47 |
+| Section reveal | 500ms ease-out, 20px rise, at 10 % visibility (root margin −5 % at the bottom) | `--ccn-dur-reveal`, `@keyframes ccn-reveal` |
+| Reveal stagger | 80ms per child, 400ms at most | `main.js` |
+| Counters | 1200ms easeOutCubic, de-DE format | `main.js` |
+| Quick panel / slide | 160ms / 280ms ease | T-58 (Quick Contact) |
 
-`--ccn-ease-out` is `cubic-bezier(.2,.7,.2,1)`. `prefers-reduced-motion:
-reduce` switches every effect off, in CSS and in JS.
+`--ccn-ease-out` is `cubic-bezier(.2,.7,.2,1)`.
+
+### How a block opts in
+
+- `data-motion="reveal"` on the root `<section>` of every block that can sit
+  below the first screen: intro, text-image, text-section,
+  featured-products, services, stats, cta-banner, info-cards,
+  numbered-list, news.
+- `data-motion-stagger` on the grid inside it; its children reveal one after
+  another: `ul.products` (featured-products), services, stats, info cards,
+  numbered list, news cards.
+- Never: home-hero, contact-cards, the landing hero band
+  (`template-parts/page-hero.php`), header and footer — they hold the LCP
+  element or sit in the first screen.
+- The smoke test fails for a new block whose root has no
+  `data-motion="reveal"`, unless it joins the first-screen list on purpose.
+
+### Runtime
+
+1. `main.js` sets `html.ccn-motion` only when IntersectionObserver exists
+   and `prefers-reduced-motion: no-preference` matches. Every hidden state in
+   `theme.css` hangs off that class: without JS, without IO or with reduced
+   motion nothing is ever hidden and no observer or `requestAnimationFrame`
+   runs.
+2. At load the positions of all targets are read once: whatever is in (or
+   above) the viewport gets `.is-in` and never animates; the rest is hidden
+   (`opacity: 0`) and observed.
+3. At 10 % visibility (or on entering, for targets taller than the viewport)
+   a target gets `.is-in.is-anim`: `animation: ccn-reveal` (`backwards` fill)
+   plays once, stagger children get an inline `animation-delay`. An
+   animation rather than a transition keeps reveal and hover independent —
+   the same cards lift on hover.
+4. Counters (`.ccn-stat-number[data-target]`, stats block): the HTML holds
+   the final value (`number_format_i18n`, decimals kept; `data-target` in
+   machine format, `data-suffix`). It counts up from 0 only together with the
+   reveal of its grid, which is still at opacity 0, so the visible number
+   never drops to 0. In view at load, with reduced motion or without JS the
+   number stays as printed.
+5. Sticky header: a 1px `aria-hidden` sentinel after `wp_body_open()`
+   (`top: 8px`); when it leaves the viewport `#header` gets `.is-stuck`
+   (solid background + `--ccn-shadow-1`). No scroll listener. This observer
+   also runs with reduced motion: it is a state, not an animation.
+6. `@media (prefers-reduced-motion: reduce)` cuts every transition and
+   animation to 0.01ms; `scroll-behavior: smooth` applies only under
+   `no-preference`.
+
+### Not animated (A5 §4, A6 §6.6)
+
+Hero image and title, contact cards, the landing hero band, the header
+height (T-47), forms and running text beyond the block reveal. No parallax,
+no image layers, no autoplay carousels, no hover-only content. Scroll-driven
+CSS (`animation-timeline: view()`, ~89 % support in 10/2026) is an idea for
+a later version, not used in v1.
 
 ## Do / don't
 
@@ -265,3 +318,9 @@ for reviewing content:
   parity"): computed h1/h2/body sizes, link and menu colours, no raw hex
   outside `:root`, token contrast, theme.json in sync with the tokens, no
   global-styles on the front end.
+- Smoke test, "Motion invariants (T-46)": blocks in view at load visible and
+  below the fold hidden, hero/contact cards/header static, reveal animations
+  playing on scroll and nothing left below opacity 1 afterwards, counters
+  counting once to the printed value, reduced motion and blocked `main.js`
+  hiding nothing, sticky sentinel, `data-motion` on every block root.
+  Lighthouse: `non-composited-animations` stays empty, CLS 0.

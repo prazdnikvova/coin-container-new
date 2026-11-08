@@ -16,7 +16,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
 	return;
 }
 ?>
-<section class="ccn-services"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-services" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-services-head ccn-container">
 		<?php if ( $ccn_heading ) : ?>
 			<h2 class="ccn-services-heading">
@@ -39,7 +39,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
 				echo wp_get_attachment_image( $ccn_img, '1536x1536', false, array( 'class' => 'ccn-services-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
 			}
 			?>
-			<div class="ccn-services-grid">
+			<div class="ccn-services-grid" data-motion-stagger>
 				<?php while ( have_rows( 'items' ) ) : the_row(); ?>
 					<div class="ccn-service">
 						<?php if ( $ccn_num = get_sub_field( 'number' ) ) : ?>
