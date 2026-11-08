@@ -146,6 +146,9 @@ the six key pages, the blog index, the search results and Containerzubehör).
   `repeat(auto-fill, minmax(min(100%, max(16rem, (100% - (cols - 1) × gap) / cols)), 1fr))`,
   gap `--ccn-space-5`. WooCommerce's clearfix pseudo-elements are off (they
   took grid cells); the grid clears the floated result count and ordering.
+- Catalogue order (shop and product categories, as on production):
+  discounted products first, then menu order and title; a sort order the
+  visitor picks (`?orderby=`) is left alone (`inc/woocommerce.php`, T-49).
 - Posts, blog index and archives keep the 820px reading column; shop,
   categories and product search use the full container.
 

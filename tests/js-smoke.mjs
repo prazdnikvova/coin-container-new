@@ -1207,6 +1207,16 @@ for (const path of [T49_PRODUCT, '/product-category/cointainer/standardcontainer
 }
 ok('Breadcrumbs: one nav "Brotkrumen" on product, category, shop, landings, post and page (current page last, not linked, 14px #605e5e), none on the front page',
 	Object.entries(crumbs).every(([p, v]) => (p === '/' ? v === '0 navs' : /^[2-9]\|true\|14px\|rgb\(96, 94, 94\)$/.test(v))), JSON.stringify(crumbs));
+// Catalogue order (production): discounted products first on the shop and the categories in the default order, so the
+// first product is on sale whenever one is; a sort order the visitor picks (?orderby=) is left alone.
+const saleOrder = {};
+for (const path of ['/container-shop/', '/product-category/cointainer/standardcontainer/', '/product-category/cointainer/spezialcontainer/', '/container-shop/?orderby=menu_order']) {
+	await bcPage.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+	saleOrder[path] = await bcPage.evaluate(() => [...document.querySelectorAll('ul.products > li.product')].map((li) => (li.querySelector('.onsale') ? 'S' : '-')).join(''));
+}
+const saleFirstOrder = (f) => !!f && (!f.includes('S') || (f[0] === 'S' && !/-S/.test(f)));
+ok('Catalogue: discounted products first on the shop and categories (the first product on sale when any is), ?orderby= from the visitor left alone',
+	Object.entries(saleOrder).every(([p, f]) => (p.includes('orderby') ? /-S/.test(f) : saleFirstOrder(f) && f.includes('S'))), JSON.stringify(saleOrder));
 await bcPage.close();
 
 await browser.close();

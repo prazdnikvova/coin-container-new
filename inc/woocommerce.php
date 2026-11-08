@@ -138,6 +138,30 @@ function ccn_single_product_request() {
 add_filter( 'loop_shop_columns', function () { return 4; } );
 add_filter( 'loop_shop_per_page', function () { return 12; } );
 
+/**
+ * Catalogue order as on production: discounted products first, then menu
+ * order and title (WooCommerce's default). Shop and product categories in
+ * their default order only: a sort order the visitor picks (?orderby=) and
+ * product searches are left alone. One join on the sale price meta.
+ *
+ * @param array    $clauses SQL clauses of the query.
+ * @param WP_Query $query   The query.
+ * @return array
+ */
+add_filter( 'posts_clauses', 'ccn_sale_first_clauses', 20, 2 );
+function ccn_sale_first_clauses( $clauses, $query ) {
+	if ( is_admin() || ! $query->is_main_query() || $query->is_search() || ! ( $query->is_post_type_archive( 'product' ) || $query->is_tax( 'product_cat' ) ) ) {
+		return $clauses;
+	}
+	if ( isset( $_GET['orderby'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only: only whether the visitor picked a sort order.
+		return $clauses;
+	}
+	global $wpdb;
+	$clauses['join']   .= " LEFT JOIN {$wpdb->postmeta} AS ccn_sale ON ( ccn_sale.post_id = {$wpdb->posts}.ID AND ccn_sale.meta_key = '_sale_price' )";
+	$clauses['orderby'] = "( ccn_sale.meta_value IS NOT NULL AND ccn_sale.meta_value <> '' ) DESC" . ( $clauses['orderby'] ? ', ' . $clauses['orderby'] : '' );
+	return $clauses;
+}
+
 // Sale badge wording as on the original site ("Angebot!", uppercased via CSS).
 add_filter( 'woocommerce_sale_flash', 'ccn_sale_flash' );
 function ccn_sale_flash() {
