@@ -48,7 +48,7 @@ function ccn_register_blocks() {
 		array(
 			'name'        => 'home-hero',
 			'title'       => __( 'Home hero', 'coin-container' ),
-			'description' => __( 'Full-screen hero: background photo, dark gradient, big left-aligned heading.', 'coin-container' ),
+			'description' => __( 'First-screen hero: background photo, big left-aligned heading, call-to-action buttons, phone line and trust row.', 'coin-container' ),
 			'category'    => 'ccn-banners',
 			'icon'        => 'cover-image',
 			'keywords'    => array( 'hero', 'banner', 'cover' ),

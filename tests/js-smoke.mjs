@@ -772,6 +772,14 @@ ok('First screen 360: phone link in the header, visible, >= 44x44, inside the 64
 	const t = fs360[p].tel;
 	return !!t && t.w >= 44 && t.h >= 44 && t.bottom <= 64;
 }), fsList((s) => JSON.stringify(s.tel)));
+ok('First screen 360: h1 takes <= 4 lines on /, kaufen, mieten', firstScreenPages.every((p) => fs360[p].h1Lines >= 1 && fs360[p].h1Lines <= 4),
+	fsList((s) => s.h1Lines));
+// Inside the first screen = bottom <= 800 and not under the action bar (when there is one).
+const fsInside = (s, b) => !!b && b.top >= 0 && b.bottom <= Math.min(800, s.bar ? s.bar.top : 800);
+ok('First screen 360 (/): primary CTA, hero phone line and trust row end inside the first screen', ['/'].every((p) => {
+	const s = fs360[p];
+	return fsInside(s, s.cta) && fsInside(s, s.heroTel) && fsInside(s, s.trust);
+}), ['/'].map((p) => `${p} cta ${JSON.stringify(fs360[p].cta)} tel ${JSON.stringify(fs360[p].heroTel)} trust ${JSON.stringify(fs360[p].trust)} bar ${JSON.stringify(fs360[p].bar)}`).join(', '));
 await fsPage.close();
 const deskHeader = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 await deskHeader.goto(BASE + '/', { waitUntil: 'load' });

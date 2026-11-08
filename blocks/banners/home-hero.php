@@ -1,9 +1,12 @@
 <?php
 /**
- * Block: Home hero. Full-viewport background photo, dark gradient overlay,
- * big left-aligned heading — mirrors the original coin-container.de hero.
- * This is the LCP element: preloaded in ccn_preload_hero() and marked
- * fetchpriority=high here. Never lazy-load anything in this block.
+ * Block: Home hero. Background photo with a dark overlay, big left-aligned
+ * heading, then the first-screen actions (T-47, DESIGN.md "Hero"): primary +
+ * optional secondary button and the phone line (template-parts/hero-cta.php),
+ * and the trust row (template-parts/trust-row.php) — on 360x800 all of it fits
+ * the first screen. The image is the LCP element: preloaded in
+ * ccn_preload_hero() and marked fetchpriority=high here. Never lazy-load
+ * anything in this block.
  *
  * @var array $block      Block settings (anchor, etc.).
  * @var bool  $is_preview True when rendered inside the editor.
@@ -13,8 +16,6 @@ $ccn_preview = ! empty( $is_preview );
 $ccn_img_id  = (int) get_field( 'image' );
 $ccn_title   = get_field( 'title' );
 $ccn_sub     = get_field( 'subtitle' );
-$ccn_btn_t   = get_field( 'button_text' );
-$ccn_btn_u   = get_field( 'button_url' );
 $ccn_tag     = ( ! $ccn_preview && is_front_page() ) ? 'h1' : 'h2';
 
 if ( $ccn_preview && ! $ccn_title && ! $ccn_img_id ) : ?>
@@ -51,8 +52,21 @@ endif;
 		<?php if ( $ccn_sub ) : ?>
 			<p class="ccn-hero-subtitle"><?php echo esc_html( $ccn_sub ); ?></p>
 		<?php endif; ?>
-		<?php if ( $ccn_btn_t && $ccn_btn_u ) : ?>
-			<a class="btn btn-primary ccn-hero-btn" href="<?php echo esc_url( $ccn_btn_u ); ?>"><?php echo esc_html( $ccn_btn_t ); ?></a>
-		<?php endif; ?>
+		<?php
+		get_template_part(
+			'template-parts/hero-cta',
+			null,
+			array(
+				'primary_text'   => get_field( 'button_text' ),
+				'primary_url'    => get_field( 'button_url' ),
+				'secondary_text' => get_field( 'button2_text' ),
+				'secondary_url'  => get_field( 'button2_url' ),
+				'phone'          => (bool) get_field( 'show_phone' ),
+			)
+		);
+		if ( get_field( 'show_trust' ) ) {
+			get_template_part( 'template-parts/trust-row' );
+		}
+		?>
 	</div>
 </section>

@@ -30,13 +30,45 @@
             "key": "field_ccn_hh_btn_text",
             "label": "Button text",
             "name": "button_text",
-            "type": "text"
+            "type": "text",
+            "instructions": "Primary call to action (yellow button). Printed with a decorative + in front, as on production."
         },
         {
             "key": "field_ccn_hh_btn_url",
             "label": "Button URL",
             "name": "button_url",
             "type": "text"
+        },
+        {
+            "key": "field_ccn_hh_btn2_text",
+            "label": "Second button text",
+            "name": "button2_text",
+            "type": "text",
+            "instructions": "Optional secondary call to action (outlined, light)."
+        },
+        {
+            "key": "field_ccn_hh_btn2_url",
+            "label": "Second button URL",
+            "name": "button2_url",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_hh_show_phone",
+            "label": "Show phone line",
+            "name": "show_phone",
+            "type": "true_false",
+            "instructions": "Phone number from Site Settings under the buttons (tel: link).",
+            "default_value": 1,
+            "ui": 1
+        },
+        {
+            "key": "field_ccn_hh_show_trust",
+            "label": "Show trust row",
+            "name": "show_trust",
+            "type": "true_false",
+            "instructions": "Trustpilot, Google and badge from Site Settings → Vertrauen; each item only when its values are filled in.",
+            "default_value": 0,
+            "ui": 1
         }
     ],
     "location": [

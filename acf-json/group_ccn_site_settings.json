@@ -23,7 +23,7 @@
             "label": "Phone",
             "name": "phone",
             "type": "text",
-            "instructions": "Displayed in header and footer. Digits, +, spaces.",
+            "instructions": "Shown as typed in header, hero, footer and contact cards (production format: +49 (40) 561 236 56); tel: links keep only the digits and +.",
             "required": 0
         },
         {
@@ -157,6 +157,84 @@
             "label": "Card button URL",
             "name": "landing_card_button_url",
             "type": "text"
+        },
+        {
+            "key": "field_ccn_tab_trust",
+            "label": "Vertrauen",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_trustpilot_rating",
+            "label": "Trustpilot rating",
+            "name": "trustpilot_rating",
+            "type": "number",
+            "instructions": "TrustScore as on the Trustpilot profile, e.g. 4.5 (hero trust row; trust blocks). The label follows Trustpilot's bands: from 4.5 \"Hervorragend\", from 4.0 \"Sehr gut\".",
+            "min": 0,
+            "max": 5,
+            "step": 0.1
+        },
+        {
+            "key": "field_ccn_trustpilot_count",
+            "label": "Trustpilot review count",
+            "name": "trustpilot_count",
+            "type": "number",
+            "min": 0,
+            "step": 1
+        },
+        {
+            "key": "field_ccn_trustpilot_url",
+            "label": "Trustpilot profile URL",
+            "name": "trustpilot_url",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_google_rating",
+            "label": "Google rating",
+            "name": "google_rating",
+            "type": "number",
+            "instructions": "Leave empty to show the review count only (as on production).",
+            "min": 0,
+            "max": 5,
+            "step": 0.1
+        },
+        {
+            "key": "field_ccn_google_count",
+            "label": "Google review count",
+            "name": "google_count",
+            "type": "number",
+            "min": 0,
+            "step": 1
+        },
+        {
+            "key": "field_ccn_google_url",
+            "label": "Google reviews URL",
+            "name": "google_url",
+            "type": "url"
+        },
+        {
+            "key": "field_ccn_badge_image",
+            "label": "Badge image",
+            "name": "badge_image",
+            "type": "image",
+            "instructions": "Seal with alt text. The hero prints the badge as text (no image in the first screen) and reads the alt as screen-reader text; the image is for the trust blocks and the certificates page.",
+            "return_format": "id",
+            "preview_size": "thumbnail"
+        },
+        {
+            "key": "field_ccn_badge_text",
+            "label": "Badge text",
+            "name": "badge_text",
+            "type": "text"
+        },
+        {
+            "key": "field_ccn_badge_url",
+            "label": "Badge link",
+            "name": "badge_url",
+            "type": "text",
+            "instructions": "Path or URL, e.g. /ueber-uns/zertifikate/."
         }
     ],
     "location": [

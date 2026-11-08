@@ -51,7 +51,7 @@ reached 4.5:1 on both `#fff` and `#f7f7f7`:
 Reproduce: `node tests/contrast.cjs --darken '#c4511f' --on '#ffffff,#f7f7f7'`.
 
 Raw `rgba()` is allowed only for transparency effects that are not palette
-colours: photo overlays (`rgba(20,20,20,.15–.6)` gradients of the heroes),
+colours: photo overlays (`rgba(20,20,20,.1–.7)` gradients of the heroes),
 hairlines and text on dark strips (`rgba(255,255,255,.12/.15/.18/.85/.9)`), the
 glass header (`rgba(255,255,255,.46)`) and the skip-link focus halo
 (`rgba(0,0,0,.6)`). Raw hex outside `:root`: none (the smoke test enforces it).
@@ -68,7 +68,7 @@ Two families, already self-hosted (latin subset, `font-display:swap`):
 | `--ccn-fs-h3` | `clamp(1.25rem, 1.1rem + .5vw, 1.5rem)` | 20px | 24px (from 1280px) | `h3`; component titles whatever their tag (sidebar heading, form card) |
 | `--ccn-fs-lead` | `clamp(1.125rem, 1.05rem + .3vw, 1.25rem)` | 18px | 20px | hero subtitle |
 | `--ccn-fs-body` | `1rem`, `1.125rem` from 64rem | 16px | 18px | body text |
-| `--ccn-fs-small` | `.875rem` | 14px | 14px | uppercase buttons, copyright |
+| `--ccn-fs-small` | `.875rem` | 14px | 14px | uppercase buttons, copyright, hero trust row |
 | `--ccn-lh-tight` | `1.15` | | | `h1` |
 | `--ccn-lh-heading` | `1.2` | | | `h2`–`h6` |
 | `--ccn-lh-body` | `1.6` | | | body |
@@ -180,7 +180,7 @@ replaces its "planned" line with the implemented spec.
 
 | # | Component | Acceptance criteria (short) | Card | Status |
 |---|---|---|---|---|
-| C1 | Hero (home) | h1 with the keyword (text as on production), 1 primary + 1 secondary CTA, phone link, rating line; on 360×800 h1 ≤ 4 lines and CTA, phone, rating inside 800px | T-47 | planned |
+| C1 | Hero (home) | h1 with the keyword (text as on production), 1 primary + 1 secondary CTA, phone link, rating line; on 360×800 h1 ≤ 4 lines and CTA, phone, rating inside 800px | T-47 | built — see Hero |
 | C2 | Mobile action bar | bottom bar 56px below 768px: Anrufen (`tel:`) + Anfrage, safe-area inset, targets ≥ 44px | T-47 | planned |
 | C3 | Sticky header | ≤ 64px on 360; 80px → 64px after scroll with `--ccn-shadow-1`; phone icon 44×44 below 1024px; CLS 0 | T-47 | built — see Header |
 | C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | planned |
@@ -231,6 +231,50 @@ replaces its "planned" line with the implemented spec.
 - Anchors: `scroll-padding-top: calc(var(--ccn-header-total) + 1rem)`.
   Logged in: `top: var(--wp-admin--admin-bar--height)` keeps the header below
   the admin bar.
+
+## Hero
+
+Home hero block (`blocks/banners/home-hero.php`, T-47, A6 C1 and §6.7). Copy
+as on production (h1, button labels, trust row: `transmax-child/inc/hero-trust.php`).
+
+- Order: h1 (`--ccn-fs-h1`), optional subtitle, actions
+  (`template-parts/hero-cta.php`: primary `.btn-primary` with a decorative
+  «+», optional secondary `.btn-outline-light`, phone line), trust row
+  (`template-parts/trust-row.php`). The same actions partial sits in the
+  landing hero band.
+- Below 48rem (the 360×800 first screen): the photo box is `aspect-ratio: 4/5`
+  and grows with its content; text starts 24px under the header row;
+  buttons full width (primary 48px, secondary 44px); phone line and trust
+  links 44px high (`--ccn-tap`); the bottom padding clears the contact cards
+  that overlap the hero by 3rem. Measured: header 64px, h1 4 lines, CTA,
+  phone and trust row above the action bar — 5 of 5 conditions of A6 §6.7.
+- From 48rem: text left over the port photo, buttons in a row (both 48px),
+  trust row on one line.
+- Overlay: from 48rem the horizontal gradient (`.6 → .15`); below 48rem a
+  vertical one — `.1` at the very top (the glass header carries a dark logo
+  and dark icons, so the photo under it stays light), `.6` at the bottom of
+  the header row, `.7` at the bottom (white text). Sampled with the texts
+  hidden (20 points each): white text ≥ 11:1 on 360 and ≥ 5:1 on 1440 at the
+  worst point; logo grey `#605e5e` against the glass ≥ 3.6:1 on average on
+  the three glass pages. A dark top gradient (`.45 → 0` over the top
+  quarter) was measured and dropped: it lowers the logo contrast (360:
+  4.52 → 4.43, 1440: 3.92 → 3.65), the logo being dark on light glass.
+- Trust row (Site Settings → Vertrauen, each item only from filled values):
+  Trustpilot band label («Hervorragend» from 4.5, «Sehr gut» from 4.0, as on
+  production), five 16px boxes with the last one filled in proportion, the
+  count and the Trustpilot mark; Google: the count, the rating only when
+  filled in; badge: its text with an inline shield (`currentColor`, yellow
+  check), the badge image's alt as screen-reader text. Names come from
+  visible plus screen-reader text, never `aria-label`: «Hervorragend 13
+  Bewertungen auf Trustpilot, 4,5 von 5 Sternen (öffnet in neuem Tab)».
+- Nothing in the hero loads a file besides its image: icons, stars and marks
+  are inline SVG. Third-party marks (Trustpilot boxes and star, the Google
+  G) are artwork and keep their brand colours inside the SVG (`#00b67a`,
+  `#dcdce6`, the four Google colours) — not tokens, never used elsewhere.
+- Links over the photo are white with a `--ccn-color-primary` hover and no
+  underline; buttons keep the `.btn` states (the button system is T-48).
+- LCP: the image (eager, `fetchpriority=high`, preloaded) as before; nothing
+  in the hero animates.
 
 ## Motion
 

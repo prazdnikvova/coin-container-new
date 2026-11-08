@@ -219,16 +219,36 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .rich-text ul{list-style:disc;margin:0 0 1rem 1.25rem}
 
 /* Hero */
-/* Block: home hero (acf/home-hero) — full-screen photo, dark gradient, big left-aligned heading */
-.ccn-hero{position:relative;overflow:hidden;color:var(--ccn-color-white)}
+/* Block: home hero (acf/home-hero) — photo, dark overlay, left-aligned h1, actions, trust row (DESIGN.md "Hero") */
+.ccn-hero{position:relative;color:var(--ccn-color-white)}
 .ccn-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ccn-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(20,20,20,.6) 0%,rgba(20,20,20,.25) 60%,rgba(20,20,20,.15) 100%)}
 .ccn-hero-inner{position:relative;z-index:2;padding-block:5rem;min-height:calc(100svh - var(--ccn-header-total));display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
 /* h1 or h2 (editor): always sized as a page title */
 .ccn-hero-title{color:var(--ccn-color-white);font-size:var(--ccn-fs-h1);line-height:var(--ccn-lh-tight);max-width:56rem}
 .ccn-hero-subtitle{font-size:var(--ccn-fs-lead);max-width:38rem;margin-top:1.25rem}
-.ccn-hero-btn{margin-top:1.75rem}
-@media (max-width:48rem){.ccn-hero-inner{min-height:70svh;padding-block:4rem}}
+/* Phone: 4:5 photo growing with its content; light under the glass header (dark logo and icons), dark under the text */
+@media (max-width:48rem){
+	.ccn-hero{aspect-ratio:4/5}
+	.ccn-hero::before{background:linear-gradient(180deg,rgba(20,20,20,.1) 0,rgba(20,20,20,.6) var(--ccn-header-h),rgba(20,20,20,.7) 100%)}
+	.ccn-hero-inner{min-height:0;justify-content:flex-start;padding-block:calc(var(--ccn-header-h) + var(--ccn-space-5)) calc(3rem + var(--ccn-space-5))}
+}
+/* Hero actions (template-parts/hero-cta.php, also in the landing band): primary + outlined light button, phone line */
+.ccn-hero-cta{display:flex;flex-direction:column;gap:var(--ccn-space-3);width:100%;margin-top:var(--ccn-space-5)}
+.ccn-hero-cta .btn{display:flex;align-items:center;justify-content:center;gap:var(--ccn-space-2);min-height:var(--ccn-tap);padding-block:0;text-decoration:none}
+.ccn-hero-cta .btn-primary{min-height:3rem}
+.btn-outline-light{border-color:var(--ccn-color-white);color:var(--ccn-color-white)}
+.btn-outline-light:hover{background:var(--ccn-color-white);color:var(--ccn-color-text)}
+@media (min-width:48rem){.ccn-hero-cta{flex-direction:row;width:auto}.ccn-hero-cta .btn{min-height:3rem}}
+.ccn-phone-line,.ccn-trust a{display:inline-flex;align-items:center;gap:var(--ccn-space-2);min-height:var(--ccn-tap);color:var(--ccn-color-white);text-decoration:none}
+.ccn-phone-line{margin-top:var(--ccn-space-3);font-family:var(--ccn-font-heading);font-weight:700;font-size:1.125rem}
+.ccn-phone-line:hover,.ccn-trust a:hover{color:var(--ccn-color-primary)}
+/* Trust row (template-parts/trust-row.php): text links; brand marks keep their colours inside the SVG */
+.ccn-trust{display:flex;flex-wrap:wrap;column-gap:var(--ccn-space-5);margin-top:var(--ccn-space-2);font-size:var(--ccn-fs-small)}
+.ccn-trust a{flex-wrap:wrap}
+.ccn-trust-mark{display:inline-flex;align-items:center;gap:var(--ccn-space-1)}
+.ccn-trust-label{font-weight:700}
+.ccn-trust-pq path+path{stroke:var(--ccn-color-primary)}
 
 /* Block: contact cards — email / phone / address strip overlapping the hero */
 .ccn-contact-cards{position:relative;z-index:3;margin-top:-3rem}
