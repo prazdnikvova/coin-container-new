@@ -818,6 +818,25 @@ const cartBar = await cartPage.evaluate(() => `${document.querySelectorAll('.ccn
 ok('Action bar: none on /warenkorb/ (no bar, no reserved body padding)', cartBar === '0|false', cartBar);
 await cartPage.close();
 
+// Components (T-48, DESIGN.md "Components"). (a) No horizontal scroll at 360/768/1280/1440 on the six
+// key pages, the blog index, the search results and the full-width landing with a product grid.
+const t48Pages = ['/', '/container-kaufen/', '/container-mieten/', '/container-shop/', '/kontakt-beratung/',
+	'/product/20-fuss-container-gebraucht/', '/nachrichten-trends-aus-der-containerwelt/', '/?s=container', '/containerzubehoer/'];
+const ovPage = await browser.newPage();
+const overflowed = {};
+for (const [w, h] of [[360, 800], [768, 1024], [1280, 800], [1440, 900]]) {
+	await ovPage.setViewportSize({ width: w, height: h });
+	for (const path of t48Pages) {
+		await ovPage.goto(BASE + path, { waitUntil: 'load' });
+		const sw = await ovPage.evaluate(() => `${document.documentElement.scrollWidth}|${innerWidth}`);
+		if (parseInt(sw, 10) > w) (overflowed[path] = overflowed[path] || []).push(`${w}: scrollWidth ${sw}`);
+	}
+}
+for (const path of t48Pages) {
+	ok(`Components (a) ${path}: no horizontal scroll at 360/768/1280/1440`, !overflowed[path], (overflowed[path] || []).join(', '));
+}
+await ovPage.close();
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
