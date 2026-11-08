@@ -852,6 +852,24 @@ for (const path of t48Pages) {
 	ok(`Components (a) ${path}: no horizontal scroll at 360/768/1280/1440`, !overflowed[path], (overflowed[path] || []).join(', '));
 }
 await ovPage.close();
+// One gutter (T-49, roadmap 128): at 360 the first text or card of every block starts 16px from the edge on the front page,
+// a landing with sidebar, a full-width and a text landing; the product card on the landing is as wide as on the front page.
+const gutterPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+const gutters = {};
+for (const path of ['/', '/container-kaufen/', '/containerzubehoer/', '/ueber-uns/']) {
+	await gutterPage.goto(BASE + path, { waitUntil: 'load' });
+	gutters[path] = await gutterPage.evaluate(() => {
+		const vis = (e) => { const s = getComputedStyle(e); const b = e.getBoundingClientRect(); return s.display !== 'none' && s.visibility !== 'hidden' && b.width > 0 && b.height > 0; };
+		const lefts = [...document.querySelectorAll('main section')].filter((s) => !s.matches('.ccn-hero, .ccn-page-hero, .ccn-contact-cards, .ccn-stats'))
+			.map((s) => [...s.querySelectorAll('h2, h3, p, li.product, .ccn-card, .btn, .rich-text, img')].find(vis)).filter(Boolean).map((e) => Math.round(e.getBoundingClientRect().left));
+		const card = [...document.querySelectorAll('ul.products > li.product')].find(vis);
+		return { lefts: [...new Set(lefts)], card: card ? Math.round(card.getBoundingClientRect().width) : null };
+	});
+}
+ok('Layout 360: one 16px gutter for every block (front page, landing with sidebar, full-width and text landing); landing product card as wide as on the front page',
+	Object.values(gutters).every((g) => g.lefts.length > 0 && g.lefts.every((l) => l === 16)) && !!gutters['/'].card && gutters['/container-kaufen/'].card === gutters['/'].card,
+	JSON.stringify(gutters));
+await gutterPage.close();
 // (b) Product card at 360 (C4): one column, the button on one line (44-48px) across >= 90 % of the card,
 // the title on <= 3 lines, the .ccn-card surface (1px border, 8px radius, --ccn-shadow-1).
 const cardPage = await browser.newPage({ viewport: { width: 360, height: 800 } });

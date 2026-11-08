@@ -377,6 +377,8 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-landing-full{padding-block:var(--ccn-space-7)}
 .ccn-landing-full>*+*{margin-top:var(--ccn-space-7)}
 .ccn-landing-full>.ccn-text-section,.ccn-landing-full>.wp-block-group,.ccn-landing-full>.ccn-text-image{max-width:var(--ccn-container);margin-inline:auto;padding-inline:var(--ccn-space-4)}
+/* The landing column and these blocks hold the gutter already: a block's own container adds none (DESIGN.md "Layout") */
+.ccn-landing .ccn-container,.ccn-landing-full>.ccn-text-image>.ccn-container{padding-inline:0}
 
 /* Block: info cards — white cards grid: photo, title, text */
 .ccn-info-cards-inner{display:grid;gap:var(--ccn-space-5);grid-template-columns:1fr}

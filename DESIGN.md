@@ -151,6 +151,10 @@ the six key pages, the blog index, the search results and Containerzubehör).
   visitor picks (`?orderby=`) is left alone (`inc/woocommerce.php`, T-49).
 - Posts, blog index and archives keep the 820px reading column; shop,
   categories and product search use the full container.
+- One gutter: the landing column (`.ccn-landing.ccn-container`) and the text
+  + image block of the full-width landing carry the 16px gutter, so a block's
+  own `.ccn-container` inside adds none (T-49: the product card on Container
+  kaufen is 328px at 360, as on the front page, was 296px).
 
 ## Editor parity
 
