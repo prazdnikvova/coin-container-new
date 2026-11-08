@@ -1378,6 +1378,90 @@ ok('Request form: the form card block on the landings, no hand-built ccn-form-ca
 ok('Request form: CF7 CSS/JS on every page with a form, no CF7 request on / and /containerzubehoer/',
 	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].cf7 >= 2) && ['/', '/containerzubehoer/'].every((p) => t51Pages[p].cf7 === 0),
 	JSON.stringify(Object.entries(t51Pages).map(([p, s]) => [p, s.cf7])));
+// The fields (T-51): visible labels, <= 4 required, consent after the fields, «Anfrage senden» >= 48px and enabled
+// from the start (consent as validation: CF7 would otherwise disable the button), hidden produkt/quelle, German form
+// language; forms.js (defer, <= 1 KB) only where the form is.
+const t51FormsJs = themeFile('assets/js/forms.js');
+ok('Request form: forms.js (defer) wherever the form is, not on / and /containerzubehoer/; <= 1 KB, no form code in main.js',
+	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].forms === 1 && t51Pages[p].formsDefer) && ['/', '/containerzubehoer/'].every((p) => t51Pages[p].forms === 0)
+	&& t51FormsJs.length > 0 && t51FormsJs.length <= 1024 && !/wpcf7/.test(themeFile('assets/js/main.js')),
+	`${JSON.stringify(Object.entries(t51Pages).map(([p, s]) => [p, s.forms, s.formsDefer]))} forms.js ${t51FormsJs.length} B`);
+for (const path of T51_CONTACT) {
+	await t51.goto(`${BASE}${path}?cb=${Date.now()}`, { waitUntil: 'load' });
+	const f = await t51.evaluate(() => {
+		const form = document.querySelector('form.wpcf7-form');
+		if (!form) return null;
+		const fields = [...form.querySelectorAll('input:not([type=hidden]):not([type=submit]), textarea, select')];
+		const label = (el) => (((el.id && form.querySelector(`label[for="${CSS.escape(el.id)}"]`)) || el.closest('label') || {}).textContent || '').trim();
+		const consent = form.querySelector('.wpcf7-acceptance input[type=checkbox]');
+		const submit = form.querySelector('.wpcf7-submit');
+		return {
+			fields: fields.map((el) => `${el.name}=${label(el).slice(0, 22)}`),
+			unlabelled: fields.filter((el) => !label(el)).map((el) => el.name || el.type),
+			required: fields.filter((el) => el.required || el.getAttribute('aria-required') === 'true' || (el === consent && !el.closest('.optional'))).map((el) => el.name),
+			consentLast: !!consent && fields[fields.length - 1] === consent && !!consent.closest('label') && !!consent.closest('label').querySelector('a[href*="/datenschutzerklaerung/"]'),
+			submit: submit ? submit.value : null, submitH: submit ? Math.round(submit.getBoundingClientRect().height) : 0, disabled: submit ? submit.disabled : null,
+			hidden: [...form.querySelectorAll('input[type=hidden]')].map((h) => h.name).filter((n) => !n.startsWith('_')),
+			lang: form.closest('.wpcf7') ? form.closest('.wpcf7').getAttribute('lang') : null,
+		};
+	});
+	ok(`Request form ${path}: every field has a visible label (label[for], the consent its own label)`, !!f && f.fields.length >= 5 && f.unlabelled.length === 0,
+		f ? f.fields.join(', ') + (f.unlabelled.length ? ` | unlabelled: ${f.unlabelled.join()}` : '') : 'no form');
+	ok(`Request form ${path}: 3-4 required, consent last with the Datenschutz link, hidden produkt and quelle`,
+		!!f && f.required.length >= 3 && f.required.length <= 4 && f.consentLast && f.hidden.join() === 'produkt,quelle',
+		f ? JSON.stringify({ required: f.required, consentLast: f.consentLast, hidden: f.hidden }) : 'no form');
+	ok(`Request form ${path}: submit «Anfrage senden» >= 48px, enabled before the consent is ticked, form lang de`,
+		!!f && f.submit === 'Anfrage senden' && f.submitH >= 48 && f.disabled === false && /^de/.test(f.lang || ''),
+		f ? JSON.stringify({ submit: f.submit, h: f.submitH, disabled: f.disabled, lang: f.lang }) : 'no form');
+}
+// Empty submit at 360: errors under their fields (CF7 sets aria-invalid and aria-describedby), the summary above
+// the fields, the focus on the first invalid field (forms.js), the error colour a token at >= 4.5:1 on the card.
+await t51.goto(`${BASE}/kontakt-beratung/?cb=${Date.now()}`, { waitUntil: 'load' });
+await t51.waitForFunction(() => { const f = document.querySelector('form.wpcf7-form'); return !!f && !!f.wpcf7; }, null, { timeout: 15000 }).catch(() => null);
+await t51.click('form.wpcf7-form .wpcf7-submit', { timeout: 10000 }).catch(() => null);
+await t51.waitForFunction(() => document.querySelectorAll('form.wpcf7-form .wpcf7-not-valid-tip').length >= 3, null, { timeout: 20000 }).catch(() => null);
+await t51.waitForTimeout(400);
+const t51Inv = await t51.evaluate(() => {
+	const form = document.querySelector('form.wpcf7-form');
+	const hex = (c) => `#${c.match(/\d+/g).slice(0, 3).map((n) => (+n).toString(16).padStart(2, '0')).join('')}`;
+	const tips = [...form.querySelectorAll('.wpcf7-not-valid-tip')];
+	const invalid = [...form.querySelectorAll('[aria-invalid="true"]')];
+	const out = form.querySelector('.wpcf7-response-output');
+	const firstWrap = form.querySelector('.wpcf7-form-control-wrap');
+	// The background the error text sits on: its nearest ancestor with an opaque background (the form card).
+	let box = tips[0] || form;
+	while (box.parentElement && !/^rgb\(/.test(getComputedStyle(box).backgroundColor)) box = box.parentElement;
+	return {
+		tips: tips.length,
+		below: tips.every((t) => { const c = t.closest('.wpcf7-form-control-wrap').querySelector('.wpcf7-form-control'); return !!c && t.getBoundingClientRect().top >= c.getBoundingClientRect().bottom - 1; }),
+		described: invalid.map((el) => { const d = el.getAttribute('aria-describedby'); const t = d && document.getElementById(d); return `${el.name}:${t ? t.textContent.trim().slice(0, 26) : 'none'}`; }),
+		active: document.activeElement ? document.activeElement.name || document.activeElement.className : null,
+		activeFirst: invalid.length > 0 && document.activeElement === invalid[0],
+		summaryAbove: !!out && getComputedStyle(out).display !== 'none' && !!firstWrap && out.getBoundingClientRect().bottom <= firstWrap.getBoundingClientRect().top,
+		summary: out ? out.textContent.trim().slice(0, 40) : '',
+		tipColor: tips[0] ? hex(getComputedStyle(tips[0]).color) : null, tipSize: tips[0] ? getComputedStyle(tips[0]).fontSize : null,
+		boxBg: /^rgb\(/.test(getComputedStyle(box).backgroundColor) ? hex(getComputedStyle(box).backgroundColor) : '#ffffff', border: invalid[0] ? hex(getComputedStyle(invalid[0]).borderTopColor) : null,
+	};
+});
+const t51TipRatio = t51Inv.tipColor ? ratio(t51Inv.tipColor, t51Inv.boxBg) : 0;
+ok('Request form, empty submit at 360: >= 3 errors under their fields, every invalid field described by its error, focus on the first invalid field',
+	t51Inv.tips >= 3 && t51Inv.below && t51Inv.described.length >= 3 && t51Inv.described.every((d) => !d.endsWith(':none')) && t51Inv.activeFirst,
+	JSON.stringify({ tips: t51Inv.tips, below: t51Inv.below, described: t51Inv.described, active: t51Inv.active }));
+ok('Request form errors: --ccn-color-error 14px at >= 4.5:1 on the form card, red field border, summary above the fields',
+	t51Inv.tipColor === '#b3261e' && t51Inv.tipSize === '14px' && t51TipRatio >= 4.5 && t51Inv.border === '#b3261e' && t51Inv.summaryAbove,
+	JSON.stringify({ color: t51Inv.tipColor, size: t51Inv.tipSize, on: t51Inv.boxBg, ratio: t51TipRatio.toFixed(2), border: t51Inv.border, summary: t51Inv.summary, above: t51Inv.summaryAbove }));
+// Without JS the form renders and posts to its own page; CF7 answers the POST with a reload.
+const t51NoJs = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 360, height: 800 } });
+const t51NoJsPage = await t51NoJs.newPage();
+await t51NoJsPage.goto(`${BASE}/kontakt-beratung/?cb=${Date.now()}`, { waitUntil: 'load' });
+const t51Post = await t51NoJsPage.evaluate(() => {
+	const f = document.querySelector('form.wpcf7-form');
+	return f ? { method: f.method, action: f.getAttribute('action'), fields: f.querySelectorAll('input[name="your-name"], textarea[name="your-message"]').length,
+		h: Math.round(f.getBoundingClientRect().height), submit: !!f.querySelector('.wpcf7-submit:not([disabled])') } : null;
+});
+ok('Request form without JS: renders and posts to its page (CF7 handles the POST with a reload)',
+	!!t51Post && t51Post.method === 'post' && /\/kontakt-beratung\//.test(t51Post.action || '') && t51Post.fields === 2 && t51Post.h > 200 && t51Post.submit, JSON.stringify(t51Post));
+await t51NoJs.close();
 await t51.close();
 
 await browser.close();

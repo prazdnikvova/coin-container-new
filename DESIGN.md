@@ -35,7 +35,7 @@ relative luminance, never rounded up). AA: 4.5:1 normal text, 3:1 large text
 | `--ccn-color-surface` | `= --ccn-color-light` | card/section surface | — |
 | `--ccn-color-text-on-dark` | `#d5d5d5` | footer text | 12.55:1 on `#141414` |
 | `--ccn-color-text-on-dark-muted` | `#a5a5a5` | copyright line | 7.47:1 on `#141414` |
-| `--ccn-color-error` | `#b3261e` | error accent: the bar of WooCommerce error notices (T-49), form errors later | 6.53:1 on `#fff`, 6.10:1 on `#f7f7f7`, 5.56:1 on `#fde8e8` |
+| `--ccn-color-error` | `#b3261e` | error accent: the bar of WooCommerce error notices (T-49); form errors, the invalid field border and the error bar of the form message (T-51) | 6.53:1 on `#fff`, 6.10:1 on `#f7f7f7`, 5.56:1 on `#fde8e8` |
 | `--ccn-color-error-surface` | `#fde8e8` | WooCommerce error notice | `#202020` on it 13.88:1 |
 
 How the text variants were chosen (T-45, step 1): candidates from the design
@@ -224,7 +224,7 @@ replaces its "planned" line with the implemented spec.
 | C7 | Stats | real figures only, dark surface with yellow numbers; `tabular-nums`, count once and final values with reduced motion are in place (T-46, see Motion) | T-48 | built: `--ccn-color-dark` band, numbers `--ccn-color-primary` (11.43:1), labels `--ccn-color-light`, final value in the HTML; 2 columns at 360 (an odd last item spans both), 3 from 48rem, one row from 64rem; front page = the five production counters |
 | C8 | Trust block | rating with count (live widgets as on production), quotes, partner logos, years/volume line; before the final CTA | T-50 | built — see Trust, FAQ, Logos: static chips (one renderer) in the hero, trust bar, product page and footer; live Google reviews + TrustBox behind a 1200px facade before the CTA banner; logos block; quotes only through the live widgets (no static reviews) |
 | C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | built: without a photo the yellow band, h2, the block's button (`.btn-dark`; empty → Site Settings `hero_cta_text` / `anfrage_url`) and the phone (`.btn-secondary`); with a photo the photo under `rgba(20,20,20,.65)` (white text ≥ 4.5:1 on any photo), optional logo, `.btn-primary` and `.btn-outline-light` |
-| C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
+| C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | built: block `acf/form-card` + CF7 340/341, see Forms |
 | C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | built (targets, icons, badge slot) — see Footer; the location/container-type columns come with the menu migration (T-53c) |
 | C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | built — see Product page |
 
@@ -631,6 +631,57 @@ Logistik-Initiative Hamburg logo (media `lihh-partner-logo-2025-640.webp`)
 of `/ueber-uns/zertifikate/`; other marks need the client's permission
 (OPEN #72).
 
+## Forms
+
+C10, T-51. One block for every request form and one stylesheet section
+(`theme.css` "Forms") for Contact Form 7's markup, which stays CF7's own:
+its events (`wpcf7mailsent`), form IDs and unit tags (`wpcf7-f<ID>-…`) are
+what analytics reads (T-61), so the theme adds no fetch and no `dataLayer`
+code. Submission is CF7's: REST with JS, a plain POST with a reload without
+JS.
+
+- **Block** `acf/form-card` (`blocks/text/form-card.php`): `form` (a CF7 form,
+  required), optional `heading` (h2, as on production, e.g. «Jetzt
+  anfragen») and `intro`, `show_contacts` (e-mail, phone and address from
+  Site Settings beside the form from 64rem, below it on phones; the address
+  links to a Google Maps search, no embedded map and no third-party request),
+  `background` (as Sections). The form sits on a light card
+  (`--ccn-color-light`, `--ccn-radius-md`, `--ccn-shadow-2`, padding
+  `--ccn-space-5`) that does not lift: a form must not move while it is
+  filled in.
+- **Assets**: CF7's CSS/JS and `assets/js/forms.js` (≤ 1 KB, deferred) load only
+  on pages with the block or an old `[contact-form-7]` shortcode
+  (`inc/assets-cleanup.php`); the front page requests nothing of CF7.
+- **Fields** (CF7 form template): a visible `<label for>` above every field,
+  never a placeholder in its place — «Name», «E-Mail», «Telefon (optional)»,
+  «Interesse (optional)», «Ihre Anfrage». Required fields are not marked, the
+  optional ones say «(optional)»; at most 4 are required (name, e-mail,
+  request, consent); `autocomplete` name, email, tel. Fields are 48px high
+  (`min-height: 3rem`), white, radius `--ccn-radius-sm`, 1px border
+  `--ccn-color-secondary` (6.44:1 on white, 6.01:1 on the card;
+  `--ccn-color-border` would give 1.25:1 / 1.17:1, under the 3:1 a field
+  boundary needs, WCAG 1.4.11); the global focus ring.
+- **Consent** after the fields: the checkbox inside its own label, with the
+  production text and its links. CF7 runs it as a validated field
+  (`acceptance_as_validation: on`), so the submit button is never disabled;
+  an unticked box gets its error like any field.
+- **Submit**: «Anfrage senden» (an action, not «Absenden»), the primary
+  button at 48px.
+- **Errors**: CF7 sets `aria-invalid="true"` and links the error text with
+  `aria-describedby`. The error stands under its field in `--ccn-color-error`
+  (6.53:1 on white, 6.10:1 on the card; CF7's own red `#dc3232` would give
+  4.31:1 on the card), 14px bold, after an icon (`mask` + `currentColor`); the
+  field border turns `--ccn-color-error` (1px border + 1px ring, no layout
+  shift). The message sits above the fields (`order: -1` in the flex form):
+  a yellow bar on white once sent, the error bar on
+  `--ccn-color-error-surface` otherwise.
+- **Focus on the result** (`forms.js`): `wpcf7invalid` → the first invalid
+  field; `wpcf7mailsent` / `wpcf7mailfailed` → the message (`tabindex="-1"`,
+  CF7's `aria-hidden` removed, so it is read once focused). CF7 describes the
+  consent's wrapper, not its checkbox: the script passes the reference on.
+- **Texts**: messages in German with «Sie» (production form 5682), form
+  language `de_DE` (`lang="de-DE"` on the form, CF7 had `en-US`).
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the
@@ -854,3 +905,16 @@ for reviewing content:
   and real widget heights, layout shifts while the widgets start, trust items
   per screen, FAQ), `t50_cookies.cjs` (cookies and storage of every frame
   before and after both widgets), `t50_jsonld.py` (JSON-LD per page).
+- Smoke test, "Request form (T-51)": the form card on the landings and the
+  contact pages and no hand-built group left; CF7 requests and `forms.js`
+  (deferred, ≤ 1 KB) only on pages with a form, none on `/`; every field
+  labelled, 3–4 required, the consent last with the Datenschutz link, hidden
+  `produkt`/`quelle`, «Anfrage senden» ≥ 48px and enabled, form language de;
+  an empty submit at 360 gives ≥ 3 errors under their fields, each invalid
+  field described by its error, the focus on the first one, the error colour
+  at ≥ 4.5:1 on the card and the message above the fields; without JS the
+  form posts to its page. Library probes:
+  `reports/2026-11-08-data/t51_probe.cjs` (fields, labels, errors and focus
+  after an empty submit, `aria-*` in the DOM),
+  `reports/2026-11-08-t51-shots/t51_shots.cjs` (360/1440 and the error
+  state).

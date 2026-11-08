@@ -73,6 +73,28 @@ function ccn_maybe_load_cf7( $load ) {
 }
 
 /**
+ * Focus after a submission (assets/js/forms.js, DESIGN.md "Forms"): a separate
+ * deferred file next to CF7's own assets, on the same pages only — main.js stays
+ * as it is on every page.
+ */
+add_action( 'wp_enqueue_scripts', 'ccn_enqueue_form_script' );
+function ccn_enqueue_form_script() {
+	if ( ! ccn_page_has_form() ) {
+		return;
+	}
+	wp_enqueue_script(
+		'ccn-forms',
+		get_template_directory_uri() . '/assets/js/forms.js',
+		array(),
+		ccn_asset_version( '/assets/js/forms.js' ),
+		array(
+			'in_footer' => true,
+			'strategy'  => 'defer',
+		)
+	);
+}
+
+/**
  * Late dequeues. Cart fragments are disabled everywhere (the header cart count
  * renders server-side); outside the WooCommerce pages the whole jQuery/Woo
  * stack goes away.
