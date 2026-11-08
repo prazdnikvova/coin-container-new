@@ -29,6 +29,16 @@ remove_action( 'wp_print_styles', 'print_emoji_styles' );
 add_filter( 'emoji_svg_url', '__return_false' );
 
 /**
+ * theme.json feeds the block editor only. On the front end theme.css is the
+ * single source of truth (tokens plus the preset classes the editor can add),
+ * so the global-styles inline CSS is not printed: with theme.json it grows to
+ * ~14 KB per page because core keeps its default presets for old content.
+ * The editor reads global styles from its own settings, not from these hooks.
+ */
+remove_action( 'wp_enqueue_scripts', 'wp_enqueue_global_styles' );
+remove_action( 'wp_footer', 'wp_enqueue_global_styles', 1 );
+
+/**
  * Drop jquery-migrate from the jQuery bundle (nothing on the front end uses
  * the deprecated APIs it shims).
  */

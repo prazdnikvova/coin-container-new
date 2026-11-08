@@ -121,6 +121,29 @@ with the layout cards.
 Breakpoints stay literal in `@media` (custom properties do not work there):
 `36rem` (576px), `48rem` (768px), `64rem` (1024px).
 
+## Editor parity
+
+The block editor shows the same colours and sizes as the site.
+
+- `theme.json` (version 3) hands the tokens to Gutenberg: a palette of 8
+  brand colours (`ccn-*` slugs; the editor gets the any-size yellow text
+  `#8a6b00` instead of the large-text-only `#a88400`, so a colour picked for
+  small text still passes AA), no custom colours, gradients or duotone; font
+  sizes small/body/lead/h3/h2/h1, the two font families and spacing sizes
+  1–9 as references to the `--ccn-*` tokens (no custom values; the clamps
+  live in `theme.css`, so `fluid` is off); content width 720px, wide 1200px;
+  `appearanceTools` off.
+- Front end: WordPress prints no `global-styles` (`inc/assets-cleanup.php`;
+  with `theme.json` it would be ~14 KB inline on every page, because core
+  keeps its default presets for old content). `theme.css` carries what the
+  editor can add instead: the `.has-ccn-*-color` / `-background-color`,
+  `.has-*-font-size` and `.has-ccn-*-font-family` classes, the spacing
+  preset variables, the base flex/grid layout rules and the element-button
+  reset core used to print.
+- The smoke test keeps both files in sync: palette hex = colour tokens,
+  every size/family/spacing preset references an existing token, layout
+  widths = container tokens, every preset class exists in `theme.css`.
+
 ## Colour rules
 
 1. Yellow and orange are never text on a light background. Yellow is a fill
@@ -228,5 +251,7 @@ for reviewing content:
   library (outside this repo) — `reports/2026-11-08-data/t45_contrast.cjs`
   (6 pages × 360/1440, normal vs large text, text over photos listed apart),
   `a6_probe.cjs`, `a6_probe2.cjs`; screenshots with `a6_shots.cjs`.
-- Smoke test (`tests/js-smoke.mjs`, "Design tokens (T-45)"): computed h1/h2/body
-  sizes, link and menu colours, no raw hex outside `:root`, token contrast.
+- Smoke test (`tests/js-smoke.mjs`, "Design tokens (T-45)" and "Editor
+  parity"): computed h1/h2/body sizes, link and menu colours, no raw hex
+  outside `:root`, token contrast, theme.json in sync with the tokens, no
+  global-styles on the front end.

@@ -487,3 +487,24 @@ ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{
 .catalog-filter-link:hover{border-color:var(--ccn-color-primary)}
 .catalog-filter-link.is-active{background:var(--ccn-color-primary);border-color:var(--ccn-color-primary);color:var(--ccn-color-text)}
 .catalog-filter-child{font-weight:400;font-size:.85rem;color:var(--ccn-color-secondary)}
+
+/* --------------------------------------------------------------------------
+ * Editor presets (theme.json): no global-styles on the front end
+ * (inc/assets-cleanup.php), so the classes the editor can add map here.
+ * ------------------------------------------------------------------------ */
+:root{--wp--preset--spacing--1:var(--ccn-space-1);--wp--preset--spacing--2:var(--ccn-space-2);--wp--preset--spacing--3:var(--ccn-space-3);--wp--preset--spacing--4:var(--ccn-space-4);--wp--preset--spacing--5:var(--ccn-space-5);--wp--preset--spacing--6:var(--ccn-space-6);--wp--preset--spacing--7:var(--ccn-space-7);--wp--preset--spacing--8:var(--ccn-space-8);--wp--preset--spacing--9:var(--ccn-space-9)}
+.has-ccn-primary-color{color:var(--ccn-color-primary)!important}.has-ccn-primary-background-color{background-color:var(--ccn-color-primary)!important}
+.has-ccn-primary-text-strong-color{color:var(--ccn-color-primary-text-strong)!important}.has-ccn-primary-text-strong-background-color{background-color:var(--ccn-color-primary-text-strong)!important}
+.has-ccn-secondary-color{color:var(--ccn-color-secondary)!important}.has-ccn-secondary-background-color{background-color:var(--ccn-color-secondary)!important}
+.has-ccn-text-color{color:var(--ccn-color-text)!important}.has-ccn-text-background-color{background-color:var(--ccn-color-text)!important}
+.has-ccn-accent-color{color:var(--ccn-color-accent)!important}.has-ccn-accent-background-color{background-color:var(--ccn-color-accent)!important}
+.has-ccn-dark-color{color:var(--ccn-color-dark)!important}.has-ccn-dark-background-color{background-color:var(--ccn-color-dark)!important}
+.has-ccn-light-color{color:var(--ccn-color-light)!important}.has-ccn-light-background-color{background-color:var(--ccn-color-light)!important}
+.has-ccn-white-color{color:var(--ccn-color-white)!important}.has-ccn-white-background-color{background-color:var(--ccn-color-white)!important}
+.has-small-font-size{font-size:var(--ccn-fs-small)!important}.has-body-font-size{font-size:var(--ccn-fs-body)!important}.has-lead-font-size{font-size:var(--ccn-fs-lead)!important}
+.has-h-3-font-size{font-size:var(--ccn-fs-h3)!important}.has-h-2-font-size{font-size:var(--ccn-fs-h2)!important}.has-h-1-font-size{font-size:var(--ccn-fs-h1)!important}
+.has-ccn-heading-font-family{font-family:var(--ccn-font-heading)!important}.has-ccn-body-font-family{font-family:var(--ccn-font-body)!important}
+/* Base layout and element-button rules core printed in global-styles before (flex/grid blocks, WooCommerce .wp-element-button links) */
+body .is-layout-flex{display:flex}.is-layout-flex{flex-wrap:wrap;align-items:center}body .is-layout-grid{display:grid}
+:where(.is-layout-flex),:where(.is-layout-grid){gap:.5em}.is-layout-flex>:is(*,div),.is-layout-grid>:is(*,div){margin:0}
+:root :where(.wp-element-button,.wp-block-button__link){background-color:var(--ccn-color-text);border-width:0;color:var(--ccn-color-white);font:inherit;letter-spacing:inherit;text-transform:inherit;padding:calc(.667em + 2px) calc(1.333em + 2px);text-decoration:none}

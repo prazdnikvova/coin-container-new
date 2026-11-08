@@ -457,6 +457,37 @@ for (const [name, bgs, need] of [
 ok('Text tokens meet WCAG AA on their backgrounds', Object.keys(colourTokens).length >= 14 && weakTokens.length === 0,
 	weakTokens.join(', ') || `${Object.keys(colourTokens).length} colour tokens`);
 
+// Editor parity (T-45): theme.json hands the tokens to Gutenberg — palette hex equal
+// to the colour tokens, size/family/spacing presets as references to existing tokens,
+// layout widths equal to the container tokens. The front end prints no global-styles;
+// theme.css carries every preset class the editor can add.
+const tj = JSON.parse(readFileSync(new URL('theme.json', themeDir), 'utf8')).settings || {};
+const hexOf = (v) => String(v || '').toLowerCase().replace(/^#(.)(.)(.)$/, '#$1$1$2$2$3$3');
+const palette = (tj.color && tj.color.palette) || [];
+const paletteDrift = palette.filter((c) => hexOf(colourTokens[c.slug.replace(/^ccn-/, 'ccn-color-')]) !== hexOf(c.color)).map((c) => c.slug);
+ok('theme.json: 8 palette colours = theme.css tokens, no custom/default colours or gradients', palette.length === 8 && paletteDrift.length === 0
+	&& tj.color.custom === false && tj.color.defaultPalette === false && tj.color.customGradient === false && (tj.color.gradients || []).length === 0,
+	paletteDrift.join(', ') || `${palette.length} colours`);
+const typo = tj.typography || {};
+const presetRefs = [...(typo.fontSizes || []).map((f) => f.size), ...(typo.fontFamilies || []).map((f) => f.fontFamily),
+	...((tj.spacing && tj.spacing.spacingSizes) || []).map((x) => x.size)];
+const badRefs = presetRefs.filter((v) => {
+	const m = /^var\(--(ccn-[a-z0-9-]+)\)$/.exec(v);
+	return !m || !themeCss.includes(`--${m[1]}:`);
+});
+ok('theme.json: size/family/spacing presets reference theme.css tokens', presetRefs.length === 17 && badRefs.length === 0,
+	badRefs.join(', ') || `${presetRefs.length} presets`);
+const tokenValue = (name) => (themeCss.match(new RegExp(`--${name}:([^;}]+)`)) || [])[1];
+ok('theme.json: layout widths = container tokens', !!tj.layout && tj.layout.contentSize === tokenValue('ccn-container-prose')
+	&& tj.layout.wideSize === tokenValue('ccn-container'), `${tj.layout && tj.layout.contentSize} / ${tj.layout && tj.layout.wideSize}`);
+const kebab = (slug) => slug.replace(/([a-z])(\d)/g, '$1-$2'); // WordPress: h3 -> h-3
+const presetClasses = [...palette.flatMap((c) => [`.has-${c.slug}-color{`, `.has-${c.slug}-background-color{`]),
+	...(typo.fontSizes || []).map((f) => `.has-${kebab(f.slug)}-font-size{`), ...(typo.fontFamilies || []).map((f) => `.has-${f.slug}-font-family{`)];
+const missingClasses = presetClasses.filter((c) => !themeCss.includes(c));
+ok('theme.css carries every editor preset class', missingClasses.length === 0, missingClasses.join(' ') || `${presetClasses.length} classes`);
+const homeHtml = await (await fetch(`${BASE}/?cb=${Date.now()}`)).text();
+ok('Front end prints no global-styles (theme.css is the source)', !/id=['"](global-styles|wp-global-styles-placeholder|classic-theme-styles)-inline-css['"]/.test(homeHtml));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

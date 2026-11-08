@@ -1,0 +1,102 @@
+{
+	"$schema": "https://schemas.wp.org/wp/6.9/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": false,
+		"color": {
+			"custom": false,
+			"customDuotone": false,
+			"customGradient": false,
+			"defaultDuotone": false,
+			"defaultGradients": false,
+			"defaultPalette": false,
+			"duotone": [],
+			"gradients": [],
+			"palette": [
+				{
+					"slug": "ccn-primary",
+					"name": "Yellow (fills only)",
+					"color": "#f7c600"
+				},
+				{
+					"slug": "ccn-primary-text-strong",
+					"name": "Yellow text",
+					"color": "#8a6b00"
+				},
+				{
+					"slug": "ccn-secondary",
+					"name": "Gray",
+					"color": "#605e5e"
+				},
+				{
+					"slug": "ccn-text",
+					"name": "Text",
+					"color": "#202020"
+				},
+				{
+					"slug": "ccn-accent",
+					"name": "Orange (fills only)",
+					"color": "#ff7d44"
+				},
+				{
+					"slug": "ccn-dark",
+					"name": "Dark",
+					"color": "#141414"
+				},
+				{
+					"slug": "ccn-light",
+					"name": "Light",
+					"color": "#f7f7f7"
+				},
+				{
+					"slug": "ccn-white",
+					"name": "White",
+					"color": "#ffffff"
+				}
+			]
+		},
+		"layout": {
+			"contentSize": "720px",
+			"wideSize": "1200px"
+		},
+		"spacing": {
+			"customSpacingSize": false,
+			"defaultSpacingSizes": false,
+			"spacingSizes": [
+				{ "slug": "1", "name": "1 (4px)", "size": "var(--ccn-space-1)" },
+				{ "slug": "2", "name": "2 (8px)", "size": "var(--ccn-space-2)" },
+				{ "slug": "3", "name": "3 (12px)", "size": "var(--ccn-space-3)" },
+				{ "slug": "4", "name": "4 (16px)", "size": "var(--ccn-space-4)" },
+				{ "slug": "5", "name": "5 (24px)", "size": "var(--ccn-space-5)" },
+				{ "slug": "6", "name": "6 (32px)", "size": "var(--ccn-space-6)" },
+				{ "slug": "7", "name": "7 (48px)", "size": "var(--ccn-space-7)" },
+				{ "slug": "8", "name": "8 (64px)", "size": "var(--ccn-space-8)" },
+				{ "slug": "9", "name": "9 (96px)", "size": "var(--ccn-space-9)" }
+			]
+		},
+		"typography": {
+			"customFontSize": false,
+			"defaultFontSizes": false,
+			"fontFamilies": [
+				{
+					"slug": "ccn-heading",
+					"name": "DM Sans (headings)",
+					"fontFamily": "var(--ccn-font-heading)"
+				},
+				{
+					"slug": "ccn-body",
+					"name": "Nunito Sans (text)",
+					"fontFamily": "var(--ccn-font-body)"
+				}
+			],
+			"fontSizes": [
+				{ "slug": "small", "name": "Small", "size": "var(--ccn-fs-small)", "fluid": false },
+				{ "slug": "body", "name": "Body", "size": "var(--ccn-fs-body)", "fluid": false },
+				{ "slug": "lead", "name": "Lead", "size": "var(--ccn-fs-lead)", "fluid": false },
+				{ "slug": "h3", "name": "Heading 3", "size": "var(--ccn-fs-h3)", "fluid": false },
+				{ "slug": "h2", "name": "Heading 2", "size": "var(--ccn-fs-h2)", "fluid": false },
+				{ "slug": "h1", "name": "Heading 1", "size": "var(--ccn-fs-h1)", "fluid": false }
+			]
+		}
+	}
+}
