@@ -35,6 +35,7 @@ relative luminance, never rounded up). AA: 4.5:1 normal text, 3:1 large text
 | `--ccn-color-surface` | `= --ccn-color-light` | card/section surface | — |
 | `--ccn-color-text-on-dark` | `#d5d5d5` | footer text | 12.55:1 on `#141414` |
 | `--ccn-color-text-on-dark-muted` | `#a5a5a5` | copyright line | 7.47:1 on `#141414` |
+| `--ccn-color-error` | `#b3261e` | error accent: the bar of WooCommerce error notices (T-49), form errors later | 6.53:1 on `#fff`, 6.10:1 on `#f7f7f7`, 5.56:1 on `#fde8e8` |
 | `--ccn-color-error-surface` | `#fde8e8` | WooCommerce error notice | `#202020` on it 13.88:1 |
 
 How the text variants were chosen (T-45, step 1): candidates from the design
@@ -218,7 +219,7 @@ replaces its "planned" line with the implemented spec.
 | C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | built: without a photo the yellow band, h2, the block's button (`.btn-dark`; empty → Site Settings `hero_cta_text` / `anfrage_url`) and the phone (`.btn-secondary`); with a photo the photo under `rgba(20,20,20,.65)` (white text ≥ 4.5:1 on any photo), optional logo, `.btn-primary` and `.btn-outline-light` |
 | C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
 | C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | built (targets, icons, badge slot) — see Footer; the location/container-type columns come with the menu migration (T-53c) |
-| C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | planned |
+| C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | built — see Product page |
 
 ## Header
 
@@ -451,6 +452,57 @@ Social links: 44×44 circles (1px `rgba(255,255,255,.18)`) with the icon, named
 by screen-reader text «Facebook (öffnet in neuem Tab)»; hover fills the circle
 yellow with a `#202020` icon. `div.footer-badges` is the empty slot for the
 Trustpilot and Google badges (T-50).
+
+## Product page
+
+C12, T-49. `woocommerce.php` renders WooCommerce's own `content-single-product.php`
+(no template overrides); hooks in `inc/woocommerce.php` and `theme.css`
+"Single product" shape it. WooCommerce's three stylesheets are off on product
+pages (`inc/assets-cleanup.php`), so every rule is the theme's.
+
+| Below 48rem: one column | From 48rem |
+|---|---|
+| h1, price with the sale badge, gallery (16:10), add to cart, «Jetzt anfragen» + trust row, short description, categories, description tab, related products | gallery (4:3) left, summary right in WooCommerce's order (h1, price + badge, short description, add to cart, request + trust, categories); description and related products across both columns |
+
+- Order below 48rem: `div.product` is a flex column and `.summary` is
+  `display: contents`, so its children take `order` values next to the gallery
+  (h1 1, price 2, gallery 3, add to cart 4, request 5, the rest 6, tabs 8,
+  related 9). At 360×800: h1 top ≤ 560, price ≤ 640, add to cart ≤ 760 and
+  above the action bar (smoke "Product & catalog").
+- Gallery: WooCommerce's stock gallery (decision 08.11.2026), FlexSlider plus
+  the PhotoSwipe lightbox, no hover zoom; jQuery and WooCommerce's scripts
+  defer. WooCommerce prints `opacity: 0` inline until its script ran; theme.css
+  shows the gallery at once (also without JS) and lays out one photo before
+  FlexSlider starts. One box for every photo: 16:10 below 48rem, 4:3 from
+  48rem, `object-fit: contain` on `--ccn-color-surface`, `--ccn-radius-md`.
+- Controls: previous/next arrows on every width (44px white circles,
+  `--ccn-shadow-2`, named «Vorheriges Bild» / «Nächstes Bild», hidden at the
+  ends); the thumbnail strip (4 columns, the active photo with a yellow
+  border) from 48rem only: on phones each thumbnail is one more request
+  (production shows dots there).
+- Photos: the first is the LCP image (eager, `fetchpriority=high`); photos
+  2..N are lazy with `fetchpriority=low` and keep their `src`. Slides not
+  shown yet skip rendering (`content-visibility: hidden`) and get
+  `.ccn-shown` just before the slider moves to them (inline script before
+  WooCommerce's single-product script), so a phone loads one photo, not five.
+- Lightbox: click or Enter on the photo opens it with focus inside; Escape
+  closes it and focus returns to the photo.
+- Price row: current price 24px bold `#202020`, `tabular-nums`, not
+  underlined; old price 18px `--ccn-color-secondary`, struck through; the
+  sale badge next to it.
+- Sale badge «Angebot!», the same in the list and here: `--ccn-color-primary`
+  fill, `#202020`, 14px bold uppercase, `--ccn-radius-sm`.
+- Add to cart: quantity 4.5rem × 44px with a `--ccn-color-secondary` border;
+  the button is the primary button at 48px, across the row on phones.
+- Request: «Jetzt anfragen» (`.btn-secondary.btn-lg`, label as on
+  production) to Site Settings `anfrage_url` with `?produkt=<slug>`, then the
+  trust row of Site Settings → Vertrauen in `#202020` on white.
+- Notices (added to cart, errors): `--ccn-color-light` with a 4px bar on the
+  left, yellow for messages, `--ccn-color-secondary` for info,
+  `--ccn-color-error` on `--ccn-color-error-surface` for errors; the button
+  follows the text.
+- Related products: product cards (see Cards), always the same four (menu
+  order, then title).
 
 ## Motion
 

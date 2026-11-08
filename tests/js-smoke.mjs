@@ -1106,6 +1106,68 @@ ok('Product without JS: gallery opacity 1 (CSS fallback), first photo visible in
 	galNoJs.opacity === '1' && !!galNoJs.main && parseInt(galNoJs.main.split('|')[1], 10) > 100 && parseInt(galNoJs.main.split('|')[0], 10) < 800 && galNoJs.hidden && galNoJs.jq === 'undefined',
 	JSON.stringify(galNoJs));
 await noJsGal.close();
+// First screen of a product at 360x800 (A6 C12): h1 top <= 560, price <= 640, add to cart <= 760 and above the action
+// bar, in the order h1, price, gallery, add to cart, request; the sale badge in the price row on the colour tokens, 14px
+// as in the list; "Jetzt anfragen" (label as on production) to the request page with the product slug.
+const fsProduct = await browser.newPage({ viewport: { width: 360, height: 800 } });
+// Layout shifts while the gallery starts (FlexSlider widens the slide row 100ms before it sizes the slides).
+await fsProduct.addInitScript(() => {
+	window.__ccnCls = 0;
+	new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) window.__ccnCls += e.value; })).observe({ type: 'layout-shift', buffered: true });
+});
+await fsProduct.goto(BASE + T49_PRODUCT, { waitUntil: 'load' });
+await fsProduct.addStyleTag({ content: noSmooth });
+await fsProduct.waitForSelector('.single_add_to_cart_button').catch(() => null);
+const prod360 = await fsProduct.evaluate(() => {
+	const top = (sel) => { const e = document.querySelector(sel); return e ? Math.round(e.getBoundingClientRect().top) : -1; };
+	const bar = document.querySelector('.ccn-action-bar');
+	const cta = document.querySelector('.single_add_to_cart_button');
+	const badge = document.querySelector('.ccn-product-price .onsale');
+	const req = document.querySelector('.ccn-product-request a.btn');
+	const s = badge && getComputedStyle(badge);
+	return { h1: top('h1.product_title'), price: top('.ccn-product-price .price'), gallery: top('.woocommerce-product-gallery'), cta: top('.single_add_to_cart_button'),
+		ctaBottom: cta ? Math.round(cta.getBoundingClientRect().bottom) : -1, request: top('.ccn-product-request'), barTop: bar ? Math.round(bar.getBoundingClientRect().top) : 800,
+		badge: s ? `${s.backgroundColor}|${s.color}|${s.fontSize}` : 'none',
+		req: req ? `${req.textContent.trim()}|${req.getAttribute('href')}|${Math.round(req.getBoundingClientRect().height)}` : 'none' };
+});
+ok('Product 360: h1 top <= 560, price <= 640, add to cart <= 760 and above the action bar; order h1, price, gallery, add to cart, request',
+	prod360.h1 >= 0 && prod360.h1 <= 560 && prod360.price > prod360.h1 && prod360.price <= 640 && prod360.gallery > prod360.price && prod360.cta > prod360.gallery
+	&& prod360.cta <= 760 && prod360.ctaBottom <= prod360.barTop && prod360.request > prod360.cta, JSON.stringify(prod360));
+const listBadge = await (async () => {
+	const p = await browser.newPage({ viewport: { width: 360, height: 800 } });
+	await p.goto(BASE + '/container-kaufen/', { waitUntil: 'load' });
+	const b = await p.evaluate(() => { const e = document.querySelector('ul.products li.product .onsale'); if (!e) return 'none'; const s = getComputedStyle(e); return `${s.backgroundColor}|${s.color}|${s.fontSize}`; });
+	await p.close();
+	return b;
+})();
+ok('Product: sale badge in the price row, yellow with #202020 text, 14px, the same in the list; "Jetzt anfragen" to the request page with ?produkt=<slug>, >= 44px',
+	prod360.badge === 'rgb(247, 198, 0)|rgb(32, 32, 32)|14px' && listBadge === prod360.badge
+	&& /^Jetzt anfragen\|\S+\?produkt=20-fuss-container-gebraucht\|(4[4-9]|5\d)$/.test(prod360.req), `${prod360.badge} / list ${listBadge} / ${prod360.req}`);
+// WooCommerce colours mapped to tokens: every visible text and background colour in <main> of the product page is a
+// colour token of theme.css :root (or white / transparent).
+const tokenRgb = [...Object.values(colourTokens).map((h) => {
+	const x = h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3');
+	return `rgb(${parseInt(x.slice(0, 2), 16)}, ${parseInt(x.slice(2, 4), 16)}, ${parseInt(x.slice(4, 6), 16)})`;
+}), 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)'];
+const offTokens = await fsProduct.evaluate((allowed) => {
+	const okSet = new Set(allowed);
+	const out = new Set();
+	for (const el of document.querySelectorAll('main *')) {
+		if (el.closest('svg')) continue;
+		const s = getComputedStyle(el);
+		const b = el.getBoundingClientRect();
+		if (s.display === 'none' || s.visibility === 'hidden' || b.width < 1 || b.height < 1) continue;
+		const name = `${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]}`;
+		if ([...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && !okSet.has(s.color)) out.add(`color ${s.color} ${name}`);
+		if (!okSet.has(s.backgroundColor)) out.add(`background ${s.backgroundColor} ${name}`);
+	}
+	return [...out];
+}, tokenRgb);
+ok('Product 360: every text and background colour in <main> is a colour token (WooCommerce colours mapped)', offTokens.length === 0, offTokens.slice(0, 6).join(' | ') || `${tokenRgb.length} allowed`);
+await fsProduct.waitForTimeout(1500);
+const productCls = await fsProduct.evaluate(() => Math.round(window.__ccnCls * 10000) / 10000);
+ok('Product 360: no layout shift while the page and the gallery start (CLS <= 0.01)', productCls <= 0.01, String(productCls));
+await fsProduct.close();
 
 await browser.close();
 console.log(results.join('\n'));

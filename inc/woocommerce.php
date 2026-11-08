@@ -81,6 +81,40 @@ function ccn_gallery_inline_script() {
 	wp_add_inline_script( 'wc-single-product', $js, 'before' );
 }
 
+/**
+ * Product summary (DESIGN.md "Product page"): the sale badge sits next to the
+ * price in one row; after the add-to-cart form a request button (the request
+ * page with the product as ?produkt=, label as on production) and the trust
+ * row of Site Settings → Vertrauen. Below 48rem theme.css orders the summary
+ * around the gallery: h1, price, gallery, add to cart, request, the rest.
+ */
+remove_action( 'woocommerce_before_single_product_summary', 'woocommerce_show_product_sale_flash', 10 );
+remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_price', 10 );
+add_action( 'woocommerce_single_product_summary', 'ccn_single_product_price', 10 );
+add_action( 'woocommerce_single_product_summary', 'ccn_single_product_request', 35 );
+
+function ccn_single_product_price() {
+	echo '<div class="ccn-product-price">';
+	woocommerce_template_single_price();
+	woocommerce_show_product_sale_flash();
+	echo '</div>';
+}
+
+function ccn_single_product_request() {
+	global $product;
+	$ccn_url = (string) ccn_setting( 'anfrage_url' );
+	echo '<div class="ccn-product-request">';
+	if ( $ccn_url && $product instanceof WC_Product ) {
+		printf(
+			'<a class="btn btn-secondary btn-lg" href="%1$s">%2$s</a>',
+			esc_url( add_query_arg( 'produkt', $product->get_slug(), $ccn_url ) ),
+			esc_html__( 'Jetzt anfragen', 'coin-container' )
+		);
+	}
+	get_template_part( 'template-parts/trust-row' );
+	echo '</div>';
+}
+
 // 4-up product grid, 12 per page.
 add_filter( 'loop_shop_columns', function () { return 4; } );
 add_filter( 'loop_shop_per_page', function () { return 12; } );
