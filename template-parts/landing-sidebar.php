@@ -26,8 +26,9 @@ $ccn_card_btn_u = ccn_setting( 'landing_card_button_url' );
 ?>
 <aside class="ccn-landing-sidebar">
 	<?php if ( $ccn_links ) : ?>
-		<nav class="ccn-sidebar-services" aria-label="<?php esc_attr_e( 'Unsere Dienstleistungen', 'coin-container' ); ?>">
-			<h2 class="ccn-sidebar-heading"><?php esc_html_e( 'Unsere Dienstleistungen', 'coin-container' ); ?></h2>
+		<?php // Named by its visible heading: aria-labelledby, not a second copy of the text in aria-label. ?>
+		<nav class="ccn-sidebar-services" aria-labelledby="ccn-sidebar-services-heading">
+			<h2 id="ccn-sidebar-services-heading" class="ccn-sidebar-heading"><?php esc_html_e( 'Unsere Dienstleistungen', 'coin-container' ); ?></h2>
 			<ul class="ccn-sidebar-services-list">
 				<?php foreach ( $ccn_links as $ccn_link ) : ?>
 					<li><a href="<?php echo esc_url( $ccn_link[1] ); ?>"><?php echo esc_html( $ccn_link[0] ); ?></a></li>

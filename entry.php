@@ -1,5 +1,5 @@
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<header class="entry-header">
+	<div class="entry-header">
 		<?php if ( is_singular() ) : ?>
 			<h1 class="entry-title"><?php the_title(); ?></h1>
 		<?php else : ?>
@@ -10,7 +10,7 @@
 		<?php if ( ! is_search() && 'post' === get_post_type() ) : ?>
 			<?php get_template_part( 'entry', 'meta' ); ?>
 		<?php endif; ?>
-	</header>
+	</div>
 
 	<?php get_template_part( 'entry', is_singular() ? 'content' : 'summary' ); ?>
 

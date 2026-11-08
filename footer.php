@@ -35,10 +35,11 @@
 			<?php
 			wp_nav_menu(
 				array(
-					'theme_location' => 'footer',
-					'container'      => false,
-					'menu_class'     => 'footer-menu',
-					'fallback_cb'    => false,
+					'theme_location'       => 'footer',
+					'container'            => 'nav',
+					'container_aria_label' => __( 'Rechtliches', 'coin-container' ),
+					'menu_class'           => 'footer-menu',
+					'fallback_cb'          => false,
 				)
 			);
 			?>

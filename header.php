@@ -68,7 +68,7 @@
 			<span class="screen-reader-text"><?php esc_html_e( 'Menü', 'coin-container' ); ?></span>
 		</button>
 
-		<nav id="site-nav" class="site-nav" aria-label="<?php esc_attr_e( 'Hauptnavigation', 'coin-container' ); ?>">
+		<nav id="site-nav" class="site-nav" aria-label="<?php esc_attr_e( 'Hauptmenü', 'coin-container' ); ?>">
 			<?php
 			wp_nav_menu(
 				array(
