@@ -585,6 +585,13 @@ reviews at the bottom, no review schema.
   (layout shift 0.45 at 360). The Google box stays `visibility: hidden`
   until the loader has formatted the widget plus 600ms. Without JS the
   facade shows the compact chips (profile links) only.
+- **Blocked hosts** (ad blocker, firewall): 8s after the start a Google
+  widget the loader has not formatted drops the facade's reserve (the box
+  collapses to 0) and a TrustBox without its iframe is hidden; the compact
+  chips stay — no permanent hole (blocked probe: section 192px at 360).
+- **Cache:** the widget HTML is a transient for an hour
+  (`ccn_google_reviews_html`, anonymous requests only): it saves the
+  shortcode render (~50ms), not the WordPress boot of the REST request.
 - **Privacy:** neither widget sets cookies or web storage (Playwright probe,
   08.11.2026); third-party hosts once started: `cdn.trustindex.io`,
   `lh3.googleusercontent.com`, `widget.trustpilot.com` (incl. impression

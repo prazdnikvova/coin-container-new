@@ -299,6 +299,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-reviews-facade.is-reserved .ccn-reviews-google{min-height:34.25rem}
 .ccn-reviews-facade.is-reserved .ccn-reviews-trustpilot{min-height:3.25rem}
 .ccn-reviews-facade.is-reserved .ccn-reviews-google:not(.is-ready){visibility:hidden}
+.ccn-reviews-facade:not(.is-reserved) .ccn-reviews-google:not(.is-ready){display:none}
 @media (min-width:36rem){.ccn-reviews-facade.is-reserved .ccn-reviews-google{min-height:19.75rem}}
 /* Block: FAQ (DESIGN.md "FAQ"): native details, the plus turns into a cross */
 .ccn-faq-heading{margin-bottom:var(--ccn-space-5)}

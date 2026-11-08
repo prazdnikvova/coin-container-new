@@ -34,14 +34,30 @@ const CCN_TRUSTBOX_HEIGHT   = 52;
  * the loader formats the widget only once it is in view and its slider moves on
  * screen (layout shift 0.45 at 360px, measured 08.11.2026).
  *
+ * Cached for an hour (transient ccn_google_reviews_html): rendering the
+ * shortcode on every approach to the facade costs a full WordPress boot plus
+ * the plugin's render. Logged-in users always get a fresh render, so admin
+ * notices of the plugin never land in the cache. Reviews or settings changed
+ * in the plugin show up within the hour (or after `wp transient delete
+ * ccn_google_reviews_html`); the plugin's view counter then counts renders,
+ * not page views.
+ *
  * @return string HTML; '' without the plugin, a connection or reviews.
  */
 function ccn_google_reviews_html() {
 	if ( ! shortcode_exists( 'trustindex' ) ) {
 		return '';
 	}
-	$html = trim( (string) do_shortcode( '[trustindex no-registration=google]' ) );
-	return (string) preg_replace( '/<div (?=[^>]*\bclass="ti-widget\b)/', '<div data-lazy-load-disabled="1" ', $html, 1 );
+	$cache = ! is_user_logged_in();
+	$html  = $cache ? get_transient( 'ccn_google_reviews_html' ) : false;
+	if ( false === $html ) {
+		$html = trim( (string) do_shortcode( '[trustindex no-registration=google]' ) );
+		$html = (string) preg_replace( '/<div (?=[^>]*\bclass="ti-widget\b)/', '<div data-lazy-load-disabled="1" ', $html, 1 );
+		if ( $cache ) {
+			set_transient( 'ccn_google_reviews_html', $html, HOUR_IN_SECONDS );
+		}
+	}
+	return (string) $html;
 }
 
 add_action( 'rest_api_init', 'ccn_register_reviews_route' );

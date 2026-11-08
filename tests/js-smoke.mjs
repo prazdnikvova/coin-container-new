@@ -1285,6 +1285,28 @@ const t50Storage = await t50.evaluate(() => Object.keys(localStorage).length + O
 const t50Cookies = (await t50Ctx.cookies()).length;
 ok('Reviews: no cookies and no web storage once both widgets ran (else a click facade until consent)', t50Cookies === 0 && t50Storage === 0, `${t50Cookies} cookies, ${t50Storage} storage keys`);
 await t50Ctx.close();
+// Widget hosts blocked (ad blocker, corporate firewall): within 10 s of the start the facade drops its reserve — the
+// Google box collapses (< 100px), the TrustBox box goes — and the profile links stay; no JS error. No permanent hole.
+const t50BlockCtx = await browser.newContext({ viewport: { width: 360, height: 800 } });
+await t50BlockCtx.route(/trustindex\.io|trustpilot\.com|googleusercontent\.com/, (r) => r.abort());
+const t50Block = await t50BlockCtx.newPage();
+const t50BlockErr = [];
+t50Block.on('pageerror', (e) => t50BlockErr.push(e.message));
+t50Block.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource|net::ERR_/.test(m.text())) t50BlockErr.push(m.text()); });
+await t50Block.goto(BASE + '/', { waitUntil: 'load' });
+await t50Block.addStyleTag({ content: noSmooth });
+const t50BlockTop = await t50Block.evaluate(() => { const f = document.querySelector('.ccn-reviews-facade'); return f ? Math.round(f.getBoundingClientRect().top + scrollY) : 0; });
+for (let y = 0; y < t50BlockTop; y += 700) { await jump(t50Block, y); await t50Block.waitForTimeout(120); }
+await t50Block.waitForFunction(() => { const f = document.querySelector('.ccn-reviews-facade'); return !!f && !f.classList.contains('is-reserved'); }, null, { timeout: 10000 }).catch(() => null);
+await t50Block.waitForTimeout(300);
+const t50Blocked = await t50Block.evaluate(() => {
+	const f = document.querySelector('.ccn-reviews-facade');
+	const h = (s) => { const e = f.querySelector(s); return e ? Math.round(e.getBoundingClientRect().height) : 0; };
+	return f ? { reserved: f.classList.contains('is-reserved'), google: h('.ccn-reviews-google'), trustbox: h('.ccn-reviews-trustpilot'), chips: h('.ccn-trust--compact') } : null;
+});
+ok('Reviews with the widget hosts blocked: within 10 s the reserve drops (Google box < 100px, TrustBox box gone), the profile links stay, 0 JS errors',
+	!!t50Blocked && !t50Blocked.reserved && t50Blocked.google < 100 && t50Blocked.trustbox === 0 && t50Blocked.chips > 0 && t50BlockErr.length === 0, JSON.stringify({ ...t50Blocked, errors: t50BlockErr.slice(0, 2) }));
+await t50BlockCtx.close();
 const t50Wide = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 const t50WideReqs = [];
 t50Wide.on('request', (r) => { if (t50Third.test(r.url())) t50WideReqs.push(r.url()); });

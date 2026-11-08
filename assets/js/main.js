@@ -129,20 +129,26 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	// Live reviews (DESIGN.md "Trust"): 1200px ahead, fetch the Google widget (its inline loader script re-created
-	// to run), unpack the TrustBox <template>, add the third-party scripts. Boxes are reserved only with JS.
+	// to run), unpack the TrustBox <template>, add the third-party scripts. Boxes are reserved only with JS; shown
+	// once the loader formatted the widget, collapsed if it has not after 8 s (blocked hosts): the links stay.
 	const start = (f) => {
 		const g = f.querySelector('.ccn-reviews-google');
+		const drop = () => f.classList.remove('is-reserved');
+		let ok = false;
 		if (g) fetch(f.dataset.ccnReviews).then((r) => r.json()).then((d) => {
 			g.innerHTML = d.html || '';
 			g.querySelectorAll('script').forEach((s) => { const n = document.createElement('script'); n.text = s.text; s.replaceWith(n); });
-			// Shown once the loader formatted it (inline hiding style gone) and the slider settled.
 			const w = g.querySelector('div.ti-widget');
-			const show = () => setTimeout(() => g.classList.add('is-ready'), 600);
-			if (!w) return show();
-			new MutationObserver((m, o) => { if (!/height:\s*0/.test(w.getAttribute('style'))) { o.disconnect(); show(); } }).observe(w, { attributes: true });
-		}).catch(() => f.classList.remove('is-reserved'));
+			if (!w) return drop();
+			new MutationObserver((m, o) => { if (!/height:\s*0/.test(w.getAttribute('style'))) { o.disconnect(); ok = true; setTimeout(() => g.classList.add('is-ready'), 600); } }).observe(w, { attributes: true });
+		}).catch(drop);
 		f.querySelectorAll('template').forEach((t) => t.replaceWith(t.content.cloneNode(true)));
 		(f.dataset.ccnScripts || '').split(' ').filter(Boolean).forEach((u) => document.head.append(Object.assign(document.createElement('script'), { src: u, async: true })));
+		setTimeout(() => {
+			const t = f.querySelector('.ccn-reviews-trustpilot');
+			if (g && !ok) drop();
+			if (t && !t.querySelector('iframe')) t.hidden = true;
+		}, 8000);
 	};
 	const facades = document.querySelectorAll('.ccn-reviews-facade');
 	facades.forEach((f) => f.classList.add('is-reserved'));
