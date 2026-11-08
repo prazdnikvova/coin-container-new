@@ -38,7 +38,8 @@ ok('main.js enqueued with defer', await mainScript.count() === 1 && (await mainS
 
 ok('Zero JS errors on home', errors.length === 0, errors.join(' | '));
 
-// Vanilla-JS policy: jQuery must not load outside Woo cart/checkout/account
+// Vanilla-JS policy: jQuery must not load outside the WooCommerce pages (shop, categories, products, cart,
+// checkout, account: decision 08.11.2026, see "Product & catalog (T-49)" below)
 ok('jQuery absent on home', await page.evaluate(() => typeof window.jQuery === 'undefined'));
 
 // Header: primary nav with dropdown structure, phone link
@@ -167,11 +168,11 @@ ok('Cart accessible name includes visible count', await page.evaluate(() => {
 	return /^\d+$/.test(count) && (a.textContent || '').includes(count);
 }));
 
-// Shop: product grid renders, jQuery still absent on a catalog page
-const respShop = await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });
+// Shop: product grid renders; a WooCommerce page keeps jQuery for WooCommerce's scripts (T-49)
+const respShop = await page.goto(BASE + '/container-shop/', { waitUntil: 'load' });
 ok('Shop responds 200', respShop.status() === 200, String(respShop.status()));
 ok('Shop lists products', await page.locator('ul.products li.product').count() >= 6);
-ok('jQuery absent on shop', await page.evaluate(() => typeof window.jQuery === 'undefined'));
+ok('jQuery on shop (WooCommerce page, T-49)', await page.evaluate(() => typeof window.jQuery === 'function'));
 
 // Category archive renders products
 const respCat = await page.goto(BASE + '/product-category/cointainer/standardcontainer/', { waitUntil: 'domcontentloaded' });
@@ -1026,6 +1027,78 @@ ok('Components: dark and yellow section backgrounds keep every text >= AA and a 
 	`${variant.n} texts; ${variantFails.slice(0, 6).join(' | ')} ring ${darkRing}`);
 await ctxRm.close();
 await secPage.close();
+
+// Product & catalog (T-49, DESIGN.md "Product page"). jQuery only on the WooCommerce pages (decision 08.11.2026):
+// shop, categories, products and the cart keep it for WooCommerce's own scripts, deferred on shop pages; the front
+// page, landings, posts and legal pages ship none.
+const T49_PRODUCT = '/product/20-fuss-container-gebraucht/';
+const wooPages = ['/container-shop/', '/product-category/cointainer/standardcontainer/', T49_PRODUCT, '/warenkorb/'];
+const jqPage = await browser.newPage();
+const jq = {};
+for (const path of [...wooPages, '/', '/container-kaufen/', '/containerzubehoer/', '/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/']) {
+	await jqPage.goto(BASE + path, { waitUntil: 'load' });
+	jq[path] = await jqPage.evaluate(() => `${typeof window.jQuery}|${(document.getElementById('jquery-core-js') || {}).defer === true ? 'defer' : 'blocking'}`);
+}
+ok('Product & catalog: jQuery on the WooCommerce pages only (shop, category, product, cart), deferred on shop/category/product',
+	Object.entries(jq).every(([p, t]) => (wooPages.includes(p) ? t.startsWith('function') && (p === '/warenkorb/' || t.endsWith('defer')) : t.startsWith('undefined'))), JSON.stringify(jq));
+await jqPage.close();
+// Stock WooCommerce gallery (slider + lightbox, no zoom). 360: visible at once (WooCommerce sets opacity 0 inline until
+// its script ran), the slider started with arrows and no thumbnail strip (one request per photo), the first photo eager
+// with high priority, photos 2..N not requested until they slide in; 1280: one thumbnail per photo.
+const galPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+const galState = () => galPage.evaluate(() => {
+	const g = document.querySelector('.woocommerce-product-gallery');
+	if (!g) return null;
+	const slides = [...g.querySelectorAll('.woocommerce-product-gallery__image')];
+	const imgs = slides.map((s) => s.querySelector('img'));
+	const done = (i) => !!i && i.complete && i.naturalWidth > 1;
+	return { opacity: getComputedStyle(g).opacity, slider: !!g.querySelector('.flex-viewport'), arrows: g.querySelectorAll('.flex-direction-nav a').length,
+		thumbs: g.querySelectorAll('.flex-control-thumbs img').length, photos: imgs.length, active: slides.findIndex((s) => s.classList.contains('flex-active-slide')),
+		main: `${imgs[0].getAttribute('loading')}|${imgs[0].getAttribute('fetchpriority')}|${done(imgs[0])}`,
+		waiting: imgs.slice(1).filter((i) => !!i.getAttribute('src') && i.getAttribute('loading') === 'lazy' && i.naturalWidth === 0).length,
+		activeLoaded: done(g.querySelector('.flex-active-slide img')) };
+});
+await galPage.goto(BASE + T49_PRODUCT, { waitUntil: 'load' });
+await galPage.waitForTimeout(1000);
+const gal360 = await galState();
+ok('Product 360: gallery opacity 1 one second after load, slider started with arrows, no thumbnail strip; first photo eager/high and loaded, photos 2..N not requested',
+	!!gal360 && gal360.opacity === '1' && gal360.slider && gal360.arrows === 2 && gal360.thumbs === 0 && gal360.main === 'eager|high|true'
+	&& gal360.photos >= 2 && gal360.waiting === gal360.photos - 1, JSON.stringify(gal360));
+await galPage.click('.flex-direction-nav .flex-next').catch(() => null);
+await galPage.waitForFunction(() => { const i = document.querySelector('.woocommerce-product-gallery .flex-active-slide img'); return !!i && i.complete && i.naturalWidth > 1; }, null, { timeout: 6000 }).catch(() => null);
+const galNext = await galState();
+ok('Product 360: the next arrow shows photo 2 with its file loaded', !!galNext && galNext.active === 1 && galNext.activeLoaded, JSON.stringify(galNext));
+// Lightbox by keyboard: Enter on the photo link opens PhotoSwipe with focus inside, Escape closes it and returns focus.
+await galPage.focus('.woocommerce-product-gallery .flex-active-slide a').catch(() => null);
+await galPage.keyboard.press('Enter');
+await galPage.waitForTimeout(900);
+const lbOpen = await galPage.evaluate(() => `${!!document.querySelector('.pswp.pswp--open')}|${!!(document.activeElement && document.activeElement.closest('.pswp'))}`);
+await galPage.keyboard.press('Escape');
+await galPage.waitForTimeout(900);
+const lbClosed = await galPage.evaluate(() => `${!document.querySelector('.pswp.pswp--open')}|${!!(document.activeElement && document.activeElement.closest('.woocommerce-product-gallery__image'))}`);
+ok('Product: lightbox opens from the photo link with Enter (focus inside), Escape closes it and focus returns to the photo', lbOpen === 'true|true' && lbClosed === 'true|true', `${lbOpen} / ${lbClosed}`);
+await galPage.setViewportSize({ width: 1280, height: 800 });
+await galPage.goto(BASE + T49_PRODUCT, { waitUntil: 'load' });
+await galPage.waitForTimeout(800);
+const gal1280 = await galState();
+ok('Product 1280: slider with one thumbnail per photo', !!gal1280 && gal1280.slider && gal1280.photos >= 2 && gal1280.thumbs === gal1280.photos, JSON.stringify(gal1280));
+await galPage.close();
+// Without JS (every script request blocked) the CSS fallback shows the gallery: opacity 1, the first photo visible in
+// the first screen, photos 2..N not laid out (no stack of photos before the slider would start).
+const noJsGal = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await noJsGal.route(/\.js(\?|$)/, (r) => r.abort());
+await noJsGal.goto(BASE + T49_PRODUCT, { waitUntil: 'load' });
+const galNoJs = await noJsGal.evaluate(() => {
+	const g = document.querySelector('.woocommerce-product-gallery');
+	const slides = g ? [...g.querySelectorAll('.woocommerce-product-gallery__image')] : [];
+	const b = slides[0] ? slides[0].querySelector('img').getBoundingClientRect() : null;
+	return { opacity: g ? getComputedStyle(g).opacity : null, main: b ? `${Math.round(b.top)}|${Math.round(b.height)}` : null,
+		hidden: slides.slice(1).every((s) => getComputedStyle(s).display === 'none'), jq: typeof window.jQuery };
+});
+ok('Product without JS: gallery opacity 1 (CSS fallback), first photo visible in the first screen, photos 2..N hidden',
+	galNoJs.opacity === '1' && !!galNoJs.main && parseInt(galNoJs.main.split('|')[1], 10) > 100 && parseInt(galNoJs.main.split('|')[0], 10) < 800 && galNoJs.hidden && galNoJs.jq === 'undefined',
+	JSON.stringify(galNoJs));
+await noJsGal.close();
 
 await browser.close();
 console.log(results.join('\n'));

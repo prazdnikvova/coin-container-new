@@ -1,8 +1,9 @@
 <?php
 /**
  * WooCommerce integration: theme support, loop layout, lean markup.
- * No gallery zoom/slider/lightbox — those pull jQuery + extra libs; the single
- * product shows a simple, fast gallery instead (vanilla-JS policy).
+ * The product page uses WooCommerce's stock gallery, slider and lightbox
+ * without hover zoom (decision of 08.11.2026: jQuery is fine on the
+ * WooCommerce pages, see inc/assets-cleanup.php); DESIGN.md "Product page".
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -18,6 +19,66 @@ function ccn_woocommerce_support() {
 			'single_image_width'    => 800,
 		)
 	);
+	add_theme_support( 'wc-product-gallery-slider' );
+	add_theme_support( 'wc-product-gallery-lightbox' );
+}
+
+/**
+ * Gallery photos: the first one is the LCP image of the product page (eager,
+ * high priority); photos 2..N load lazily at low priority and keep their src
+ * (image search). Until FlexSlider starts they are hidden, afterwards the
+ * slides not shown yet skip rendering (theme.css, content-visibility), so the
+ * lazy photos wait until the slider is about to show them (production card
+ * K103 had the same aim).
+ *
+ * @param array $params        Image attributes.
+ * @param int   $attachment_id Attachment ID.
+ * @param mixed $image_size    Image size.
+ * @param bool  $main_image    True for the first photo.
+ * @return array
+ */
+add_filter( 'woocommerce_gallery_image_html_attachment_image_params', 'ccn_gallery_image_params', 10, 4 );
+function ccn_gallery_image_params( $params, $attachment_id = 0, $image_size = '', $main_image = false ) {
+	$params['loading']       = $main_image ? 'eager' : 'lazy';
+	$params['fetchpriority'] = $main_image ? 'high' : 'low';
+	return $params;
+}
+
+/**
+ * Slider controls: previous/next arrows on every width, the thumbnail strip
+ * from 48rem only (one image request per photo does not fit the product page
+ * budget on phones; production shows dots there).
+ *
+ * @param array $options FlexSlider options.
+ * @return array
+ */
+add_filter( 'woocommerce_single_product_carousel_options', 'ccn_gallery_carousel_options' );
+function ccn_gallery_carousel_options( $options ) {
+	$options['directionNav'] = true;
+	$options['prevText']     = esc_html__( 'Vorheriges Bild', 'coin-container' );
+	$options['nextText']     = esc_html__( 'Nächstes Bild', 'coin-container' );
+	return $options;
+}
+
+/**
+ * Gallery settings that need the browser, inline before WooCommerce's
+ * single-product script (it reads them in its ready handler; jQuery loads
+ * deferred, so a later script would race it): no thumbnail strip below
+ * 48rem; before every move the current, the target and the next slide get
+ * .ccn-shown and render (their lazy photos load), slide 2 also on the first
+ * touch or focus inside the gallery, so a swipe never drags in an empty slide.
+ */
+add_action( 'wp_enqueue_scripts', 'ccn_gallery_inline_script', 20 );
+function ccn_gallery_inline_script() {
+	if ( ! wp_script_is( 'wc-single-product', 'enqueued' ) ) {
+		return;
+	}
+	$js = "(function(p){if(!p||!p.flexslider)return;if(matchMedia('(max-width: 47.99rem)').matches)p.flexslider.controlNav=false;"
+		. "var show=function(s){if(s)s.classList.add('ccn-shown');};"
+		. 'p.flexslider.before=function(sl){show(sl.slides[sl.currentSlide]);show(sl.slides[sl.animatingTo]);show(sl.slides[sl.animatingTo+1]);};'
+		. "var near=function(e){var g=e.target.closest&&e.target.closest('.woocommerce-product-gallery');if(g)show(g.querySelectorAll('.woocommerce-product-gallery__image')[1]);};"
+		. "document.addEventListener('pointerdown',near,true);document.addEventListener('focusin',near,true);})(window.wc_single_product_params);";
+	wp_add_inline_script( 'wc-single-product', $js, 'before' );
 }
 
 // 4-up product grid, 12 per page.

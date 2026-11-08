@@ -1,10 +1,12 @@
 <?php
 /**
- * Front-end asset cleanup — the theme is vanilla-JS only.
+ * Front-end asset cleanup — the theme's own code is vanilla JS.
  *
- * Policy (see project decision 2026-07-06): jQuery is removed everywhere except
- * the WooCommerce transactional pages (cart / checkout / account), whose core
- * scripts still depend on it. Theme code never depends on jQuery.
+ * Policy: jQuery stays on the WooCommerce pages only — shop, product
+ * categories, products, cart, checkout and account — for WooCommerce's own
+ * scripts (stock product gallery, sort order, checkout; decision of
+ * 08.11.2026, as on clinexTheme). Every other page ships no jQuery (decision
+ * 2026-07-06). Theme code never depends on jQuery.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -12,13 +14,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * True on the WooCommerce pages whose core JS still needs jQuery.
+ * True on the WooCommerce pages that keep jQuery and WooCommerce's scripts.
  */
-function ccn_is_wc_transactional() {
+function ccn_keeps_jquery() {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		return false;
 	}
-	return is_cart() || is_checkout() || is_account_page();
+	return is_woocommerce() || is_cart() || is_checkout() || is_account_page();
 }
 
 /**
@@ -70,16 +72,32 @@ function ccn_maybe_load_cf7( $load ) {
 
 /**
  * Late dequeues. Cart fragments are disabled everywhere (the header cart count
- * renders server-side); on non-transactional pages the whole jQuery/Woo stack
- * goes away.
+ * renders server-side); outside the WooCommerce pages the whole jQuery/Woo
+ * stack goes away.
  */
 add_action( 'wp_enqueue_scripts', 'ccn_cleanup_assets', 99 );
 function ccn_cleanup_assets() {
 	// No jQuery-powered AJAX cart on any page.
 	wp_dequeue_script( 'wc-cart-fragments' );
 
-
-	if ( ccn_is_wc_transactional() ) {
+	if ( ccn_keeps_jquery() ) {
+		if ( is_woocommerce() ) {
+			// Add to cart stays a plain request (the product form posts, loop buttons are
+			// ?add-to-cart= links): without cart fragments an AJAX add would leave the
+			// server-rendered cart count in the header stale.
+			wp_dequeue_script( 'wc-add-to-cart' );
+			// WooCommerce prints its scripts in <head> with defer; jQuery defers with them
+			// (WordPress keeps it blocking if any dependent is not deferred), so it never
+			// blocks the first paint.
+			wp_script_add_data( 'jquery-core', 'strategy', 'defer' );
+			wp_script_add_data( 'jquery', 'strategy', 'defer' );
+		}
+		if ( is_product() ) {
+			// The product page needs jQuery for the gallery (FlexSlider, PhotoSwipe, the
+			// single-product script) only; woocommerce.js (sort order, store notice,
+			// password toggles) has nothing to do there.
+			wp_dequeue_script( 'woocommerce' );
+		}
 		return;
 	}
 
