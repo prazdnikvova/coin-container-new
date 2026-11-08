@@ -1,0 +1,78 @@
+{
+    "key": "group_ccn_block_form_card",
+    "title": "Block: Form card",
+    "fields": [
+        {
+            "key": "field_ccn_fc_form",
+            "label": "Form",
+            "name": "form",
+            "type": "post_object",
+            "instructions": "The Contact Form 7 form to show. Its fields, labels, consent text and e-mails are edited in Contact → Contact Forms. Keep the production form IDs (analytics reads them, DESIGN.md \"Forms\").",
+            "required": 1,
+            "post_type": [
+                "wpcf7_contact_form"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "return_format": "id",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 1
+        },
+        {
+            "key": "field_ccn_fc_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional section heading (h2), as on production, e.g. «Jetzt anfragen»."
+        },
+        {
+            "key": "field_ccn_fc_intro",
+            "label": "Intro",
+            "name": "intro",
+            "type": "textarea",
+            "instructions": "Optional line under the heading.",
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_ccn_fc_show_contacts",
+            "label": "Show contacts",
+            "name": "show_contacts",
+            "type": "true_false",
+            "instructions": "E-mail, phone and address from Site Settings next to the form (from 64rem; below it on phones). Off in the narrow landing column.",
+            "default_value": 0,
+            "ui": 1
+        },
+        {
+            "key": "field_ccn_fc_background",
+            "label": "Background",
+            "name": "background",
+            "type": "select",
+            "instructions": "Section background: alternate with the neighbouring sections; yellow only for short sections, at most one per screen (DESIGN.md, Sections). The form itself stays on its light card.",
+            "choices": {
+                "default": "Default (white)",
+                "light": "Light grey",
+                "dark": "Dark",
+                "yellow": "Yellow"
+            },
+            "default_value": "default",
+            "return_format": "value",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/form-card"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the form card block (blocks\/text\/form-card.php)."
+}

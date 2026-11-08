@@ -189,6 +189,15 @@ function ccn_register_blocks() {
 			'keywords'    => array( 'logos', 'partner', 'certificate', 'zertifikate' ),
 			'template'    => 'blocks/lists/logos.php',
 		),
+		array(
+			'name'        => 'form-card',
+			'title'       => __( 'Form card', 'coin-container' ),
+			'description' => __( 'Request form: heading, intro and a Contact Form 7 form on a light card, optionally with e-mail, phone and address from Site Settings beside it.', 'coin-container' ),
+			'category'    => 'ccn-text',
+			'icon'        => 'email-alt',
+			'keywords'    => array( 'form', 'anfrage', 'kontakt', 'contact form 7' ),
+			'template'    => 'blocks/text/form-card.php',
+		),
 	);
 
 	foreach ( $blocks as $block ) {

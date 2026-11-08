@@ -861,7 +861,7 @@ for (const path of ['/', '/container-kaufen/', '/containerzubehoer/', '/ueber-un
 	gutters[path] = await gutterPage.evaluate(() => {
 		const vis = (e) => { const s = getComputedStyle(e); const b = e.getBoundingClientRect(); return s.display !== 'none' && s.visibility !== 'hidden' && b.width > 0 && b.height > 0; };
 		const lefts = [...document.querySelectorAll('main section')].filter((s) => !s.matches('.ccn-hero, .ccn-page-hero, .ccn-contact-cards, .ccn-stats'))
-			.map((s) => [...s.querySelectorAll('h2, h3, p, li.product, .ccn-card, .btn, .rich-text, img')].find(vis)).filter(Boolean).map((e) => Math.round(e.getBoundingClientRect().left));
+			.map((s) => [...s.querySelectorAll('h2, h3, p, li.product, .ccn-card, .ccn-form-card-box, .btn, .rich-text, img')].find(vis)).filter(Boolean).map((e) => Math.round(e.getBoundingClientRect().left));
 		const card = [...document.querySelectorAll('ul.products > li.product')].find(vis);
 		return { lefts: [...new Set(lefts)], card: card ? Math.round(card.getBoundingClientRect().width) : null };
 	});
@@ -1351,6 +1351,34 @@ ok('Schema: FAQ questions as on production (Rank Math: WebPage.mainEntity = FAQ 
 const t50Logos = themeFile('blocks/lists/logos.php');
 ok('Logos block: lazy images, alt from the field, 48px high grey marks', /'loading'\s*=>\s*'lazy'/.test(t50Logos) && /'alt'\s*=>\s*\$ccn_item\['alt'\]/.test(t50Logos)
 	&& /\.ccn-logo-img\{[^}]*height:3rem[^}]*filter:grayscale\(1\)/.test(themeCss), 'blocks/lists/logos.php, theme.css .ccn-logo-img');
+
+// Request form (T-51, DESIGN.md "Forms"). The form card block (acf/form-card) replaces the hand-built
+// core/group.ccn-form-card of the landings; Contact Form 7's CSS/JS load only where a form is (the block or the
+// old shortcode), so a page without a form requests nothing of CF7.
+const T51_LANDINGS = ['/container-kaufen/', '/container-mieten/', '/container-transport-logistik/', '/container-modifikation-umbau-dienstleistungen/'];
+const T51_CONTACT = ['/kontakt-beratung/', '/container-angebot-anfordern/'];
+const t51 = await browser.newPage({ viewport: { width: 360, height: 800 } });
+const t51Req = [];
+t51.on('request', (r) => t51Req.push(r.url()));
+const t51Pages = {};
+for (const path of [...T51_LANDINGS, ...T51_CONTACT, '/', '/containerzubehoer/']) {
+	t51Req.length = 0;
+	await t51.goto(`${BASE}${path}?cb=${Date.now()}`, { waitUntil: 'load' });
+	t51Pages[path] = await t51.evaluate(() => ({
+		card: document.querySelectorAll('section.ccn-form-card form.wpcf7-form').length,
+		group: document.querySelectorAll('.wp-block-group.ccn-form-card').length,
+		formsDefer: [...document.scripts].some((s) => /\/assets\/js\/forms\.js/.test(s.src) && s.defer),
+	}));
+	t51Pages[path].cf7 = t51Req.filter((u) => /\/contact-form-7\//.test(u)).length;
+	t51Pages[path].forms = t51Req.filter((u) => /\/assets\/js\/forms\.js/.test(u)).length;
+}
+const t51CardPages = [...T51_LANDINGS];
+ok('Request form: the form card block on the landings, no hand-built ccn-form-card group left',
+	t51CardPages.every((p) => t51Pages[p].card === 1 && t51Pages[p].group === 0), JSON.stringify(t51CardPages.map((p) => [p, t51Pages[p].card, t51Pages[p].group])));
+ok('Request form: CF7 CSS/JS on every page with a form, no CF7 request on / and /containerzubehoer/',
+	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].cf7 >= 2) && ['/', '/containerzubehoer/'].every((p) => t51Pages[p].cf7 === 0),
+	JSON.stringify(Object.entries(t51Pages).map(([p, s]) => [p, s.cf7])));
+await t51.close();
 
 await browser.close();
 console.log(results.join('\n'));

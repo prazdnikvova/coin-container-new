@@ -407,8 +407,6 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-sidebar-services-list li a::before{content:'';border-left:.42rem solid var(--ccn-color-primary);border-top:.32rem solid transparent;border-bottom:.32rem solid transparent}
 .ccn-sidebar-card{padding:var(--ccn-space-7) var(--ccn-space-5);display:flex;flex-direction:column;align-items:center;gap:var(--ccn-space-5);text-align:center}
 .ccn-sidebar-card-title{font-family:var(--ccn-font-heading);font-weight:700;font-size:1.125rem}
-.ccn-form-card{background:var(--ccn-color-light);padding:var(--ccn-space-6);box-shadow:var(--ccn-shadow-2)}
-.ccn-form-card h2{font-size:var(--ccn-fs-h3);margin-bottom:var(--ccn-space-5)}
 
 /* Landing (full width) template: constrain flow blocks, let banner blocks bleed */
 .ccn-landing-full{padding-block:var(--ccn-space-7)}
@@ -645,8 +643,16 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
 .archive .site-main article,.blog .site-main article{border-bottom:1px solid var(--ccn-color-light);padding-bottom:1.5rem;margin-bottom:1.5rem}
 
 /* --------------------------------------------------------------------------
- * Contact Form 7
+ * Forms: form card + CF7 (DESIGN.md "Forms")
  * ------------------------------------------------------------------------ */
+.ccn-form-card-inner{display:grid;gap:var(--ccn-space-6)}
+@media (min-width:64rem){.ccn-form-card-inner.has-contacts{grid-template-columns:minmax(0,1fr) 19rem;align-items:start}}
+.ccn-form-card-box{padding:var(--ccn-space-5);border-radius:var(--ccn-radius-md);background:var(--ccn-color-light);color:var(--ccn-color-text);box-shadow:var(--ccn-shadow-2)}
+.ccn-form-card-heading{font-size:var(--ccn-fs-h3);margin-bottom:var(--ccn-space-3)}
+.ccn-form-card-intro{margin-bottom:var(--ccn-space-5)}
+.ccn-form-card-contacts{display:grid;gap:var(--ccn-space-5);overflow-wrap:anywhere}
+.ccn-form-card-contacts li{display:grid;justify-items:start}
+.ccn-form-card-contacts a{display:inline-flex;align-items:center;min-height:var(--ccn-tap);text-decoration:underline}
 .wpcf7 label{display:block;font-weight:700;margin-bottom:1rem}
 .wpcf7 input[type=text],.wpcf7 input[type=email],.wpcf7 input[type=tel],.wpcf7 textarea{width:100%;padding:.65rem;margin-top:.3rem;border:1px solid var(--ccn-color-secondary);border-radius:4px;font:inherit}
 .wpcf7 textarea{min-height:9rem}
