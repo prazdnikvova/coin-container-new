@@ -98,6 +98,11 @@ function ccn_catalog_filter() {
  * Lazy-load product loop thumbnails. WooCommerce marks them eager by default,
  * so featured products (below the fold on the home page) would otherwise
  * compete with the hero LCP and inflate the initial payload.
+ *
+ * The card draws the square image contained in a 4:3 box (DESIGN.md "Cards"),
+ * i.e. at three quarters of the box width: "sizes" says so instead of WP's
+ * "auto" (the box width), which kept phones on the 768px file after the grid
+ * went to one column (T-48); the 500px file is enough there.
  */
 remove_action( 'woocommerce_before_shop_loop_item_title', 'woocommerce_template_loop_product_thumbnail', 10 );
 add_action( 'woocommerce_before_shop_loop_item_title', 'ccn_loop_product_thumbnail', 10 );
@@ -106,10 +111,27 @@ function ccn_loop_product_thumbnail() {
 	if ( ! $product ) {
 		return;
 	}
+	add_filter( 'wp_img_tag_add_auto_sizes', '__return_false' );
 	echo $product->get_image( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- WC image HTML
 		'woocommerce_thumbnail',
-		array( 'loading' => 'lazy' )
+		array(
+			'loading' => 'lazy',
+			'sizes'   => '(max-width: 575px) calc(75vw - 44px), (max-width: 1023px) calc(38vw - 40px), 270px',
+		)
 	);
+	remove_filter( 'wp_img_tag_add_auto_sizes', '__return_false' );
+}
+
+/**
+ * Inside post content (featured-products block) the content filter adds the
+ * "auto" again; drop it for the loop thumbnails only (see above).
+ *
+ * @param string $img Filtered img tag.
+ * @return string
+ */
+add_filter( 'wp_content_img_tag', 'ccn_loop_thumbnail_sizes' );
+function ccn_loop_thumbnail_sizes( $img ) {
+	return str_contains( $img, 'attachment-woocommerce_thumbnail' ) ? str_replace( 'sizes="auto, ', 'sizes="', $img ) : $img;
 }
 
 /**

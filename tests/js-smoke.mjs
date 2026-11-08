@@ -863,6 +863,11 @@ const card360 = await cardPage.evaluate(() => {
 		ratio: Math.round(100 * r(btn).width / r(li).width) / 100, titleLines: Math.round(r(title).height / parseFloat(getComputedStyle(title).lineHeight)),
 		look: `${s.borderTopWidth}|${s.borderTopLeftRadius}|${s.boxShadow.includes('0px 2px 8px')}` };
 });
+// The square image is drawn at 3/4 of its 4:3 box (contain): sizes says so instead of WP's "auto" (box width),
+// otherwise phones load the 768px file in the one-column grid (LH: +79 KB on kaufen).
+const thumbSizes = await cardPage.evaluate(() => [...document.querySelectorAll('ul.products img.attachment-woocommerce_thumbnail')].map((i) => i.getAttribute('sizes')));
+ok('Components: product thumbnails sized for the contained image (no sizes="auto")', thumbSizes.length >= 4
+	&& thumbSizes.every((s) => /^\(max-width: 575px\) calc\(75vw - 44px\)/.test(s || '')), [...new Set(thumbSizes)].join(' | '));
 ok('Components (b) kaufen 360: 1 column, card button 44-48px and >= 90% of the card, title <= 3 lines, card surface', !!card360
 	&& card360.perRow === 1 && card360.btnH >= 44 && card360.btnH <= 48 && card360.ratio >= 0.9 && card360.titleLines <= 3 && card360.look === '1px|8px|true',
 	JSON.stringify(card360));

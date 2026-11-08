@@ -387,7 +387,10 @@ the landing request card ("Jetzt anfragen") and product cards
   on `--ccn-color-surface` (renders now; real photos arrive with the
   migration, OPEN #72); title at most 3 lines (`line-clamp`); price on one
   line with `tabular-nums`; the button fills the width, stays on one line and
-  sits at the bottom; sale badge top left inside the image.
+  sits at the bottom; sale badge top left inside the image. The square image
+  is drawn at 3/4 of its box, so the thumbnail's `sizes` is
+  `(max-width: 575px) calc(75vw - 44px), (max-width: 1023px) calc(38vw - 40px), 270px`
+  without WordPress's `auto` (`inc/woocommerce.php`): phones load the 500px file.
 - Service card: 48px yellow circle with an outline icon, `h3`, text always
   visible (no numbers: the services carry no sequence).
 - Featured products at 360: one column, no rail (T-48 decision, measured on
