@@ -562,12 +562,26 @@ ok('Motion: #header.is-stuck after scrollTo(0, 300), gone at 0 (sentinel)', stuc
 	&& await page.locator('body > .ccn-header-sentinel[aria-hidden="true"]').count() === 1, `300: ${stuckAt300}, 0: ${stuckAt0}`);
 ok('Motion: main.js has no scroll listener', mainJs.length > 0 && !/addEventListener\(\s*['"]scroll['"]/.test(mainJs));
 // Counters: the HTML carries the final number; on reveal it counts up from 0 and lands on
-// the same text, once (scrolling away and back does not restart it).
+// the same text, once (scrolling away and back does not restart it). The first frame in which
+// a number changes must find its item still fading in (opacity < 0.5): the drop to 0 is never
+// seen (A1 F15 — the old code reset a fully visible number).
 const counterTexts = () => page.evaluate(() => [...document.querySelectorAll('.ccn-stat-number')].map((e) => e.textContent.trim()));
 const countersAtLoad = await counterTexts();
-await page.evaluate(() => document.querySelector('.ccn-stats-grid').scrollIntoView({ block: 'center', behavior: 'instant' }));
-await page.waitForTimeout(250);
-const countersRunning = await counterTexts();
+const counterStart = await page.evaluate(() => new Promise((resolve) => {
+	const nums = [...document.querySelectorAll('.ccn-stat-number')];
+	const grid = document.querySelector('.ccn-stats-grid');
+	if (!nums.length || !grid) return resolve(null);
+	const finals = nums.map((n) => n.textContent.trim());
+	grid.scrollIntoView({ block: 'center', behavior: 'instant' });
+	const t0 = performance.now();
+	const poll = () => {
+		const i = nums.findIndex((n, k) => n.textContent.trim() !== finals[k]);
+		if (i >= 0) return resolve({ text: nums[i].textContent.trim(), opacity: parseFloat(getComputedStyle(nums[i].closest('.ccn-stat') || nums[i]).opacity) });
+		if (performance.now() - t0 > 3000) return resolve(null);
+		requestAnimationFrame(poll);
+	};
+	requestAnimationFrame(poll);
+}));
 await page.waitForTimeout(1500);
 const countersDone = await counterTexts();
 await jump(page, 0);
@@ -575,9 +589,10 @@ await page.waitForTimeout(100);
 await page.evaluate(() => document.querySelector('.ccn-stats-grid').scrollIntoView({ block: 'center', behavior: 'instant' }));
 await page.waitForTimeout(150);
 const countersAgain = await counterTexts();
-ok('Motion: counters count up once and land on the HTML value', countersAtLoad.length >= 3 && countersRunning.some((t, i) => t !== countersAtLoad[i])
+ok('Motion: counters count up once, hidden while they drop to 0, and land on the HTML value', countersAtLoad.length >= 3
+	&& !!counterStart && counterStart.opacity < 0.5
 	&& countersDone.join('|') === countersAtLoad.join('|') && countersAgain.join('|') === countersAtLoad.join('|'),
-	`${countersAtLoad} -> ${countersRunning} -> ${countersDone} -> ${countersAgain}`);
+	`${countersAtLoad} -> first change ${JSON.stringify(counterStart)} -> ${countersDone} -> ${countersAgain}`);
 // (c) Scroll the whole page in 600px steps: reveal animations run, afterwards every block is
 // .is-in and fully visible (A6 probe: nothing left below opacity 0.05).
 await page.goto(BASE + '/', { waitUntil: 'load' });
@@ -688,29 +703,31 @@ const railState = () => railPage.evaluate(() => {
 		pageScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
 	} : null;
 });
+const railClick = (dir) => railPage.evaluate((d) => { const b = document.querySelector(`.ccn-news .ccn-rail-btn[data-dir="${d}"]`); if (b) b.click(); }, dir);
 const rail360 = await railState();
-await railPage.evaluate(() => document.querySelector('.ccn-news .ccn-rail-btn[data-dir="1"]').click());
+await railClick(1);
 await railPage.waitForTimeout(800);
 const railNext = await railState();
-await railPage.evaluate(() => document.querySelector('.ccn-news .ccn-rail-btn[data-dir="-1"]').click());
+await railClick(-1);
 await railPage.waitForTimeout(800);
 const railBack = await railState();
 ok('Rail: news is a scroll-snap row at 360, Weiter/Zurück scroll it, no page scroll', !!rail360 && rail360.scrolls
 	&& rail360.snap === 'x mandatory|start' && rail360.nav === 'visible|block' && rail360.names === '‹Zurück|›Weiter'
-	&& rail360.sizes === '44x44|44x44' && !rail360.pageScroll && rail360.left === 0 && railNext.left > 100 && railBack.left === 0,
+	&& rail360.sizes === '44x44|44x44' && !rail360.pageScroll && rail360.left === 0 && railNext && railNext.left > 100 && railBack && railBack.left === 0,
 	JSON.stringify({ rail360, next: railNext && railNext.left, back: railBack && railBack.left }));
 await railPage.setViewportSize({ width: 1440, height: 900 });
 await railPage.waitForTimeout(200);
 const rail1440 = await railPage.evaluate(() => {
 	const r = document.querySelector('.ccn-news .ccn-rail');
-	return `${getComputedStyle(r).display}|${getComputedStyle(r).gridTemplateColumns.split(' ').length}|${r.scrollWidth <= r.clientWidth + 1}|${getComputedStyle(r.parentElement.querySelector('.ccn-rail-nav')).display}`;
+	const nav = r && r.parentElement.querySelector('.ccn-rail-nav');
+	return r && nav ? `${getComputedStyle(r).display}|${getComputedStyle(r).gridTemplateColumns.split(' ').length}|${r.scrollWidth <= r.clientWidth + 1}|${getComputedStyle(nav).display}` : 'no rail';
 });
 ok('Rail: news is a 4-column grid at 1440 without the buttons', rail1440 === 'grid|4|true|none', rail1440);
 await railPage.close();
 const noJsRail = await browser.newPage({ viewport: { width: 360, height: 800 } });
 await noJsRail.route('**/assets/js/main.js*', (r) => r.abort());
 await noJsRail.goto(BASE + '/', { waitUntil: 'load' });
-const railNoJs = await noJsRail.evaluate(() => getComputedStyle(document.querySelector('.ccn-news .ccn-rail-nav')).visibility);
+const railNoJs = await noJsRail.evaluate(() => { const n = document.querySelector('.ccn-news .ccn-rail-nav'); return n ? getComputedStyle(n).visibility : 'no rail nav'; });
 ok('Rail (main.js blocked): buttons stay invisible, no dead controls', railNoJs === 'hidden', railNoJs);
 await noJsRail.close();
 ok('Motion: main.js <= 7 KB raw', Buffer.byteLength(mainJs) <= 7168, `${Buffer.byteLength(mainJs)} B`);
