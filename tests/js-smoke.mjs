@@ -1,6 +1,7 @@
 // Coin Container smoke test: rendering, accessibility basics, security hardening.
 // Requires a local WordPress site running this theme.
 import { chromium } from 'playwright';
+import { readFileSync } from 'node:fs';
 
 const BASE = process.env.CCN_BASE_URL || 'http://coin-container-new.local';
 
@@ -318,6 +319,77 @@ ok('XML-RPC POST answers faultCode 405 (disabled)', xmlrpcBody.includes('faultCo
 
 // oEmbed discovery links removed from wp_head (checked on the post: singular only).
 ok('wp_head without json+oembed link', !postHtml.includes('json+oembed'));
+
+// Structure invariants (T-44), one page per template type. Each page must answer
+// with its own status (a renamed slug would otherwise test 404.php instead) and
+// render exactly one <header>, <main>, <footer> and <h1>; no <header> inside
+// <main>; every <nav> named by aria-label/aria-labelledby, never "...navigation"
+// (screen readers add the role); heading levels of theme markup never skip —
+// editor content (.entry-content, .rich-text, WooCommerce tab panels) is content,
+// not theme, and is left out; main#content takes focus from the skip link;
+// anchor targets clear the sticky header. A new page template adds its page here.
+const structurePages = [
+	['/', 200], // front page (blocks)
+	['/container-kaufen/', 200], // landing with sidebar + product grid
+	['/container-mieten/', 200], // landing with sidebar
+	['/containerzubehoer/', 200], // landing full width
+	['/datenschutzerklaerung/', 200], // default page.php
+	['/gebrauchte-seecontainer-in-cuxhaven/', 200], // single post
+	['/nachrichten-trends-aus-der-containerwelt/', 200], // blog index (home.php)
+	['/container-shop/', 200], // shop
+	['/product-category/cointainer/kuehlcontainer/', 200], // product category
+	['/product/20-fuss-container-gebraucht/', 200], // single product
+	['/?s=container', 200], // search results
+	['/kein-solcher-pfad/', 404], // 404.php
+];
+for (const [path, status] of structurePages) {
+	const resp = await page.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+	const s = await page.evaluate(() => {
+		const count = (sel) => document.querySelectorAll(sel).length;
+		const navName = (nav) => (nav.getAttribute('aria-label') || '').trim()
+			|| (nav.getAttribute('aria-labelledby') || '').split(/\s+/).filter(Boolean)
+				.map((id) => ((document.getElementById(id) || {}).textContent || '').trim()).join(' ').trim();
+		const badNavs = [...document.querySelectorAll('nav')]
+			.filter((n) => !navName(n) || /navigation/i.test(navName(n)))
+			.map((n) => `${n.id || n.className || 'nav'} "${navName(n)}"`);
+		const jumps = [];
+		let prev = 0;
+		for (const h of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+			if (h.closest('.entry-content, .rich-text, .woocommerce-Tabs-panel')) continue;
+			const level = Number(h.tagName[1]);
+			if (level > prev + 1) jumps.push(`h${prev}->h${level} "${h.textContent.trim().slice(0, 40)}"`);
+			prev = level;
+		}
+		return {
+			header: count('header'), main: count('main'), footer: count('footer'), h1: count('h1'),
+			headerInMain: count('main header'), badNavs, jumps,
+			mainFocusable: count('main#content[tabindex="-1"]'),
+			scrollPad: getComputedStyle(document.documentElement).scrollPaddingTop,
+		};
+	});
+	ok(`Structure ${path}: HTTP ${status}`, resp.status() === status, String(resp.status()));
+	ok(`Structure ${path}: one <header>`, s.header === 1, String(s.header));
+	ok(`Structure ${path}: one <main>`, s.main === 1, String(s.main));
+	ok(`Structure ${path}: one <footer>`, s.footer === 1, String(s.footer));
+	ok(`Structure ${path}: one <h1>`, s.h1 === 1, String(s.h1));
+	ok(`Structure ${path}: no <header> inside <main>`, s.headerInMain === 0, String(s.headerInMain));
+	ok(`Structure ${path}: every <nav> named, not "navigation"`, s.badNavs.length === 0, s.badNavs.join(', '));
+	ok(`Structure ${path}: heading levels never skip (theme markup)`, s.jumps.length === 0, s.jumps.join(', '));
+	ok(`Structure ${path}: main#content[tabindex="-1"]`, s.mainFocusable === 1, String(s.mainFocusable));
+	ok(`Structure ${path}: scroll-padding-top clears the header`, s.scrollPad !== 'auto' && parseFloat(s.scrollPad) > 0, s.scrollPad);
+}
+
+// Every registered block prints the editor's HTML anchor as id on its root
+// <section> (T-44). Code-level: no stored content carries an anchor to test with.
+const themeDir = new URL('../', import.meta.url);
+const blockTemplates = [...readFileSync(new URL('blocks/acf-blocks.php', themeDir), 'utf8')
+	.matchAll(/'template'\s*=>\s*'(blocks\/[^']+\.php)'/g)].map((m) => m[1]);
+const anchorless = blockTemplates.filter((t) => {
+	const root = readFileSync(new URL(t, themeDir), 'utf8').split('\n').find((l) => l.includes('<section'));
+	return !root || !root.includes("$block['anchor']");
+});
+ok('Every block root prints the HTML anchor', blockTemplates.length >= 12 && anchorless.length === 0,
+	`${blockTemplates.length - anchorless.length}/${blockTemplates.length}${anchorless.length ? ' missing: ' + anchorless.join(', ') : ''}`);
 
 await browser.close();
 console.log(results.join('\n'));
