@@ -14,7 +14,7 @@ if ( empty( $ccn_cards ) ) {
 	return;
 }
 ?>
-<section class="ccn-info-cards">
+<section class="ccn-info-cards"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-info-cards-inner">
 		<?php foreach ( $ccn_cards as $ccn_card ) : ?>
 			<div class="ccn-info-card">

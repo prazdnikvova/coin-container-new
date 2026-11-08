@@ -16,7 +16,7 @@ if ( ! $ccn_email && ! $ccn_phone && ! $ccn_address ) {
 	return;
 }
 ?>
-<section class="ccn-contact-cards">
+<section class="ccn-contact-cards"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-contact-cards-inner">
 		<?php if ( $ccn_email ) : ?>
 			<div class="ccn-contact-card">
