@@ -78,7 +78,8 @@ Every page renders:
   skipping a level. Footer and sidebar headings are fixed `h2`.
 - a name on every `<nav>`, unique on the page and without the word
   "navigation" (screen readers add the role): `Hauptmenü` (header),
-  `Rechtliches` (footer), `Kategorien` (catalogue filter), the landing
+  `Rechtliches` (footer), `Schnellkontakt` (bottom action bar on phones),
+  `Kategorien` (catalogue filter), the landing
   sidebar via `aria-labelledby` on its visible heading; WordPress and
   WooCommerce pagination bring their own labels. Search stays a
   `<form role="search">`.

@@ -762,7 +762,7 @@ for (const path of firstScreenPages) {
 			heroTel: box([...document.querySelectorAll('.ccn-hero a[href^="tel:"], .ccn-page-hero a[href^="tel:"]')].find(vis)),
 			heroTelColor: ((e) => (e ? getComputedStyle(e).color : 'none'))(document.querySelector('.ccn-hero a[href^="tel:"], .ccn-page-hero a[href^="tel:"]')),
 			trust: box(document.querySelector('.ccn-trust')),
-			bar: box(bar), barLinks: bar ? [...bar.querySelectorAll('a')].map((a) => `${a.textContent.trim()}|${a.getAttribute('href')}`) : [],
+			bar: box(bar), barLinks: bar ? [...bar.querySelectorAll('a')].map((a) => `${a.textContent.trim()}|${a.getAttribute('href')}|${getComputedStyle(a).color}`) : [],
 		};
 	});
 }
@@ -801,6 +801,18 @@ ok('Header 1280: 80px row under the 40px top bar at rest; after scrollTo(0, 300)
 	deskRest.row === 80 && deskRest.topbar === 40 && deskRest.header === 120 && deskScrolled.header <= 64
 	&& deskScrolled.topbar === 0 && deskScrolled.topbarVis === 'hidden', JSON.stringify({ rest: deskRest, scrolled: deskScrolled }));
 await deskHeader.close();
+// Action bar (DESIGN.md "Action bar"): a bottom bar below 48rem with "Anrufen" (tel:) and "Anfrage"
+// (the request page), gone from 48rem and never on the cart.
+ok('Action bar 360: visible, >= 56px, white Anrufen (tel:) + dark Anfrage on /, kaufen, mieten; display none at 1280', firstScreenPages.every((p) => {
+	const s = fs360[p];
+	return !!s.bar && s.bar.h >= 56 && s.bar.bottom === 800 && s.barLinks.length === 2
+		&& /^Anrufen\|tel:\+?\d+\|rgb\(255, 255, 255\)$/.test(s.barLinks[0]) && /^Anfrage\|\S+\|rgb\(32, 32, 32\)$/.test(s.barLinks[1]);
+}) && deskRest.bar === 'none', `${fsList((s) => `${JSON.stringify(s.bar)} ${s.barLinks.join(' / ')}`)}; 1280: ${deskRest.bar}`);
+const cartPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await cartPage.goto(BASE + '/warenkorb/', { waitUntil: 'load' });
+const cartBar = await cartPage.evaluate(() => `${document.querySelectorAll('.ccn-action-bar').length}|${document.body.classList.contains('ccn-has-action-bar')}`);
+ok('Action bar: none on /warenkorb/ (no bar, no reserved body padding)', cartBar === '0|false', cartBar);
+await cartPage.close();
 
 await browser.close();
 console.log(results.join('\n'));

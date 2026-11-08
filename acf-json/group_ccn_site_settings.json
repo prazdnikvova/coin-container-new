@@ -259,6 +259,14 @@
             "type": "text",
             "instructions": "Empty = the request page URL below.",
             "default_value": "/container-angebot-anfordern/"
+        },
+        {
+            "key": "field_ccn_anfrage_url",
+            "label": "Request page URL",
+            "name": "anfrage_url",
+            "type": "text",
+            "instructions": "\"Anfrage\" button of the bottom action bar on phones (and the landing button when its URL is empty). The bar is hidden on this page itself and on cart, checkout and account.",
+            "default_value": "/container-angebot-anfordern/"
         }
     ],
     "location": [

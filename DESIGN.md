@@ -181,7 +181,7 @@ replaces its "planned" line with the implemented spec.
 | # | Component | Acceptance criteria (short) | Card | Status |
 |---|---|---|---|---|
 | C1 | Hero (home) | h1 with the keyword (text as on production), 1 primary + 1 secondary CTA, phone link, rating line; on 360×800 h1 ≤ 4 lines and CTA, phone, rating inside 800px | T-47 | built — see Hero |
-| C2 | Mobile action bar | bottom bar 56px below 768px: Anrufen (`tel:`) + Anfrage, safe-area inset, targets ≥ 44px | T-47 | planned |
+| C2 | Mobile action bar | bottom bar 56px below 768px: Anrufen (`tel:`) + Anfrage, safe-area inset, targets ≥ 44px | T-47 | built — see Action bar |
 | C3 | Sticky header | ≤ 64px on 360; 80px → 64px after scroll with `--ccn-shadow-1`; phone icon 44×44 below 1024px; CLS 0 | T-47 | built — see Header |
 | C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | planned |
 | C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | planned |
@@ -279,6 +279,30 @@ as on production (h1, button labels, trust row: `transmax-child/inc/hero-trust.p
   underline; buttons keep the `.btn` states (the button system is T-48).
 - LCP: the image (eager, `fetchpriority=high`, preloaded) as before; nothing
   in the hero animates.
+
+## Action bar
+
+`footer.php`, `ccn_action_bar()` in `functions.php` (T-47, A6 C2): one
+`<nav class="ccn-action-bar" aria-label="Schnellkontakt">` with two links
+and no JS.
+
+- Below 48rem only: `position: fixed` at the bottom, 56px (4px + 48px
+  buttons + 4px) plus `env(safe-area-inset-bottom)`; two equal columns —
+  «Anrufen» (`.btn-dark`, `tel:` from the Site Settings phone) and «Anfrage»
+  (`.btn-primary`, Site Settings `anfrage_url`, the request page). White
+  surface with a 1px `--ccn-color-border` line on top (a shadow, so the
+  height stays 56px).
+- `body.ccn-has-action-bar` reserves the same height at the bottom of the
+  page below 48rem, so the footer never ends under the bar. From 48rem the
+  bar is `display: none` and nothing is reserved.
+- Not rendered at all on cart, checkout and account pages, nor on the page
+  that `anfrage_url` points to.
+- Stacking: `z-index` 900 — under the header (1000) and its mobile menu, so
+  an open menu always covers the bar, never the other way round; under the
+  cookie banner of the deploy (CookieHub sits far above).
+- One floating element only: no side tabs, chat bubbles or Quick Contact on
+  phones next to it (Quick Contact is T-58 and must take this bar into
+  account).
 
 ## Motion
 

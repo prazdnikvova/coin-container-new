@@ -203,6 +203,13 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .footer-tagline{max-width:28rem}
 .site-copyright{border-top:1px solid rgba(255,255,255,.12);padding:1.25rem 1rem;text-align:center;font-size:var(--ccn-fs-small);color:var(--ccn-color-text-on-dark-muted)}
 
+/* Action bar (DESIGN.md "Action bar"): phones only, fixed at the bottom, under the header's menu */
+.ccn-action-bar{position:fixed;inset-inline:0;bottom:0;z-index:900;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:var(--ccn-space-2);padding:var(--ccn-space-1) var(--ccn-space-4) calc(var(--ccn-space-1) + env(safe-area-inset-bottom));background:var(--ccn-color-white);box-shadow:0 -1px 0 var(--ccn-color-border)}
+.ccn-action-bar .btn{display:flex;align-items:center;justify-content:center;min-height:3rem;padding-block:0;font-size:var(--ccn-fs-body);letter-spacing:0;text-transform:none;text-decoration:none}
+.ccn-action-bar .btn-dark{color:var(--ccn-color-white)} /* beats the reset's a[href^="tel"]{color:inherit} */
+@media (max-width:47.99rem){body.ccn-has-action-bar{padding-bottom:calc(3.5rem + env(safe-area-inset-bottom))}}
+@media (min-width:48rem){.ccn-action-bar{display:none}}
+
 /* --------------------------------------------------------------------------
  * Buttons
  * ------------------------------------------------------------------------ */

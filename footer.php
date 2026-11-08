@@ -75,6 +75,19 @@
 	</div>
 </footer>
 
+<?php $ccn_bar = ccn_action_bar(); ?>
+<?php if ( $ccn_bar ) : ?>
+	<?php // Phones only (CSS, below 48rem); never on cart, checkout, account or the request page itself. ?>
+	<nav class="ccn-action-bar" aria-label="<?php esc_attr_e( 'Schnellkontakt', 'coin-container' ); ?>">
+		<?php if ( $ccn_bar['tel'] ) : ?>
+			<a class="btn btn-dark" href="<?php echo esc_url( $ccn_bar['tel'] ); ?>"><?php esc_html_e( 'Anrufen', 'coin-container' ); ?></a>
+		<?php endif; ?>
+		<?php if ( $ccn_bar['url'] ) : ?>
+			<a class="btn btn-primary" href="<?php echo esc_url( $ccn_bar['url'] ); ?>"><?php esc_html_e( 'Anfrage', 'coin-container' ); ?></a>
+		<?php endif; ?>
+	</nav>
+<?php endif; ?>
+
 <?php wp_footer(); ?>
 </body>
 </html>

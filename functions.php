@@ -113,6 +113,46 @@ function ccn_transparent_header_class( $classes ) {
 	return $classes;
 }
 
+/**
+ * Bottom action bar below 48rem (DESIGN.md "Action bar"): "Anrufen" (tel:)
+ * and "Anfrage" (Site Settings anfrage_url). Off on cart, checkout and
+ * account pages and on the request page itself. The body class reserves its
+ * height, so the footer never ends under the bar.
+ *
+ * @return array Links ('tel', 'url'); empty when the bar is off.
+ */
+function ccn_action_bar() {
+	static $bar = null;
+	if ( null !== $bar ) {
+		return $bar;
+	}
+	$bar = array();
+	if ( function_exists( 'is_cart' ) && ( is_cart() || is_checkout() || is_account_page() ) ) {
+		return $bar;
+	}
+	$tel  = ccn_phone_href();
+	$url  = (string) ccn_setting( 'anfrage_url' );
+	$here = is_singular() ? (string) wp_parse_url( (string) get_permalink( get_queried_object_id() ), PHP_URL_PATH ) : '';
+	if ( $url && $here && untrailingslashit( (string) wp_parse_url( $url, PHP_URL_PATH ) ) === untrailingslashit( $here ) ) {
+		return $bar;
+	}
+	if ( $tel || $url ) {
+		$bar = array(
+			'tel' => $tel,
+			'url' => $url,
+		);
+	}
+	return $bar;
+}
+
+add_filter( 'body_class', 'ccn_action_bar_body_class' );
+function ccn_action_bar_body_class( $classes ) {
+	if ( ccn_action_bar() ) {
+		$classes[] = 'ccn-has-action-bar';
+	}
+	return $classes;
+}
+
 add_action( 'wp_head', 'ccn_preload_hero', 3 );
 function ccn_preload_hero() {
 	// Landing templates: the hero band is the featured image (LCP element).
