@@ -149,3 +149,42 @@ function ccn_scope_wc_styles( $styles ) {
 	}
 	return array();
 }
+
+/**
+ * The lightbox's two stylesheets (PhotoSwipe) matter only once it opens: they
+ * load as print styles and switch to all media once loaded, so they never
+ * block the first paint of a product page (footer styles would not help:
+ * WordPress 7 moves them back into <head>). theme.css keeps the closed
+ * lightbox hidden meanwhile.
+ *
+ * @param string $tag    Stylesheet link tag.
+ * @param string $handle Style handle.
+ * @return string
+ */
+add_filter( 'style_loader_tag', 'ccn_lightbox_styles_async', 10, 2 );
+
+/**
+ * WooPayments' tracker (frontend-tracks with wp-dom-ready and wp-polyfill,
+ * registered in wp_footer) printed three blocking scripts at the end of a
+ * product page and held its LCP back by about 0.25s (T-49 A/B). They defer
+ * there now (production delays them through WP Rocket); its data and config
+ * still run inline before it. WordPress keeps a dependency blocking if a
+ * non-deferred script needs it.
+ */
+add_action( 'wp_footer', 'ccn_defer_wcpay_tracker', 11 );
+function ccn_defer_wcpay_tracker() {
+	if ( ! function_exists( 'is_product' ) || ! is_product() ) {
+		return;
+	}
+	foreach ( array( 'wcpay-frontend-tracks', 'wp-dom-ready', 'wp-polyfill' ) as $ccn_handle ) {
+		if ( wp_script_is( $ccn_handle, 'registered' ) ) {
+			wp_script_add_data( $ccn_handle, 'strategy', 'defer' );
+		}
+	}
+}
+function ccn_lightbox_styles_async( $tag, $handle ) {
+	if ( 'photoswipe' !== $handle && 'photoswipe-default-skin' !== $handle ) {
+		return $tag;
+	}
+	return str_replace( " media='all'", " media='print' onload=\"this.media='all'\"", $tag );
+}

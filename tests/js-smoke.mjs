@@ -1053,6 +1053,14 @@ ok('Product & catalog: jQuery on the WooCommerce pages only (shop, category, pro
 ok('Product & catalog: WooCommerce stylesheets on shop, category and cart only (product page, front page, landings: 0)',
 	Object.entries(wcCss).every(([p, n]) => (['/container-shop/', '/product-category/cointainer/standardcontainer/', '/warenkorb/'].includes(p) ? n === 3 : n === 0)), JSON.stringify(wcCss));
 await jqPage.close();
+// Critical path of the product page: theme.css is the only stylesheet that blocks the first paint (the lightbox styles
+// load as print styles and switch on load) and every external script defers (WooCommerce's, WooPayments' tracker).
+const productHtml = await (await fetch(`${BASE}${T49_PRODUCT}?cb=${Date.now()}`)).text();
+const blockingCss = [...productHtml.matchAll(/<link rel='stylesheet' id='([^']+)'[^>]*\smedia='all'/g)].map((m) => m[1]);
+const blockingJs = [...productHtml.matchAll(/<script\b[^>]*\bsrc=[^>]*>/g)].map((m) => m[0])
+	.filter((t) => !/\s(defer|async)[\s>=]/.test(t)).map((t) => (t.match(/id="([^"]+)"/) || [])[1] || t.slice(0, 60));
+ok('Product page: theme.css is the only render-blocking stylesheet and every external script defers',
+	blockingCss.join() === 'coin-container-css' && blockingJs.length === 0, `blocking css: ${blockingCss.join(', ')}; blocking js: ${blockingJs.join(', ') || 'none'}`);
 // Stock WooCommerce gallery (slider + lightbox, no zoom). 360: visible at once (WooCommerce sets opacity 0 inline until
 // its script ran), the slider started with arrows and no thumbnail strip (one request per photo), the first photo eager
 // with high priority, photos 2..N not requested until they slide in; 1280: one thumbnail per photo.

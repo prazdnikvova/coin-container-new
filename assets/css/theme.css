@@ -527,6 +527,7 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
 .single-product .flex-direction-nav a::before{content:"";position:absolute;top:50%;left:50%;width:.6rem;height:.6rem;border:solid currentColor;border-width:0 2px 2px 0;transform:translate(-30%,-50%) rotate(135deg)}
 .single-product .flex-direction-nav .flex-next::before{transform:translate(-70%,-50%) rotate(-45deg)}
 .single-product .flex-direction-nav .flex-disabled{visibility:hidden}
+.pswp:not(.pswp--open){display:none}
 @media (min-width:48rem){.single-product div.product .woocommerce-product-gallery__image img,.single-product .flex-direction-nav{aspect-ratio:4/3}}
 .single-product div.product .woocommerce-product-gallery__image a{display:block}
 /* FlexSlider sizes the slides 100ms after it widened their row (2000 % for 10 photos): until then a slide is capped at the window, no 4100px flash */
