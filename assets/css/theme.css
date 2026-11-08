@@ -476,7 +476,7 @@ ul.products{--ccn-cols:1;display:grid;gap:var(--ccn-space-5);grid-template-colum
 ul.products.products::before,ul.products.products::after{display:none}
 /* Product card (C4) */
 ul.products li.product.product.product{position:relative;display:flex;flex-direction:column;float:none;width:auto;margin:0;padding:var(--ccn-space-3);text-align:left}
-ul.products li.product a{display:block}
+ul.products li.product a{display:block;text-decoration:none}
 ul.products li.product.product a img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;background:var(--ccn-color-surface);border-radius:var(--ccn-radius-sm);margin:0 0 var(--ccn-space-3)}
 ul.products li.product .woocommerce-loop-product__title[class]{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;font-family:var(--ccn-font-heading);font-size:1.05rem;font-weight:700;padding:0;margin:0 0 var(--ccn-space-2)}
 ul.products li.product .price[class]{display:block;color:var(--ccn-color-text);font-size:1rem;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:var(--ccn-space-3)}

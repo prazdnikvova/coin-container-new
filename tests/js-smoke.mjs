@@ -1052,6 +1052,15 @@ ok('Product & catalog: jQuery on the WooCommerce pages only (shop, category, pro
 // page and the product cards of the front page and landings run on theme.css alone (same computed card styles, T-49 probe).
 ok('Product & catalog: WooCommerce stylesheets on shop, category and cart only (product page, front page, landings: 0)',
 	Object.entries(wcCss).every(([p, n]) => (['/container-shop/', '/product-category/cointainer/standardcontainer/', '/warenkorb/'].includes(p) ? n === 3 : n === 0)), JSON.stringify(wcCss));
+// Product card title links without underline on every page with cards, with or without WooCommerce's stylesheets.
+const cardLinks = {};
+for (const path of ['/', '/container-kaufen/', '/container-shop/', T49_PRODUCT]) {
+	await jqPage.goto(BASE + path, { waitUntil: 'load' });
+	cardLinks[path] = await jqPage.evaluate(() => [...new Set([...document.querySelectorAll('ul.products li.product a.woocommerce-LoopProduct-link')]
+		.map((a) => getComputedStyle(a).textDecorationLine))].join() || 'no cards');
+}
+ok('Product cards: title links not underlined on the front page, a landing, the shop and the product page (related)',
+	Object.values(cardLinks).every((v) => v === 'none'), JSON.stringify(cardLinks));
 await jqPage.close();
 // Critical path of the product page: theme.css is the only stylesheet that blocks the first paint (the lightbox styles
 // load as print styles and switch on load) and every external script defers (WooCommerce's, WooPayments' tracker).
