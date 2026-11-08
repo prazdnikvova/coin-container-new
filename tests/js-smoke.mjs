@@ -533,7 +533,7 @@ const loadSplit = (p) => p.evaluate(() => {
 	const below = targets.filter((e) => e.getBoundingClientRect().top >= vh);
 	return {
 		above: above.length, below: below.length,
-		aboveHidden: above.filter((e) => !e.classList.contains('is-in') || kids(e).some((k) => op(k) < 1)).length,
+		aboveHidden: above.filter((e) => !e.classList.contains('is-in') || e.classList.contains('is-anim') || kids(e).some((k) => op(k) < 1)).length,
 		belowShown: below.filter((e) => e.classList.contains('is-in') || kids(e).some((k) => op(k) > 0)).length,
 	};
 });
@@ -672,6 +672,48 @@ await mobMenu.keyboard.press('Escape');
 const menuClosed = await mobMenu.evaluate(() => getComputedStyle(document.getElementById('site-nav')).display);
 ok('Mobile menu: opens with an opacity/transform transition, closes at once', menuOpen === 'opacity,transform' && menuClosed === 'none', `${menuOpen} / ${menuClosed}`);
 await mobMenu.close();
+// Rail (.ccn-rail): the news cards form a scroll-snap row below 64rem with working prev/next
+// buttons (44x44, named), a 4-column grid from 64rem; never a horizontal page scroll.
+const railPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await railPage.goto(BASE + '/', { waitUntil: 'load' });
+const railState = () => railPage.evaluate(() => {
+	const r = document.querySelector('.ccn-news .ccn-rail');
+	const nav = r && r.parentElement.querySelector('.ccn-rail-nav');
+	const btns = nav ? [...nav.querySelectorAll('.ccn-rail-btn')] : [];
+	return r ? {
+		scrolls: r.scrollWidth > r.clientWidth + 10, left: Math.round(r.scrollLeft),
+		snap: `${getComputedStyle(r).scrollSnapType}|${getComputedStyle(r.firstElementChild).scrollSnapAlign}`,
+		nav: nav ? `${getComputedStyle(nav).visibility}|${getComputedStyle(nav).display}` : 'none',
+		names: btns.map((b) => b.textContent.trim()).join('|'), sizes: btns.map((b) => `${b.offsetWidth}x${b.offsetHeight}`).join('|'),
+		pageScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+	} : null;
+});
+const rail360 = await railState();
+await railPage.evaluate(() => document.querySelector('.ccn-news .ccn-rail-btn[data-dir="1"]').click());
+await railPage.waitForTimeout(800);
+const railNext = await railState();
+await railPage.evaluate(() => document.querySelector('.ccn-news .ccn-rail-btn[data-dir="-1"]').click());
+await railPage.waitForTimeout(800);
+const railBack = await railState();
+ok('Rail: news is a scroll-snap row at 360, Weiter/Zurück scroll it, no page scroll', !!rail360 && rail360.scrolls
+	&& rail360.snap === 'x mandatory|start' && rail360.nav === 'visible|block' && rail360.names === '‹Zurück|›Weiter'
+	&& rail360.sizes === '44x44|44x44' && !rail360.pageScroll && rail360.left === 0 && railNext.left > 100 && railBack.left === 0,
+	JSON.stringify({ rail360, next: railNext && railNext.left, back: railBack && railBack.left }));
+await railPage.setViewportSize({ width: 1440, height: 900 });
+await railPage.waitForTimeout(200);
+const rail1440 = await railPage.evaluate(() => {
+	const r = document.querySelector('.ccn-news .ccn-rail');
+	return `${getComputedStyle(r).display}|${getComputedStyle(r).gridTemplateColumns.split(' ').length}|${r.scrollWidth <= r.clientWidth + 1}|${getComputedStyle(r.parentElement.querySelector('.ccn-rail-nav')).display}`;
+});
+ok('Rail: news is a 4-column grid at 1440 without the buttons', rail1440 === 'grid|4|true|none', rail1440);
+await railPage.close();
+const noJsRail = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await noJsRail.route('**/assets/js/main.js*', (r) => r.abort());
+await noJsRail.goto(BASE + '/', { waitUntil: 'load' });
+const railNoJs = await noJsRail.evaluate(() => getComputedStyle(document.querySelector('.ccn-news .ccn-rail-nav')).visibility);
+ok('Rail (main.js blocked): buttons stay invisible, no dead controls', railNoJs === 'hidden', railNoJs);
+await noJsRail.close();
+ok('Motion: main.js <= 7 KB raw', Buffer.byteLength(mainJs) <= 7168, `${Buffer.byteLength(mainJs)} B`);
 ok('Motion: prefers-reduced-motion handled in theme.css and main.js', /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\*,\s*\*::before,\s*\*::after\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important;\s*animation-duration:\s*0\.01ms\s*!important/.test(themeCss)
 	&& /matchMedia\(\s*'\(prefers-reduced-motion: no-preference\)'\s*\)/.test(mainJs));
 

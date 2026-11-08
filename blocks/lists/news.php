@@ -2,6 +2,8 @@
 /**
  * Block: News. Yellow left-aligned heading and the latest posts as cards:
  * photo with a yellow category badge, date, title, "Weiterlesen" link.
+ * Below 64rem the cards form a .ccn-rail (scroll-snap row, T-46) with
+ * prev/next buttons that main.js wires up; from 64rem a 4-column grid.
  */
 
 $ccn_heading = get_field( 'heading' );
@@ -29,7 +31,8 @@ if ( ! $ccn_q->have_posts() ) {
 		<?php if ( $ccn_heading ) : ?>
 			<h2 class="ccn-news-heading"><?php echo esc_html( $ccn_heading ); ?></h2>
 		<?php endif; ?>
-		<div class="ccn-news-grid" data-motion-stagger>
+		<?php $ccn_rail = wp_unique_id( 'ccn-news-rail-' ); ?>
+		<div id="<?php echo esc_attr( $ccn_rail ); ?>" class="ccn-news-grid ccn-rail" data-motion-stagger>
 			<?php
 			while ( $ccn_q->have_posts() ) :
 				$ccn_q->the_post();
@@ -51,6 +54,11 @@ if ( ! $ccn_q->have_posts() ) {
 					</div>
 				</article>
 			<?php endwhile; ?>
+		</div>
+		<?php // Icon-only buttons named by screen-reader text (README "Markup standard"); invisible but space-keeping until main.js wires them. ?>
+		<div class="ccn-rail-nav">
+			<button type="button" class="ccn-rail-btn" data-dir="-1" aria-controls="<?php echo esc_attr( $ccn_rail ); ?>"><span aria-hidden="true">‹</span><span class="screen-reader-text"><?php esc_html_e( 'Zurück', 'coin-container' ); ?></span></button>
+			<button type="button" class="ccn-rail-btn" data-dir="1" aria-controls="<?php echo esc_attr( $ccn_rail ); ?>"><span aria-hidden="true">›</span><span class="screen-reader-text"><?php esc_html_e( 'Weiter', 'coin-container' ); ?></span></button>
 		</div>
 	</div>
 </section>

@@ -70,24 +70,16 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Sticky header: solid background + shadow (.is-stuck) once the sentinel at
-	// the top of <body> (header.php) leaves the viewport. No scroll listener; it
-	// also runs with reduced motion (a state, not an animation).
+	// Sticky header: .is-stuck once the header.php sentinel leaves the viewport (a state: also with reduced motion).
 	const header = document.getElementById('header');
 	const sentinel = document.querySelector('.ccn-header-sentinel');
 	if (header && sentinel && 'IntersectionObserver' in window) {
 		new IntersectionObserver((es) => header.classList.toggle('is-stuck', !es[es.length - 1].isIntersecting)).observe(sentinel);
 	}
 
-	// Motion (T-46, DESIGN.md "Motion"): one IntersectionObserver reveals the
-	// [data-motion] blocks and [data-motion-stagger] grids below the fold and
-	// starts the stats counters. html.ccn-motion, the class behind every hidden
-	// state in theme.css, is set only here: without JS, without IO or with
-	// prefers-reduced-motion nothing is hidden and no observer or rAF runs.
+	// Motion (DESIGN.md "Motion"): reveal, stagger, counters. html.ccn-motion (all hidden states) only from here.
 	if ('IntersectionObserver' in window && matchMedia('(prefers-reduced-motion: no-preference)').matches) {
-		// 0 -> final value in 1200 ms (easeOutCubic, de-DE format, decimals kept).
-		// Runs only with the reveal of its grid, which still sits at opacity 0, so
-		// the final number printed in the HTML never visibly drops to 0.
+		// 0 -> printed value in 1200 ms, easeOutCubic, de-DE; starts with its grid's reveal (still at opacity 0).
 		const count = (el) => {
 			const to = parseFloat(el.dataset.target) || 0;
 			const dec = (el.dataset.target.split('.')[1] || '').length;
@@ -109,17 +101,27 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		};
 		const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-			// 10 % visible, or simply entered when taller than the viewport.
+			// 10 % visible, or entered when taller than the viewport.
 			if (e.isIntersecting && (e.intersectionRatio >= 0.1 || e.boundingClientRect.height > window.innerHeight)) {
 				io.unobserve(e.target);
 				show(e.target);
 			}
 		}), { threshold: [0, 0.1], rootMargin: '0px 0px -5% 0px' });
-		// Read all positions first, then write: whatever is in (or above) the
-		// viewport now stays visible and never animates.
+		// Reads first, then writes: in (or above) the viewport at load = visible, never animated.
 		const targets = [...document.querySelectorAll('[data-motion],[data-motion-stagger]')];
 		const tops = targets.map((el) => el.getBoundingClientRect().top);
 		targets.forEach((el, i) => (tops[i] < window.innerHeight ? el.classList.add('is-in') : io.observe(el)));
 		document.documentElement.classList.add('ccn-motion');
 	}
+
+	// Rail buttons: scroll by 80 % of the visible width; their row stays invisible until wired here.
+	document.querySelectorAll('.ccn-rail-btn').forEach((b) => {
+		const rail = document.getElementById(b.getAttribute('aria-controls'));
+		if (!rail) return;
+		b.parentNode.classList.add('is-ready');
+		b.addEventListener('click', () => rail.scrollBy({
+			left: b.dataset.dir * rail.clientWidth * 0.8,
+			behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+		}));
+	});
 });

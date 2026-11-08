@@ -270,6 +270,31 @@ inventory of the old site (A5 §4), principles from the design brief (A6
 - Services: the column text is always visible (no `max-height: 0` /
   `opacity: 0` until hover any more, A1 F7); hover only lifts the column.
 
+### Rail (carousel without a library)
+
+`.ccn-rail` replaces Swiper: a flex row with `overflow-x: auto`,
+`scroll-snap-type: x mandatory`, `scroll-padding-inline` and children at
+`min(85%, 20rem)` with `scroll-snap-align: start`. Its padding/negative
+margin (`--ccn-space-5` / `--ccn-space-4`) keeps card shadows and the hover
+lift unclipped and lets the row run to the screen edge; scrollbars are
+hidden on coarse pointers. Optional buttons:
+
+```html
+<div id="…" class="… ccn-rail">…cards…</div>
+<div class="ccn-rail-nav">
+  <button type="button" class="ccn-rail-btn" data-dir="-1" aria-controls="…"><span aria-hidden="true">‹</span><span class="screen-reader-text">Zurück</span></button>
+  <button type="button" class="ccn-rail-btn" data-dir="1" aria-controls="…">…Weiter…</button>
+</div>
+```
+
+`main.js` wires them (`scrollBy` 80 % of the visible width, smooth unless
+reduced motion) and only then makes the row visible (`.is-ready`); without
+JS the row keeps its space but stays invisible — no dead controls, no layout
+shift. Buttons are 44×44px and named by screen-reader text (README "Markup
+standard"). No autoplay. A block decides where the rail turns back into a
+grid: `news` below 64rem (from 64rem a 4-column grid, buttons hidden);
+featured products on 360 is T-48's decision.
+
 ### Not animated (A5 §4, A6 §6.6)
 
 Hero image and title, contact cards, the landing hero band, the header

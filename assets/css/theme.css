@@ -105,7 +105,6 @@ html{scroll-padding-top:calc(var(--ccn-header-h) + 1rem)}
 .site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000;font-size:1rem;transition:background-color var(--ccn-dur-base) var(--ccn-ease-out),box-shadow var(--ccn-dur-base) var(--ccn-ease-out)}
 .site-header a{text-decoration:none}
 .site-header.is-stuck{box-shadow:var(--ccn-shadow-1)}
-/* Sentinel (header.php): .is-stuck after 8px of scroll */
 .ccn-header-sentinel{position:absolute;top:8px;left:0;width:1px;height:1px}
 
 /* Over a hero the header starts as translucent glass (original: rgba(255,255,255,.46)
@@ -155,7 +154,6 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 
 .site-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);z-index:100}
 .nav-open .site-nav{display:block;transition:opacity var(--ccn-dur-base) var(--ccn-ease-out),transform var(--ccn-dur-base) var(--ccn-ease-out)}
-/* Mobile menu: animated open, instant close */
 @starting-style{.nav-open .site-nav{opacity:0;transform:translateY(-.5rem)}}
 .site-menu a{display:block;padding:.75rem 1rem;font-family:var(--ccn-font-heading);font-weight:700}
 .site-menu .sub-menu a{padding-left:2rem;font-weight:400}
@@ -169,7 +167,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 	.site-menu{display:flex;gap:.25rem}
 	.site-menu a{padding:.5rem .75rem}
 	.site-menu>li{position:relative}
-	/* Current/hovered item: dark text + yellow bar that grows in (::after is the submenu caret) */
+	/* Current/hovered item: dark text + yellow bar (::after is the submenu caret) */
 	.site-menu>li>a:hover,.site-menu>li.current-menu-item>a,.site-menu>li.current-menu-ancestor>a{color:var(--ccn-color-text)}
 	.site-menu>li>a::before{content:'';position:absolute;left:.75rem;right:.75rem;bottom:0;height:3px;background:var(--ccn-color-primary);transform:scaleX(0);transition:transform var(--ccn-dur-fast) var(--ccn-ease-out)}
 	.site-menu>li>a:hover::before,.site-menu>li.current-menu-item>a::before,.site-menu>li.current-menu-ancestor>a::before{transform:none}
@@ -353,12 +351,18 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-text-section .rich-text ul li::marker{color:var(--ccn-color-primary)}
 .ccn-text-section .rich-text hr{border:0;border-top:1px solid var(--ccn-color-border);width:14rem;margin:2rem auto}
 
+/* Rail (T-46, DESIGN.md "Motion") */
+.ccn-rail{position:relative;display:flex;gap:var(--ccn-space-5);overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--ccn-space-4);padding:var(--ccn-space-5) var(--ccn-space-4);margin:calc(-1*var(--ccn-space-5)) calc(-1*var(--ccn-space-4))}
+.ccn-rail>*{flex:0 0 min(85%,20rem);scroll-snap-align:start}
+@media (pointer:coarse){.ccn-rail{scrollbar-width:none}}
+.ccn-rail-nav{text-align:right;margin-top:var(--ccn-space-4)}
+.ccn-rail-nav:not(.is-ready){visibility:hidden}
+.ccn-rail-btn{width:44px;height:44px;border:1px solid var(--ccn-color-border);border-radius:50%;background:none;font-size:1.5rem;cursor:pointer}
+
 /* Block: news — post cards with category badges */
 .ccn-news{padding:3.5rem 0}
 .ccn-news-heading{color:var(--ccn-color-primary-text);margin-bottom:1.75rem}
-.ccn-news-grid{display:grid;gap:1.5rem;grid-template-columns:1fr}
-@media (min-width:48rem){.ccn-news-grid{grid-template-columns:repeat(2,1fr)}}
-@media (min-width:64rem){.ccn-news-grid{grid-template-columns:repeat(4,1fr)}}
+@media (min-width:64rem){.ccn-news-grid{display:grid;grid-template-columns:repeat(4,1fr);overflow:visible;padding:0;margin:0}.ccn-news .ccn-rail-nav{display:none}}
 .ccn-news-card{background:var(--ccn-color-white);box-shadow:var(--ccn-shadow-2);display:flex;flex-direction:column}
 .ccn-news-media{position:relative;display:block}
 .ccn-news-media img{display:block;width:100%;height:11rem;object-fit:cover}
@@ -511,13 +515,12 @@ body .is-layout-flex{display:flex}.is-layout-flex{flex-wrap:wrap;align-items:cen
 .is-layout-constrained>:where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width:var(--ccn-container-prose);margin-left:auto!important;margin-right:auto!important}.is-layout-constrained>.alignwide{max-width:var(--ccn-container)}
 :root :where(.wp-element-button,.wp-block-button__link){background-color:var(--ccn-color-text);border-width:0;color:var(--ccn-color-white);font:inherit;letter-spacing:inherit;text-transform:inherit;padding:calc(.667em + 2px) calc(1.333em + 2px);text-decoration:none}
 
-/* Motion (T-46, DESIGN.md "Motion"): hidden only under html.ccn-motion, which main.js sets */
+/* Motion (T-46, DESIGN.md "Motion"): states hang off html.ccn-motion from main.js */
 @media (prefers-reduced-motion:no-preference){
 .ccn-motion [data-motion]:not(.is-in),.ccn-motion [data-motion-stagger]:not(.is-in)>*{opacity:0}
 .ccn-motion .is-anim[data-motion],.ccn-motion .is-anim[data-motion-stagger]>*{animation:ccn-reveal var(--ccn-dur-reveal) var(--ccn-ease-out) backwards}
 @keyframes ccn-reveal{from{opacity:0;transform:translateY(20px)}}
 }
-/* Hover/focus feedback: listed properties (never "all") on the motion tokens */
 .btn,.woocommerce a.button,.woocommerce button.button,ul.products li.product .button,li.product,.ccn-news-card,.ccn-info-card,.ccn-service{transition-property:color,background-color,border-color,box-shadow,transform;transition-duration:var(--ccn-dur-fast);transition-timing-function:var(--ccn-ease-out)}
 .btn:is(:hover,:focus-visible),ul.products li.product:is(:hover,:focus-within),:is(.ccn-news-card,.ccn-info-card,.ccn-service):is(:hover,:focus-within){transform:translateY(-2px);box-shadow:var(--ccn-shadow-3)}
 .btn:active{transform:translateY(0)}
