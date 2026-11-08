@@ -92,20 +92,16 @@ em,i{font-style:italic}
 .ccn-container--prose{max-width:var(--ccn-container-prose)}
 
 /* --------------------------------------------------------------------------
- * Header + navigation (mobile-first; burger below 64rem), DESIGN.md "Header".
- * One fixed element: a 64px row below 64rem; from 64rem the grey top bar
- * (contacts + social) over an 80px row, folding to one 64px row once
- * .is-stuck. Fixed, so its height never moves the page: body reserves
- * --ccn-header-total.
+ * Header + navigation (mobile-first; burger below 64rem), DESIGN.md "Header":
+ * fixed, body reserves --ccn-header-total.
  * ------------------------------------------------------------------------ */
 :root{--ccn-topbar-h:2.5rem;--ccn-header-h:4rem;--ccn-header-h-compact:4rem;--ccn-header-total:var(--ccn-header-h);--ccn-tap:2.75rem}
 @media (min-width:64rem){:root{--ccn-header-h:5rem;--ccn-header-total:calc(var(--ccn-topbar-h) + var(--ccn-header-h))}}
-/* Anchor jumps and the skip link land below the header; smooth
- * scrolling only when the visitor has not asked for reduced motion. */
+/* Anchors clear the header; smooth scroll only without reduced motion */
 html{scroll-padding-top:calc(var(--ccn-header-total) + 1rem)}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 body{padding-top:var(--ccn-header-total)}
-/* 16px metrics; the hairline is a shadow so the header stays exactly 64px */
+/* 16px metrics; hairline as a shadow (row stays 64px) */
 .site-header{position:fixed;top:0;inset-inline:0;z-index:1000;background:var(--ccn-color-white);box-shadow:0 1px 0 var(--ccn-color-light);font-size:1rem;transition:background-color var(--ccn-dur-base) var(--ccn-ease-out),box-shadow var(--ccn-dur-base) var(--ccn-ease-out)}
 .admin-bar .site-header{top:var(--wp-admin--admin-bar--height,0)}
 .site-header a{text-decoration:none}
@@ -131,7 +127,6 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-topbar-social a:hover{color:var(--ccn-color-white)}
 .ccn-icon{flex-shrink:0}
 
-/* Row: logo, menu, then phone, cart, search, burger (DOM = visual order); 44px targets */
 .header-inner{display:flex;align-items:center;gap:1rem;min-height:var(--ccn-header-h-compact)}
 .site-logo{display:flex;align-items:center;flex-shrink:0;height:var(--ccn-header-h-compact)}
 .site-logo img{width:auto;height:2.5rem}
@@ -157,16 +152,15 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .nav-open .nav-toggle-bar::before{transform:rotate(-90deg) translateX(-7px);top:0}
 .nav-open .nav-toggle-bar::after{opacity:0}
 
-/* Mobile menu panel: scrolls inside itself (the header is fixed), above the action bar */
-.site-nav{display:none;position:absolute;top:100%;left:0;right:0;max-height:calc(100vh - var(--ccn-header-h));max-height:calc(100dvh - var(--ccn-header-h));overflow-y:auto;overscroll-behavior:contain;background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);z-index:100}
+/* Mobile menu scrolls inside itself */
+.site-nav{display:none;position:absolute;top:100%;left:0;right:0;max-height:calc(100dvh - var(--ccn-header-h));overflow-y:auto;overscroll-behavior:contain;background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);z-index:100}
 .nav-open .site-nav{display:block;transition:opacity var(--ccn-dur-base) var(--ccn-ease-out),transform var(--ccn-dur-base) var(--ccn-ease-out)}
 @starting-style{.nav-open .site-nav{opacity:0;transform:translateY(-.5rem)}}
 .site-menu a{display:block;padding:.75rem 1rem;font-family:var(--ccn-font-heading);font-weight:700}
 .site-menu .sub-menu a{padding-left:2rem;font-weight:400}
 
 @media (min-width:64rem){
-	/* Desktop-only top bar; .is-stuck folds it away and compacts the row 80 -> 64px.
-	 * Height moves here on purpose (DESIGN.md "Header"): the header is fixed, the page never shifts. */
+	/* .is-stuck folds the top bar, row 80 -> 64px: the one height transition (DESIGN.md "Header") */
 	.ccn-topbar{display:block;max-height:var(--ccn-topbar-h);overflow:hidden;transition:max-height var(--ccn-dur-base) var(--ccn-ease-out),opacity var(--ccn-dur-base) var(--ccn-ease-out),visibility var(--ccn-dur-base)}
 	.is-stuck .ccn-topbar{max-height:0;opacity:0;visibility:hidden}
 	.header-inner{padding-block:var(--ccn-space-2);transition:padding var(--ccn-dur-base) var(--ccn-ease-out)}
@@ -203,10 +197,10 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .footer-tagline{max-width:28rem}
 .site-copyright{border-top:1px solid rgba(255,255,255,.12);padding:1.25rem 1rem;text-align:center;font-size:var(--ccn-fs-small);color:var(--ccn-color-text-on-dark-muted)}
 
-/* Action bar (DESIGN.md "Action bar"): phones only, fixed at the bottom, under the header's menu */
+/* Action bar (DESIGN.md) */
 .ccn-action-bar{position:fixed;inset-inline:0;bottom:0;z-index:900;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:var(--ccn-space-2);padding:var(--ccn-space-1) var(--ccn-space-4) calc(var(--ccn-space-1) + env(safe-area-inset-bottom));background:var(--ccn-color-white);box-shadow:0 -1px 0 var(--ccn-color-border)}
-.ccn-action-bar .btn{display:flex;align-items:center;justify-content:center;min-height:3rem;padding-block:0;font-size:var(--ccn-fs-body);letter-spacing:0;text-transform:none;text-decoration:none}
-.ccn-action-bar .btn-dark{color:var(--ccn-color-white)} /* beats the reset's a[href^="tel"]{color:inherit} */
+.ccn-action-bar .btn{font-size:var(--ccn-fs-body);letter-spacing:0;text-transform:none}
+.ccn-action-bar .btn-dark{color:var(--ccn-color-white)} /* over a[href^="tel"]{color:inherit} */
 @media (max-width:47.99rem){body.ccn-has-action-bar{padding-bottom:calc(3.5rem + env(safe-area-inset-bottom))}}
 @media (min-width:48rem){.ccn-action-bar{display:none}}
 
@@ -226,7 +220,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .rich-text ul{list-style:disc;margin:0 0 1rem 1.25rem}
 
 /* Hero */
-/* Block: home hero (acf/home-hero) — photo, dark overlay, left-aligned h1, actions, trust row (DESIGN.md "Hero") */
+/* Block: home hero (acf/home-hero), DESIGN.md "Hero" */
 .ccn-hero{position:relative;color:var(--ccn-color-white)}
 .ccn-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ccn-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(20,20,20,.6) 0%,rgba(20,20,20,.25) 60%,rgba(20,20,20,.15) 100%)}
@@ -234,23 +228,23 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 /* h1 or h2 (editor): always sized as a page title */
 .ccn-hero-title{color:var(--ccn-color-white);font-size:var(--ccn-fs-h1);line-height:var(--ccn-lh-tight);max-width:56rem}
 .ccn-hero-subtitle{font-size:var(--ccn-fs-lead);max-width:38rem;margin-top:1.25rem}
-/* Phone: 4:5 photo growing with its content; light under the glass header (dark logo and icons), dark under the text */
+/* Phone: 4:5 box, light under the glass header, dark under the text */
 @media (max-width:48rem){
 	.ccn-hero{aspect-ratio:4/5}
 	.ccn-hero::before{background:linear-gradient(180deg,rgba(20,20,20,.1) 0,rgba(20,20,20,.6) var(--ccn-header-h),rgba(20,20,20,.7) 100%)}
 	.ccn-hero-inner{min-height:0;justify-content:flex-start;padding-block:calc(var(--ccn-header-h) + var(--ccn-space-5)) calc(3rem + var(--ccn-space-5))}
+	.ccn-hero-cta .btn.btn-outline-light{min-height:var(--ccn-tap)}
 }
-/* Hero actions (template-parts/hero-cta.php, also in the landing band): primary + outlined light button, phone line */
+/* Hero actions (template-parts/hero-cta.php); the action bar shares the button rule */
 .ccn-hero-cta{display:flex;flex-direction:column;gap:var(--ccn-space-3);width:100%;margin-top:var(--ccn-space-5)}
-.ccn-hero-cta .btn{display:flex;align-items:center;justify-content:center;gap:var(--ccn-space-2);min-height:var(--ccn-tap);padding-block:0;text-decoration:none}
-.ccn-hero-cta .btn-primary{min-height:3rem}
+.ccn-hero-cta .btn,.ccn-action-bar .btn{display:flex;align-items:center;justify-content:center;gap:var(--ccn-space-2);min-height:3rem;padding-block:0;text-decoration:none}
 .btn-outline-light{border-color:var(--ccn-color-white);color:var(--ccn-color-white)}
 .btn-outline-light:hover{background:var(--ccn-color-white);color:var(--ccn-color-text)}
-@media (min-width:48rem){.ccn-hero-cta{flex-direction:row;width:auto}.ccn-hero-cta .btn{min-height:3rem}}
+@media (min-width:48rem){.ccn-hero-cta{flex-direction:row;width:auto}}
 .ccn-phone-line,.ccn-trust a{display:inline-flex;align-items:center;gap:var(--ccn-space-2);min-height:var(--ccn-tap);color:var(--ccn-color-white);text-decoration:none}
 .ccn-phone-line{margin-top:var(--ccn-space-3);font-family:var(--ccn-font-heading);font-weight:700;font-size:1.125rem}
 .ccn-phone-line:hover,.ccn-trust a:hover{color:var(--ccn-color-primary)}
-/* Trust row (template-parts/trust-row.php): text links; brand marks keep their colours inside the SVG */
+/* Trust row (template-parts/trust-row.php) */
 .ccn-trust{display:flex;flex-wrap:wrap;column-gap:var(--ccn-space-5);margin-top:var(--ccn-space-2);font-size:var(--ccn-fs-small)}
 .ccn-trust a{flex-wrap:wrap}
 .ccn-trust-mark{display:inline-flex;align-items:center;gap:var(--ccn-space-1)}
