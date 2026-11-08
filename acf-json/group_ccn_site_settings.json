@@ -286,6 +286,31 @@
             ]
         },
         {
+            "key": "field_ccn_tab_schema",
+            "label": "Schema",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_faq_schema_mode",
+            "label": "FAQ schema",
+            "name": "faq_schema_mode",
+            "type": "select",
+            "instructions": "JSON-LD of the FAQ blocks. Production: the questions inside the WebPage node (mainEntity), no FAQPage node; this mode needs Rank Math (T-54) and prints nothing before. aggregateRating is never printed (team decision 22.09.2026).",
+            "choices": {
+                "webpage-mainentity": "Questions in WebPage.mainEntity (as on production, via Rank Math)",
+                "faqpage": "Own FAQPage node",
+                "none": "No FAQ schema"
+            },
+            "default_value": "webpage-mainentity",
+            "return_format": "value",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 0
+        },
+        {
             "key": "field_ccn_tab_cta",
             "label": "Calls to action",
             "name": "",

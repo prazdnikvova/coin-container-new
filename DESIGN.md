@@ -607,6 +607,11 @@ pairs (answers keep `p`, `a`, `ul`/`ol`, `strong`, `br` only).
   the question at `--ccn-fs-lead`, the plus turns into a cross
   (`transform: rotate(45deg)`, `--ccn-dur-fast`); the answer at 68ch,
   links underlined; the global focus ring on the summary.
+- Schema (`inc/schema.php`): the pairs of every `acf/faq` block of a page
+  (nested blocks too), Site Settings → Schema → `faq_schema_mode`:
+  `webpage-mainentity` (default, production: the questions as `mainEntity`
+  of Rank Math's WebPage node through `rank_math/json_ld`, no FAQPage node;
+  nothing before Rank Math, T-54), `faqpage` (own FAQPage node), `none`.
 
 ## Logos
 
@@ -836,7 +841,8 @@ for reviewing content:
   boxes (CDN unreachable: skipped); no cookies or storage afterwards; hero
   and trust bar chips (13, 126, AVPQ, trust bar in the first two screens);
   footer badges as on production; FAQ details by Enter and click, h3 under
-  the h2; logos lazy (code level). Library probes:
+  the h2; FAQPage 0, aggregateRating 0, FAQ questions only per schema mode;
+  logos lazy (code level). Library probes:
   `reports/2026-11-08-data/t50_probe.cjs` (requests before scroll, reserved
   and real widget heights, layout shifts while the widgets start, trust items
   per screen, FAQ), `t50_cookies.cjs` (cookies and storage of every frame

@@ -1313,6 +1313,18 @@ await t50Bar.click('details.ccn-faq-item:nth-of-type(2) summary').catch(() => nu
 const t50Click = await t50Bar.evaluate(() => { const d = document.querySelectorAll('details.ccn-faq-item')[1]; return !!d && d.open; });
 ok('FAQ (/container-kaufen/): >= 3 details, Enter and click open an answer, questions h3 under the h2', t50Faq.n >= 3 && t50Faq.h2 && t50Faq.h3 === t50Faq.n && t50Key && t50Click, JSON.stringify({ ...t50Faq, enter: t50Key, click: t50Click }));
 await t50Bar.close();
+// Schema: no FAQPage node and no aggregateRating anywhere (team decision 22.09.2026); FAQ questions only as on
+// production — as WebPage.mainEntity once Rank Math is there (T-54), none before.
+const t50Ld = [];
+for (const p of ['/', '/container-kaufen/', '/container-mieten/', '/container-inspiration-ideen/', '/ueber-uns/', '/product/20-fuss-container-gebraucht/']) {
+	const html = await (await fetch(`${BASE}${p}?cb=${Date.now()}`)).text();
+	const ld = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join(' ');
+	t50Ld.push({ p, faqPage: (ld.match(/"FAQPage"/g) || []).length, question: (ld.match(/"Question"/g) || []).length, rating: (html.match(/aggregateRating/g) || []).length,
+		rankMath: html.includes('rank-math-schema'), details: (html.match(/<details class="ccn-faq-item"/g) || []).length });
+}
+ok('Schema: FAQPage 0 and aggregateRating 0 on six pages', t50Ld.every((r) => r.faqPage === 0 && r.rating === 0), JSON.stringify(t50Ld.map((r) => [r.p, r.faqPage, r.rating])));
+ok('Schema: FAQ questions as on production (Rank Math: WebPage.mainEntity = FAQ items; before T-54: none)',
+	t50Ld.every((r) => (r.rankMath ? r.question === r.details : r.question === 0)) && t50Ld.some((r) => r.details >= 3), JSON.stringify(t50Ld.map((r) => [r.p, r.details, r.question, r.rankMath])));
 // Logos (code level: no page carries the block before the migration of /ueber-uns/zertifikate/, T-53a/b).
 const t50Logos = themeFile('blocks/lists/logos.php');
 ok('Logos block: lazy images, alt from the field, 48px high grey marks', /'loading'\s*=>\s*'lazy'/.test(t50Logos) && /'alt'\s*=>\s*\$ccn_item\['alt'\]/.test(t50Logos)
