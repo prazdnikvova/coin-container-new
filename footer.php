@@ -64,7 +64,7 @@
 						continue;
 					}
 					?>
-					<li><a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank"><?php echo esc_html( $ccn_label ); ?></a></li>
+					<li><a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank"><?php echo esc_html( $ccn_label ); ?><span class="screen-reader-text"> <?php esc_html_e( '(öffnet in neuem Tab)', 'coin-container' ); ?></span></a></li>
 				<?php endforeach; ?>
 			</ul>
 		</div>

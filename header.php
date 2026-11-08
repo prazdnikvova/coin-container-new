@@ -49,8 +49,10 @@
 					}
 					?>
 					<li>
-						<a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank" aria-label="<?php echo esc_attr( $ccn_soc['label'] ); ?>">
+						<?php // Named by screen-reader text, not aria-label: an aria-label would hide the new-tab note from the accessible name. ?>
+						<a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank">
 							<svg class="ccn-icon" width="13" height="13" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true"><path d="<?php echo esc_attr( $ccn_soc['path'] ); ?>"/></svg>
+							<span class="screen-reader-text"><?php echo esc_html( $ccn_soc['label'] ); ?> <?php esc_html_e( '(öffnet in neuem Tab)', 'coin-container' ); ?></span>
 						</a>
 					</li>
 				<?php endforeach; ?>
@@ -59,7 +61,7 @@
 	</div>
 
 	<div class="header-inner">
-		<a class="site-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+		<a class="site-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
 			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="106" height="80" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 		</a>
 
@@ -107,4 +109,4 @@
 	</div>
 </header>
 
-<main id="content" class="site-main">
+<main id="content" class="site-main" tabindex="-1">
