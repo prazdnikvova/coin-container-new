@@ -14,6 +14,13 @@ function ccn_setup() {
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'woocommerce' );
+	// Block editor (always an iframe on WP 7.1): theme.css styles the canvas, so
+	// ACF block previews use the same tokens and rules as the front end. In the
+	// iframe the editor style is not prefixed, only its url()s are rebased, so
+	// the element-level reset stays below the editor's own class rules.
+	// editor.css holds the few editor-only rules (canvas width for ACF blocks).
+	add_theme_support( 'editor-styles' );
+	add_editor_style( array( 'assets/css/theme.css', 'assets/css/editor.css' ) );
 	// No custom hero size on purpose. A hard crop (1920x1080, true) empties
 	// srcset: wp_calculate_image_srcset() only keeps sizes with a matching
 	// aspect ratio, and every stock WP size is a square box. Heroes use the

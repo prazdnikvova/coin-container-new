@@ -504,7 +504,8 @@ ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{
 .has-small-font-size{font-size:var(--ccn-fs-small)!important}.has-body-font-size{font-size:var(--ccn-fs-body)!important}.has-lead-font-size{font-size:var(--ccn-fs-lead)!important}
 .has-h-3-font-size{font-size:var(--ccn-fs-h3)!important}.has-h-2-font-size{font-size:var(--ccn-fs-h2)!important}.has-h-1-font-size{font-size:var(--ccn-fs-h1)!important}
 .has-ccn-heading-font-family{font-family:var(--ccn-font-heading)!important}.has-ccn-body-font-family{font-family:var(--ccn-font-body)!important}
-/* Base layout and element-button rules core printed in global-styles before (flex/grid blocks, WooCommerce .wp-element-button links) */
+/* Layout rules for flex/grid/constrained blocks (constrained = theme.json contentSize, as the editor shows it) and the element-button reset core printed before (WooCommerce .wp-element-button links) */
 body .is-layout-flex{display:flex}.is-layout-flex{flex-wrap:wrap;align-items:center}body .is-layout-grid{display:grid}
 :where(.is-layout-flex),:where(.is-layout-grid){gap:.5em}.is-layout-flex>:is(*,div),.is-layout-grid>:is(*,div){margin:0}
+.is-layout-constrained>:where(:not(.alignleft):not(.alignright):not(.alignfull)){max-width:var(--ccn-container-prose);margin-left:auto!important;margin-right:auto!important}.is-layout-constrained>.alignwide{max-width:var(--ccn-container)}
 :root :where(.wp-element-button,.wp-block-button__link){background-color:var(--ccn-color-text);border-width:0;color:var(--ccn-color-white);font:inherit;letter-spacing:inherit;text-transform:inherit;padding:calc(.667em + 2px) calc(1.333em + 2px);text-decoration:none}

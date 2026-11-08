@@ -157,19 +157,27 @@ function ccn_register_blocks() {
 
 	foreach ( $blocks as $block ) {
 		$args = array(
-			'name'            => $block['name'],
-			'title'           => $block['title'],
-			'description'     => $block['description'] ?? '',
-			'category'        => $block['category'] ?? 'ccn-banners',
-			'icon'            => $block['icon'] ?? 'block-default',
-			'keywords'        => $block['keywords'] ?? array(),
-			'mode'            => 'preview',
-			'supports'        => array(
+			'name'              => $block['name'],
+			'title'             => $block['title'],
+			'description'       => $block['description'] ?? '',
+			'category'          => $block['category'] ?? 'ccn-banners',
+			'icon'              => $block['icon'] ?? 'block-default',
+			'keywords'          => $block['keywords'] ?? array(),
+			'mode'              => 'preview',
+			// Block API v3: WP 7.1 always edits in an iframe. ACF Blocks v3: ACF
+			// 6.3.9 treats every version above 1 as v2 markup (no extra wrapper);
+			// an ACF release with the v3 editing UI picks it up without a change here.
+			'api_version'       => 3,
+			'acf_block_version' => 3,
+			'supports'          => array(
 				'align'  => false,
 				'anchor' => true,
 				'jsx'    => false,
+				// No inline edit form in the canvas: fields live in the sidebar,
+				// the canvas always shows the rendered preview.
+				'mode'   => false,
 			),
-			'render_template' => $block['template'],
+			'render_template'   => $block['template'],
 		);
 
 		if ( ! empty( $block['assets'] ) ) {

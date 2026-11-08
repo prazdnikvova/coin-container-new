@@ -143,6 +143,16 @@ The block editor shows the same colours and sizes as the site.
 - The smoke test keeps both files in sync: palette hex = colour tokens,
   every size/family/spacing preset references an existing token, layout
   widths = container tokens, every preset class exists in `theme.css`.
+- Editor canvas (always an iframe on WP 7.1): `theme.css` is the editor style
+  (`add_editor_style`), so ACF block previews use the front-end CSS; inside
+  the iframe the editor style is not prefixed (only its `url()`s are
+  rebased), so the element reset never beats the editor's own class rules.
+  `assets/css/editor.css` (editor only) lets ACF sections span the canvas,
+  which theme.json's `contentSize` would otherwise cap at 720px; constrained
+  groups get the same 720px on the front end from `theme.css`.
+- ACF blocks register with `api_version` 3 and `acf_block_version` 3 and
+  without the edit/preview toggle (`supports.mode` false): fields live in
+  the sidebar, the canvas always shows the rendered preview.
 
 ## Colour rules
 

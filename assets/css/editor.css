@@ -1,0 +1,9 @@
+/*
+ * Block editor only, loaded after theme.css by add_editor_style() (functions.php);
+ * never enqueued on the front end.
+ *
+ * theme.json's contentSize (720px) constrains the canvas root, which is right for
+ * running text. ACF blocks are full-width sections on the front end, so they span
+ * the canvas and their previews keep the front-end layout.
+ */
+.block-editor-block-list__layout.is-root-container>[data-type^="acf/"]{max-width:none}

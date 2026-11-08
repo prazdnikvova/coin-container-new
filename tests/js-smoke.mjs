@@ -488,6 +488,18 @@ ok('theme.css carries every editor preset class', missingClasses.length === 0, m
 const homeHtml = await (await fetch(`${BASE}/?cb=${Date.now()}`)).text();
 ok('Front end prints no global-styles (theme.css is the source)', !/id=['"](global-styles|wp-global-styles-placeholder|classic-theme-styles)-inline-css['"]/.test(homeHtml));
 
+// Iframe block editor (T-45): every ACF block registers as v3 without the inline edit
+// mode; theme.css plus editor.css style the canvas, editor.css never reaches the front
+// end. Code-level: the editor itself needs a login (checked by the T-45 editor probe).
+const themeFile = (rel) => { try { return readFileSync(new URL(rel, themeDir), 'utf8'); } catch { return ''; } };
+const registry = themeFile('blocks/acf-blocks.php');
+const functionsPhp = themeFile('functions.php');
+ok('ACF blocks register as v3 (api_version, acf_block_version), no inline edit mode',
+	/'api_version'\s*=>\s*3,/.test(registry) && /'acf_block_version'\s*=>\s*3,/.test(registry) && /'mode'\s*=>\s*false,/.test(registry));
+ok('Block editor styles: theme.css + editor.css, editor.css not on the front end', /add_theme_support\(\s*'editor-styles'\s*\)/.test(functionsPhp)
+	&& /add_editor_style\(\s*array\(\s*'assets\/css\/theme\.css',\s*'assets\/css\/editor\.css'\s*\)\s*\)/.test(functionsPhp)
+	&& themeFile('assets/css/editor.css').includes('[data-type^="acf/"]{max-width:none}') && !homeHtml.includes('assets/css/editor.css'));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

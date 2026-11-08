@@ -33,7 +33,9 @@ mobile emulation) and the numbers go into the commit body.
 - Content blocks are ACF blocks registered in `blocks/acf-blocks.php` under
   custom inserter categories (COIN Banners / Lists / Products / Text); each
   block template lives in `blocks/<category>/<name>.php`, its fields in
-  `acf-json/`. Every page is built from these blocks (front page, landings) or
+  `acf-json/`. Blocks register as block API v3 / ACF Blocks v3 for the
+  iframe editor of WP 7.1 (fields in the sidebar, previews in the canvas),
+  and `theme.css` is also the editor style, so previews match the site. Every page is built from these blocks (front page, landings) or
   rendered by a plain template (legal pages, posts, shop); there is no
   flexible-content layer any more.
 - Scoped assets: all block CSS lives in `assets/css/theme.css` and all theme
