@@ -39,7 +39,7 @@ mobile emulation) and the numbers go into the commit body.
   rendered by a plain template (legal pages, posts, shop); there is no
   flexible-content layer any more.
 - Scoped assets: all block CSS lives in `assets/css/theme.css` and all theme
-  JS in `assets/js/main.js` (none of the 12 blocks ships its own file today).
+  JS in `assets/js/main.js` (none of the 16 blocks ships its own file today).
   A block that ever needs one registers a script/style handle and lists it
   under `'assets'` in the registry; the handle is then enqueued only on pages
   that contain the block.
@@ -61,7 +61,10 @@ mobile emulation) and the numbers go into the commit body.
   templates that use them.
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
-  external requests.
+  external requests. The one exception is the reviews widget block (live
+  Google reviews and the Trustpilot TrustBox, as on production): its widget
+  HTML comes from `/wp-json/ccn/v1/reviews` and its third-party scripts start
+  only when the block comes near ([`DESIGN.md`](DESIGN.md) "Trust").
 
 ## Markup standard
 

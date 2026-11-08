@@ -237,6 +237,55 @@
             "instructions": "Path or URL, e.g. /ueber-uns/zertifikate/."
         },
         {
+            "key": "field_ccn_trustpilot_businessunit",
+            "label": "Trustpilot business unit ID",
+            "name": "trustpilot_businessunit",
+            "type": "text",
+            "instructions": "Public ID of the Trustpilot profile for the TrustBox in the reviews block (template Review Collector: the only TrustBox this profile's plan allows, measured 08.11.2026). Empty = no TrustBox.",
+            "default_value": "69de1de21f8d1dd5b20d29b5"
+        },
+        {
+            "key": "field_ccn_key_facts",
+            "label": "Key facts",
+            "name": "key_facts",
+            "type": "repeater",
+            "instructions": "Up to three figures for the trust bar (e.g. years, customers). Only figures with a source: the source is required and never displayed.",
+            "layout": "table",
+            "max": 3,
+            "button_label": "Add fact",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_key_fact_number",
+                    "label": "Number",
+                    "name": "number",
+                    "type": "number",
+                    "required": 1
+                },
+                {
+                    "key": "field_ccn_key_fact_suffix",
+                    "label": "Suffix",
+                    "name": "suffix",
+                    "type": "text",
+                    "instructions": "e.g. +"
+                },
+                {
+                    "key": "field_ccn_key_fact_label",
+                    "label": "Label",
+                    "name": "label",
+                    "type": "text",
+                    "required": 1
+                },
+                {
+                    "key": "field_ccn_key_fact_source",
+                    "label": "Source (not displayed)",
+                    "name": "source",
+                    "type": "text",
+                    "instructions": "Where the figure comes from, e.g. client decision with date.",
+                    "required": 1
+                }
+            ]
+        },
+        {
             "key": "field_ccn_tab_cta",
             "label": "Calls to action",
             "name": "",

@@ -222,7 +222,7 @@ replaces its "planned" line with the implemented spec.
 | C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | built — see Buttons |
 | C6 | Section heading + eyebrow | eyebrow only where it carries information (category), 13px uppercase, `--ccn-color-primary-text-strong`; otherwise the accent tail of the heading | T-48 | rule in force: no section carries a category label today, so headings keep their accent tails and no eyebrow is printed |
 | C7 | Stats | real figures only, dark surface with yellow numbers; `tabular-nums`, count once and final values with reduced motion are in place (T-46, see Motion) | T-48 | built: `--ccn-color-dark` band, numbers `--ccn-color-primary` (11.43:1), labels `--ccn-color-light`, final value in the HTML; 2 columns at 360 (an odd last item spans both), 3 from 48rem, one row from 64rem; front page = the five production counters |
-| C8 | Trust block | rating with count (live widgets as on production), quotes, partner logos, years/volume line; before the final CTA | T-50 | planned |
+| C8 | Trust block | rating with count (live widgets as on production), quotes, partner logos, years/volume line; before the final CTA | T-50 | built — see Trust, FAQ, Logos: static chips (one renderer) in the hero, trust bar, product page and footer; live Google reviews + TrustBox behind a 1200px facade before the CTA banner; logos block; quotes only through the live widgets (no static reviews) |
 | C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | built: without a photo the yellow band, h2, the block's button (`.btn-dark`; empty → Site Settings `hero_cta_text` / `anfrage_url`) and the phone (`.btn-secondary`); with a photo the photo under `rgba(20,20,20,.65)` (white text ≥ 4.5:1 on any photo), optional logo, `.btn-primary` and `.btn-outline-light` |
 | C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
 | C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | built (targets, icons, badge slot) — see Footer; the location/container-type columns come with the menu migration (T-53c) |
@@ -457,8 +457,9 @@ C11: dark surface, `--ccn-color-text-on-dark` text, every link a 44px target
 (`inline-flex`, `min-height: var(--ccn-tap)`), hover white with an underline.
 Social links: 44×44 circles (1px `rgba(255,255,255,.18)`) with the icon, named
 by screen-reader text «Facebook (öffnet in neuem Tab)»; hover fills the circle
-yellow with a `#202020` icon. `div.footer-badges` is the empty slot for the
-Trustpilot and Google badges (T-50).
+yellow with a `#202020` icon. `div.footer-badges` under the social icons holds
+the Trustpilot and Google badges of the production footer (T-50: the compact
+trust row, see Trust; white, hover white + underline).
 
 ## Product page
 
@@ -534,6 +535,89 @@ schema of its own.
   20 Fuß Container …» today; production shows «Startseite › Container
   kaufen › Standardcontainer › …» — settled with Rank Math in T-54, which
   also checks the look of its own markup (a `<p>` with separator spans).
+
+## Trust
+
+C8, T-50. Three layers, as on production: static chips above the fold, live
+reviews at the bottom, no review schema.
+
+- **One renderer for the chips:** `template-parts/trust-row.php` (Site
+  Settings → Vertrauen: Trustpilot rating/count/URL, Google count (+ rating
+  only when filled in)/URL, badge text/URL/image alt). The home hero, the
+  product page (under «Jetzt anfragen»), the trust bar block and the footer
+  all print it; `get_template_part( 'template-parts/trust-row', null,
+  array( 'compact' => true ) )` gives the two links of the production footer
+  («★ Trustpilot 4,5», «G Google-Bewertungen»). Inline SVG only, no request.
+- **Trust bar block** (`acf/trust-bar`, `blocks/banners/trust-bar.php`): a
+  section around the chips plus up to three key facts (Site Settings →
+  Vertrauen → `key_facts`: number, suffix, label and a required source that
+  is never printed — no figure without a source). No fields of its own.
+  On light surfaces the chips are 44px boxes (1px `--ccn-color-border`,
+  `--ccn-radius-md`, white, `#202020` text, accent-text hover); the badge
+  keeps its shield next to the text. Place: under the landing hero
+  (`/container-kaufen/`: inside the first screen at 360). Not on the front
+  page: the hero already shows the same three items in the first screen.
+- **Reviews widget block** (`acf/reviews-widget`,
+  `blocks/lists/reviews-widget.php`, optional heading/intro): Google reviews
+  through the Trustindex free widget (plugin `wp-reviews-plugin-for-google`,
+  layout 13, set drop-shadow, no widget ID — as on production) and the
+  Trustpilot TrustBox «Review Collector» (`56278e9abfbbba0bdcd568bc`, 52px:
+  the only TrustBox the profile's plan allows; public IDs only, business unit
+  in Site Settings). Production place: front page between stats and the CTA
+  banner, `/ueber-uns/bewertungen/`.
+- **Facade, not the widget, in the page:** the document carries an empty
+  box, the TrustBox snippet in an inert `<template>` and the REST URL; the
+  widget HTML (~26 KB, ~4 KB gzip, it would push the front page document past
+  the first 14.6 KB TCP window) comes from `GET /wp-json/ccn/v1/reviews`
+  (`inc/trust.php`). `main.js` starts both widgets when the facade comes
+  within 1200px (IntersectionObserver): fetch, re-created scripts (the
+  plugin's loader fallback), the TrustBox bootstrap. Before that: 0 requests
+  to Trustindex, Trustpilot or Google photos. Never put `[trustindex]` into
+  content directly — the plugin then queues its loader and stylesheet for
+  the first paint.
+- **No layout shift:** `main.js` marks the facade `is-reserved`; the Google
+  box then keeps `min-height` 34.25rem (548px) below 36rem and 19.75rem
+  (316px) from 36rem = the widget (527px at 320–360, 296px from ~560px,
+  measured) plus its own 5px/15px margins, which `display: flow-root`
+  keeps inside the box; the TrustBox box 3.25rem (52px). The loader's own
+  lazy mode is off (`data-lazy-load-disabled`, set in `inc/trust.php`): it
+  would format the widget only once in view and move its slider on screen
+  (layout shift 0.45 at 360). The Google box stays `visibility: hidden`
+  until the loader has formatted the widget plus 600ms. Without JS the
+  facade shows the compact chips (profile links) only.
+- **Privacy:** neither widget sets cookies or web storage (Playwright probe,
+  08.11.2026); third-party hosts once started: `cdn.trustindex.io`,
+  `lh3.googleusercontent.com`, `widget.trustpilot.com` (incl. impression
+  pings with the page URL) — for the consent setup (T-61).
+- **Schema:** never `aggregateRating` or `Review` for the own business
+  (self-serving, team decision 22.09.2026); the plugin's own schema stays
+  off (the free widget prints none).
+
+## FAQ
+
+`acf/faq` (`blocks/text/faq.php`): heading (required h2, as on production,
+e.g. «Häufige Fragen zum Containerkauf»), optional intro, question/answer
+pairs (answers keep `p`, `a`, `ul`/`ol`, `strong`, `br` only).
+
+- Markup: `<details class="ccn-faq-item"><summary><h3>…</h3><svg
+  class="ccn-faq-icon"></summary><div class="ccn-faq-answer">…</div></details>`
+  — native keyboard (Enter/Space) and screen reader behaviour, no JS; the
+  question stays an h3 under the section h2.
+- Look: hairlines `--ccn-color-border` between items, summary ≥ 44px with
+  the question at `--ccn-fs-lead`, the plus turns into a cross
+  (`transform: rotate(45deg)`, `--ccn-dur-fast`); the answer at 68ch,
+  links underlined; the global focus ring on the summary.
+
+## Logos
+
+`acf/logos` (`blocks/lists/logos.php`): optional heading, logos with alt
+text and an optional link. A row of marks 48px high (`height: 3rem`, width
+auto), lazy, `filter: grayscale(1)` until hover or focus — switched without
+a transition (motion rule: only opacity and transform move). Content only
+as on production: the AVPQ seal (media `avpq-seal.png`) and the
+Logistik-Initiative Hamburg logo (media `lihh-partner-logo-2025-640.webp`)
+of `/ueber-uns/zertifikate/`; other marks need the client's permission
+(OPEN #72).
 
 ## Motion
 
@@ -744,3 +828,16 @@ for reviewing content:
   jQuery per page, lightbox, catalogue order), `t49_wccss_diff.cjs`
   (computed styles with and without WooCommerce's stylesheets),
   `t49_gutter.cjs`, `t49_lh.py` (Lighthouse summary and request list).
+- Smoke test, "Trust & FAQ (T-50)": no widget markup or third-party URL in
+  the front page document; before any scroll 0 requests to Trustindex,
+  Trustpilot, Google photos and the reviews endpoint (360 and 1440) and the
+  Google box reserved; near the facade the widget HTML arrives and the
+  loader and TrustBox are requested, both formatted inside the unchanged
+  boxes (CDN unreachable: skipped); no cookies or storage afterwards; hero
+  and trust bar chips (13, 126, AVPQ, trust bar in the first two screens);
+  footer badges as on production; FAQ details by Enter and click, h3 under
+  the h2; logos lazy (code level). Library probes:
+  `reports/2026-11-08-data/t50_probe.cjs` (requests before scroll, reserved
+  and real widget heights, layout shifts while the widgets start, trust items
+  per screen, FAQ), `t50_cookies.cjs` (cookies and storage of every frame
+  before and after both widgets), `t50_jsonld.py` (JSON-LD per page).

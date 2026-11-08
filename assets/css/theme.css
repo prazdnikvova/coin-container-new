@@ -284,6 +284,42 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-trust-mark{display:inline-flex;align-items:center;gap:var(--ccn-space-1)}
 .ccn-trust-label{font-weight:700}
 .ccn-trust-pq path+path{stroke:var(--ccn-color-primary)}
+/* Trust (T-50, DESIGN.md "Trust"): trust bar chips on light, footer badges, reviews facade (main.js reserves the widget boxes, no layout shift when they start) */
+:is(.ccn-trust-bar,.ccn-reviews) .ccn-trust{gap:var(--ccn-space-2) var(--ccn-space-3);margin:0}
+:is(.ccn-trust-bar,.ccn-reviews) .ccn-trust a{padding:var(--ccn-space-1) var(--ccn-space-3);border:1px solid var(--ccn-color-border);border-radius:var(--ccn-radius-md);background:var(--ccn-color-white);color:var(--ccn-color-text)}
+:is(.ccn-trust-bar,.ccn-reviews) .ccn-trust a:has(.ccn-trust-pq){flex-wrap:nowrap}
+:is(.ccn-trust-bar,.ccn-reviews) .ccn-trust a:hover{color:var(--ccn-color-accent-text)}
+.ccn-trust-facts{display:flex;flex-wrap:wrap;gap:var(--ccn-space-2) var(--ccn-space-5);margin-top:var(--ccn-space-3)}
+.footer-badges .ccn-trust{margin-top:var(--ccn-space-3)}
+.footer-badges .ccn-trust a:hover{color:var(--ccn-color-white);text-decoration:underline}
+.ccn-reviews-intro{margin-bottom:var(--ccn-space-5)}
+.ccn-reviews-facade>*+*{margin-top:var(--ccn-space-5)}
+/* flow-root keeps the widget's own 5px/15px margins inside the box; reserve = widget + margins (527/296 + 20px, measured) */
+.ccn-reviews-google{display:flow-root}
+.ccn-reviews-facade.is-reserved .ccn-reviews-google{min-height:34.25rem}
+.ccn-reviews-facade.is-reserved .ccn-reviews-trustpilot{min-height:3.25rem}
+.ccn-reviews-facade.is-reserved .ccn-reviews-google:not(.is-ready){visibility:hidden}
+@media (min-width:36rem){.ccn-reviews-facade.is-reserved .ccn-reviews-google{min-height:19.75rem}}
+/* Block: FAQ (DESIGN.md "FAQ"): native details, the plus turns into a cross */
+.ccn-faq-heading{margin-bottom:var(--ccn-space-5)}
+.ccn-faq-intro{max-width:68ch;margin:calc(-1 * var(--ccn-space-2)) 0 var(--ccn-space-5)}
+.ccn-faq-list{border-top:1px solid var(--ccn-color-border)}
+.ccn-faq-item{border-bottom:1px solid var(--ccn-color-border)}
+.ccn-faq-item summary{display:flex;align-items:center;justify-content:space-between;gap:var(--ccn-space-4);min-height:var(--ccn-tap);padding-block:var(--ccn-space-4);cursor:pointer;list-style:none}
+.ccn-faq-item summary::-webkit-details-marker{display:none}
+.ccn-faq-item h3{font-size:var(--ccn-fs-lead)}
+.ccn-faq-icon{flex:none;transition:transform var(--ccn-dur-fast) var(--ccn-ease-out)}
+.ccn-faq-item[open] .ccn-faq-icon{transform:rotate(45deg)}
+.ccn-faq-answer{max-width:68ch;padding-bottom:var(--ccn-space-5)}
+.ccn-faq-answer>*+*{margin-top:var(--ccn-space-3)}
+.ccn-faq-answer :is(ul,ol){padding-left:1.25rem;list-style:disc}
+.ccn-faq-answer a{color:var(--ccn-color-link);text-decoration:underline}
+.ccn-faq-answer a:hover{color:var(--ccn-color-accent-text)}
+/* Block: logos (DESIGN.md "Logos"): grey marks, colour on hover or focus; no transition (motion rule: opacity and transform only) */
+.ccn-logos-list{display:flex;flex-wrap:wrap;align-items:center;gap:var(--ccn-space-6)}
+.ccn-logos-list a{display:inline-flex;align-items:center;min-height:var(--ccn-tap)}
+.ccn-logo-img{width:auto;height:3rem;filter:grayscale(1)}
+.ccn-logos-list :is(li:hover,a:focus-visible) .ccn-logo-img{filter:none}
 
 /* Block: contact cards — email / phone / address strip overlapping the hero */
 .ccn-contact-cards{position:relative;z-index:3;margin-top:-3rem}

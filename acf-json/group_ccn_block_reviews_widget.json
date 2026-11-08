@@ -1,0 +1,33 @@
+{
+    "key": "group_ccn_block_reviews_widget",
+    "title": "Block: Reviews widget",
+    "fields": [
+        {
+            "key": "field_ccn_rw_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional section heading (h2). The front page of production shows the widget without one."
+        },
+        {
+            "key": "field_ccn_rw_intro",
+            "label": "Intro",
+            "name": "intro",
+            "type": "textarea",
+            "instructions": "Optional line under the heading.",
+            "rows": 2,
+            "new_lines": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/reviews-widget"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Reviews widget block (blocks\/lists\/reviews-widget.php). The reviews come from the Trustindex plugin (Google) and the Trustpilot business unit in Site Settings → Vertrauen."
+}

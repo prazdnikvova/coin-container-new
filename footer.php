@@ -68,8 +68,8 @@
 					<li><a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank"><?php echo ccn_icon( $ccn_social[1], 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?><span class="screen-reader-text"><?php echo esc_html( $ccn_social[0] ); ?> <?php esc_html_e( '(öffnet in neuem Tab)', 'coin-container' ); ?></span></a></li>
 				<?php endforeach; ?>
 			</ul>
-			<?php // Slot for the Trustpilot and Google badges (T-50); empty until then. ?>
-			<div class="footer-badges"></div>
+			<?php // Trustpilot and Google badges as in the production footer (T-50): the shared trust row, compact. ?>
+			<div class="footer-badges"><?php get_template_part( 'template-parts/trust-row', null, array( 'compact' => true ) ); ?></div>
 		</div>
 	</div>
 

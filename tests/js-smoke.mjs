@@ -1237,6 +1237,87 @@ ok('Catalogue: discounted products first on the shop and categories (the first p
 	Object.entries(saleOrder).every(([p, f]) => (p.includes('orderby') ? /-S/.test(f) : saleFirstOrder(f) && f.includes('S'))), JSON.stringify(saleOrder));
 await bcPage.close();
 
+// Trust & FAQ (T-50, DESIGN.md "Trust", "FAQ", "Logos"). Trust chips are static (inline SVG, no request). The live
+// reviews (Trustindex Google widget + Trustpilot TrustBox) start only when their facade comes within 1200px: before
+// any scroll the front page makes 0 requests to Trustindex, Trustpilot, Google photos or the reviews endpoint, the
+// widget markup is not in the document, and the facade holds its reserved height. Near the facade the endpoint
+// delivers the widget HTML and the third-party scripts are requested; formatting needs the CDNs (unreachable ->
+// skipped, not FAIL). Neither widget may set cookies or web storage (else a click facade until consent, T-61).
+const t50Third = /trustindex\.io|trustpilot\.com|googleusercontent\.com|\/wp-json\/ccn\/v1\/reviews/;
+const t50Text = (p, sel) => p.evaluate((s) => [...document.querySelectorAll(s)].map((e) => e.textContent.replace(/\s+/g, ' ').trim()).join(' | '), sel);
+const t50Doc = await (await fetch(BASE + '/?cb=' + Date.now())).text();
+ok('Reviews: the widget markup and third-party URLs are not part of the front page document (facade only)',
+	t50Doc.includes('ccn-reviews-facade') && !/class="ti-widget|cdn\.trustindex\.io|widget\.trustpilot\.com\/trustboxes/.test(t50Doc), `facade ${t50Doc.includes('ccn-reviews-facade')}`);
+const t50Ctx = await browser.newContext({ viewport: { width: 360, height: 800 } });
+const t50 = await t50Ctx.newPage();
+const t50Reqs = [];
+const t50Failed = [];
+t50.on('request', (r) => { if (t50Third.test(r.url())) t50Reqs.push(r.url()); });
+t50.on('requestfailed', (r) => { if (t50Third.test(r.url())) t50Failed.push(r.url()); });
+await t50.goto(BASE + '/', { waitUntil: 'load' });
+await t50.addStyleTag({ content: noSmooth });
+await t50.waitForTimeout(1500);
+const t50Hero = await t50Text(t50, '.ccn-hero .ccn-trust');
+ok('Trust: the home hero trust row shows 13 Trustpilot reviews and 126 Google reviews (Site Settings)', /13 Bewertungen/.test(t50Hero) && /126 Google-Bewertungen/.test(t50Hero), t50Hero.slice(0, 160));
+const t50Box = await t50.evaluate(() => {
+	const f = document.querySelector('.ccn-reviews-facade');
+	const g = f && f.querySelector('.ccn-reviews-google');
+	return f && g ? { reserved: f.classList.contains('is-reserved'), google: Math.round(g.getBoundingClientRect().height), top: Math.round(f.getBoundingClientRect().top + scrollY) } : null;
+});
+ok('Reviews 360: before any scroll 0 requests to Trustindex, Trustpilot, Google photos or the reviews endpoint', !!t50Box && t50Reqs.length === 0, t50Reqs.slice(0, 3).join(' | ') || JSON.stringify(t50Box));
+ok('Reviews 360: the facade reserves the Google box before the start (>= 506px, no layout shift)', !!t50Box && t50Box.reserved && t50Box.google >= 506, JSON.stringify(t50Box));
+for (let y = 0; y < (t50Box ? t50Box.top : 0); y += 700) { await jump(t50, y); await t50.waitForTimeout(120); }
+const t50Items = await t50.waitForFunction(() => document.querySelectorAll('.ccn-reviews-google .ti-review-item').length, null, { timeout: 15000 }).then((h) => h.jsonValue()).catch(() => 0);
+await t50.waitForFunction(() => !!document.querySelector('.ccn-reviews-google.is-ready') && !!document.querySelector('.ccn-reviews-trustpilot iframe'), null, { timeout: 12000 }).catch(() => null);
+await t50.waitForTimeout(1500);
+const t50Asked = { endpoint: t50Reqs.some((u) => u.includes('/wp-json/ccn/v1/reviews')), loader: t50Reqs.some((u) => u.includes('cdn.trustindex.io/loader.js')), trustbox: t50Reqs.some((u) => u.includes('widget.trustpilot.com/bootstrap')) };
+ok('Reviews: near the facade the widget HTML arrives (>= 1 Google review) and the Trustindex loader and TrustBox are requested', t50Items >= 1 && t50Asked.endpoint && t50Asked.loader && t50Asked.trustbox, JSON.stringify({ items: t50Items, ...t50Asked }));
+const t50Live = await t50.evaluate(() => {
+	const w = document.querySelector('.ccn-reviews-google div.ti-widget');
+	const f = document.querySelector('.ccn-reviews-trustpilot iframe');
+	const g = document.querySelector('.ccn-reviews-google');
+	return { ready: !!document.querySelector('.ccn-reviews-google.is-ready'), widget: w ? Math.round(w.getBoundingClientRect().height) : 0, trustbox: f ? Math.round(f.getBoundingClientRect().height) : 0, google: g ? Math.round(g.getBoundingClientRect().height) : 0 };
+});
+const t50CdnDown = t50Failed.some((u) => /cdn\.trustindex\.io\/loader|widget\.trustpilot\.com\/bootstrap/.test(u));
+ok(`Reviews: both widgets formatted inside the reserved boxes (Google box height unchanged, TrustBox 52px)${t50CdnDown ? ' — skipped: CDN unreachable' : ''}`,
+	t50CdnDown || (!!t50Box && t50Live.ready && t50Live.widget > 0 && t50Live.google === t50Box.google && t50Live.trustbox === 52), JSON.stringify(t50Live) + (t50CdnDown ? ' ' + t50Failed.join(' | ') : ''));
+const t50Storage = await t50.evaluate(() => Object.keys(localStorage).length + Object.keys(sessionStorage).length);
+const t50Cookies = (await t50Ctx.cookies()).length;
+ok('Reviews: no cookies and no web storage once both widgets ran (else a click facade until consent)', t50Cookies === 0 && t50Storage === 0, `${t50Cookies} cookies, ${t50Storage} storage keys`);
+await t50Ctx.close();
+const t50Wide = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const t50WideReqs = [];
+t50Wide.on('request', (r) => { if (t50Third.test(r.url())) t50WideReqs.push(r.url()); });
+await t50Wide.goto(BASE + '/', { waitUntil: 'load' });
+await t50Wide.waitForTimeout(1500);
+const t50WideBox = await t50Wide.evaluate(() => { const g = document.querySelector('.ccn-reviews-facade.is-reserved .ccn-reviews-google'); return g ? Math.round(g.getBoundingClientRect().height) : 0; });
+ok('Reviews 1440: before any scroll 0 third-party requests, the Google box reserved (>= 296px)', t50WideReqs.length === 0 && t50WideBox >= 296, `${t50WideReqs.length} requests, box ${t50WideBox}px`);
+// Footer: the two badges of the production footer from the shared trust row (compact), 44px targets.
+const t50Foot = await t50Wide.evaluate(() => [...document.querySelectorAll('.footer-badges .ccn-trust a')].map((a) => ({ text: a.textContent.replace(/\s+/g, ' ').trim(), h: Math.round(a.getBoundingClientRect().height) })));
+ok('Footer badges as on production: «Trustpilot 4,5» and «Google-Bewertungen», 44px targets', t50Foot.length === 2 && /^Trustpilot 4,5/.test(t50Foot[0].text)
+	&& /^Google-Bewertungen/.test(t50Foot[1].text) && t50Foot.every((a) => a.h >= 44), JSON.stringify(t50Foot));
+await t50Wide.close();
+// Trust bar under the landing hero: the same chips (13, 126, AVPQ) within the first two screens at 360.
+const t50Bar = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await t50Bar.goto(BASE + '/container-kaufen/', { waitUntil: 'load' });
+const t50BarText = await t50Text(t50Bar, '.ccn-trust-bar .ccn-trust');
+const t50BarTop = await t50Bar.evaluate(() => { const b = document.querySelector('.ccn-trust-bar'); return b ? Math.round(b.getBoundingClientRect().top + scrollY) : -1; });
+ok('Trust bar (/container-kaufen/): 13 Trustpilot and 126 Google reviews plus AVPQ, within the first two screens at 360', /13 Bewertungen/.test(t50BarText) && /126 Google-Bewertungen/.test(t50BarText)
+	&& /AVPQ/.test(t50BarText) && t50BarTop >= 0 && t50BarTop < 1600, `top ${t50BarTop}: ${t50BarText.slice(0, 120)}`);
+// FAQ: native details; Enter on the question and a click open the answer; questions h3 under the section h2.
+const t50Faq = await t50Bar.evaluate(() => ({ n: document.querySelectorAll('details.ccn-faq-item').length, h2: !!document.querySelector('.ccn-faq h2'), h3: document.querySelectorAll('details.ccn-faq-item > summary > h3').length }));
+await t50Bar.focus('details.ccn-faq-item summary').catch(() => null);
+await t50Bar.keyboard.press('Enter');
+const t50Key = await t50Bar.evaluate(() => { const d = document.querySelector('details.ccn-faq-item'); return !!d && d.open && d.querySelector('.ccn-faq-answer').getBoundingClientRect().height > 0; });
+await t50Bar.click('details.ccn-faq-item:nth-of-type(2) summary').catch(() => null);
+const t50Click = await t50Bar.evaluate(() => { const d = document.querySelectorAll('details.ccn-faq-item')[1]; return !!d && d.open; });
+ok('FAQ (/container-kaufen/): >= 3 details, Enter and click open an answer, questions h3 under the h2', t50Faq.n >= 3 && t50Faq.h2 && t50Faq.h3 === t50Faq.n && t50Key && t50Click, JSON.stringify({ ...t50Faq, enter: t50Key, click: t50Click }));
+await t50Bar.close();
+// Logos (code level: no page carries the block before the migration of /ueber-uns/zertifikate/, T-53a/b).
+const t50Logos = themeFile('blocks/lists/logos.php');
+ok('Logos block: lazy images, alt from the field, 48px high grey marks', /'loading'\s*=>\s*'lazy'/.test(t50Logos) && /'alt'\s*=>\s*\$ccn_item\['alt'\]/.test(t50Logos)
+	&& /\.ccn-logo-img\{[^}]*height:3rem[^}]*filter:grayscale\(1\)/.test(themeCss), 'blocks/lists/logos.php, theme.css .ccn-logo-img');
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

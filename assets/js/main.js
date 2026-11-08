@@ -127,4 +127,27 @@ document.addEventListener('DOMContentLoaded', () => {
 			behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
 		}));
 	});
+
+	// Live reviews (DESIGN.md "Trust"): 1200px ahead, fetch the Google widget (its inline loader script re-created
+	// to run), unpack the TrustBox <template>, add the third-party scripts. Boxes are reserved only with JS.
+	const start = (f) => {
+		const g = f.querySelector('.ccn-reviews-google');
+		if (g) fetch(f.dataset.ccnReviews).then((r) => r.json()).then((d) => {
+			g.innerHTML = d.html || '';
+			g.querySelectorAll('script').forEach((s) => { const n = document.createElement('script'); n.text = s.text; s.replaceWith(n); });
+			// Shown once the loader formatted it (inline hiding style gone) and the slider settled.
+			const w = g.querySelector('div.ti-widget');
+			const show = () => setTimeout(() => g.classList.add('is-ready'), 600);
+			if (!w) return show();
+			new MutationObserver((m, o) => { if (!/height:\s*0/.test(w.getAttribute('style'))) { o.disconnect(); show(); } }).observe(w, { attributes: true });
+		}).catch(() => f.classList.remove('is-reserved'));
+		f.querySelectorAll('template').forEach((t) => t.replaceWith(t.content.cloneNode(true)));
+		(f.dataset.ccnScripts || '').split(' ').filter(Boolean).forEach((u) => document.head.append(Object.assign(document.createElement('script'), { src: u, async: true })));
+	};
+	const facades = document.querySelectorAll('.ccn-reviews-facade');
+	facades.forEach((f) => f.classList.add('is-reserved'));
+	const near = 'IntersectionObserver' in window && new IntersectionObserver((es) => es.forEach((e) => {
+		if (e.isIntersecting) { near.unobserve(e.target); start(e.target); }
+	}), { rootMargin: '1200px 0px' });
+	facades.forEach((f) => (near ? near.observe(f) : start(f)));
 });

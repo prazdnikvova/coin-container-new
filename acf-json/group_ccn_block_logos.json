@@ -1,0 +1,59 @@
+{
+    "key": "group_ccn_block_logos",
+    "title": "Block: Logos",
+    "fields": [
+        {
+            "key": "field_ccn_lg_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional section heading (h2)."
+        },
+        {
+            "key": "field_ccn_lg_items",
+            "label": "Logos",
+            "name": "items",
+            "type": "repeater",
+            "instructions": "Only marks the client may show (production: AVPQ seal, Logistik-Initiative Hamburg; others need permission, OPEN #72).",
+            "layout": "table",
+            "button_label": "Add logo",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_lg_image",
+                    "label": "Logo",
+                    "name": "image",
+                    "type": "image",
+                    "return_format": "id",
+                    "preview_size": "thumbnail",
+                    "required": 1
+                },
+                {
+                    "key": "field_ccn_lg_alt",
+                    "label": "Alt text",
+                    "name": "alt",
+                    "type": "text",
+                    "instructions": "Names the mark, e.g. «Partner der Logistik-Initiative Hamburg – Logo».",
+                    "required": 1
+                },
+                {
+                    "key": "field_ccn_lg_url",
+                    "label": "Link",
+                    "name": "url",
+                    "type": "text",
+                    "instructions": "Optional path or URL, e.g. /ueber-uns/zertifikate/."
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/logos"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Logos block (blocks\/lists\/logos.php)."
+}

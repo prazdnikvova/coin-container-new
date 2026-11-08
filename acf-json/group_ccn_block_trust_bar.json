@@ -1,0 +1,26 @@
+{
+    "key": "group_ccn_block_trust_bar",
+    "title": "Block: Trust bar",
+    "fields": [
+        {
+            "key": "field_ccn_tb_note",
+            "label": "Where the values live",
+            "name": "",
+            "type": "message",
+            "message": "This block has no fields of its own. Ratings, review counts, profile links, the badge and the key facts come from Site Settings → Vertrauen, the same values as the trust row in the home hero, the product page and the footer.",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/trust-bar"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the Trust bar block (blocks\/banners\/trust-bar.php): a note only, the data is in Site Settings."
+}

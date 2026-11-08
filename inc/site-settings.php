@@ -6,7 +6,10 @@
  * Performance contract (project decision 2026-07-06): templates never call
  * get_field(..., 'option') directly — always ccn_setting(), which loads all
  * options once per request. Editable content must never add render-blocking
- * or external resources.
+ * or external resources. One deliberate exception (decision 08.11.2026: live
+ * reviews as on production): the Trustpilot business unit feeds the reviews
+ * widget block, whose third-party scripts start only near the block
+ * (inc/trust.php, DESIGN.md "Trust").
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

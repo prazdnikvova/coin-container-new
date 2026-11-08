@@ -1,0 +1,63 @@
+{
+    "key": "group_ccn_block_faq",
+    "title": "Block: FAQ",
+    "fields": [
+        {
+            "key": "field_ccn_fq_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Section heading (h2), as on production, e.g. «Häufige Fragen zum Containerkauf». The questions are h3.",
+            "required": 1
+        },
+        {
+            "key": "field_ccn_fq_intro",
+            "label": "Intro",
+            "name": "intro",
+            "type": "textarea",
+            "instructions": "Optional line under the heading.",
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_ccn_fq_items",
+            "label": "Questions",
+            "name": "items",
+            "type": "repeater",
+            "instructions": "Question/answer pairs; texts as on production. Answers keep paragraphs, links, lists and bold only. They also feed the FAQ schema (Site Settings → Schema).",
+            "layout": "block",
+            "min": 1,
+            "button_label": "Add question",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_fq_question",
+                    "label": "Question",
+                    "name": "question",
+                    "type": "text",
+                    "required": 1
+                },
+                {
+                    "key": "field_ccn_fq_answer",
+                    "label": "Answer",
+                    "name": "answer",
+                    "type": "wysiwyg",
+                    "required": 1,
+                    "tabs": "visual",
+                    "toolbar": "basic",
+                    "media_upload": 0
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/faq"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the FAQ block (blocks\/text\/faq.php)."
+}

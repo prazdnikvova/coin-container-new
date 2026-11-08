@@ -153,6 +153,42 @@ function ccn_register_blocks() {
 			'keywords'    => array( 'news', 'posts', 'blog' ),
 			'template'    => 'blocks/lists/news.php',
 		),
+		array(
+			'name'        => 'trust-bar',
+			'title'       => __( 'Trust bar', 'coin-container' ),
+			'description' => __( 'Trustpilot and Google ratings and the badge from Site Settings (Vertrauen), the same chips as in the home hero, plus up to three key facts with a source. No own fields.', 'coin-container' ),
+			'category'    => 'ccn-banners',
+			'icon'        => 'shield',
+			'keywords'    => array( 'trust', 'reviews', 'rating', 'trustpilot', 'google' ),
+			'template'    => 'blocks/banners/trust-bar.php',
+		),
+		array(
+			'name'        => 'reviews-widget',
+			'title'       => __( 'Reviews widget', 'coin-container' ),
+			'description' => __( 'Live Google reviews (Trustindex, as on production) and the Trustpilot TrustBox, loaded only when the section comes near.', 'coin-container' ),
+			'category'    => 'ccn-lists',
+			'icon'        => 'star-filled',
+			'keywords'    => array( 'reviews', 'google', 'trustpilot', 'widget' ),
+			'template'    => 'blocks/lists/reviews-widget.php',
+		),
+		array(
+			'name'        => 'faq',
+			'title'       => __( 'FAQ', 'coin-container' ),
+			'description' => __( 'Frequently asked questions as expandable items (details/summary); JSON-LD per Site Settings → Schema.', 'coin-container' ),
+			'category'    => 'ccn-text',
+			'icon'        => 'editor-help',
+			'keywords'    => array( 'faq', 'questions', 'fragen', 'accordion' ),
+			'template'    => 'blocks/text/faq.php',
+		),
+		array(
+			'name'        => 'logos',
+			'title'       => __( 'Logos', 'coin-container' ),
+			'description' => __( 'Partner and certificate logos in a row (lazy, grey until hover).', 'coin-container' ),
+			'category'    => 'ccn-lists',
+			'icon'        => 'awards',
+			'keywords'    => array( 'logos', 'partner', 'certificate', 'zertifikate' ),
+			'template'    => 'blocks/lists/logos.php',
+		),
 	);
 
 	foreach ( $blocks as $block ) {
