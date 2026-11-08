@@ -683,6 +683,10 @@ ok('Hover: card lifts 2px with --ccn-shadow-3; .btn transitions listed, 200ms, e
 	cardHover.transform === 'matrix(1, 0, 0, 1, 0, -2)' && cardHover.shadow.includes('0px 8px 24px')
 	&& cardHover.btn === 'color, background-color, border-color, box-shadow, transform|0.2s|cubic-bezier(0.2, 0.7, 0.2, 1)', JSON.stringify(cardHover));
 await jump(deskPage, 0);
+// Back at the top the header unfolds its top bar (T-47, 250ms) and the menu item moves 40px: hover only once it settled
+// (the hover landed next to the item in 1 of ~10 runs, T-48/T-49).
+await deskPage.waitForFunction(() => { const h = document.getElementById('header'); return !!h && !h.classList.contains('is-stuck'); }, null, { timeout: 3000 }).catch(() => null);
+await deskPage.waitForTimeout(400);
 const barOf = (sel) => deskPage.evaluate((s) => getComputedStyle(document.querySelector(s), '::before').transform, sel);
 const menuItem = '.site-menu > li:not(.current-menu-item):not(.current-menu-ancestor) > a';
 const barRest = await barOf(menuItem);
