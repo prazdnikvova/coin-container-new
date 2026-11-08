@@ -760,6 +760,7 @@ for (const path of firstScreenPages) {
 			h1Lines: h1 ? Math.round(h1.getBoundingClientRect().height / parseFloat(getComputedStyle(h1).lineHeight)) : -1,
 			cta: box(document.querySelector('.ccn-hero .btn-primary, .ccn-page-hero .btn-primary')),
 			heroTel: box([...document.querySelectorAll('.ccn-hero a[href^="tel:"], .ccn-page-hero a[href^="tel:"]')].find(vis)),
+			heroTelColor: ((e) => (e ? getComputedStyle(e).color : 'none'))(document.querySelector('.ccn-hero a[href^="tel:"], .ccn-page-hero a[href^="tel:"]')),
 			trust: box(document.querySelector('.ccn-trust')),
 			bar: box(bar), barLinks: bar ? [...bar.querySelectorAll('a')].map((a) => `${a.textContent.trim()}|${a.getAttribute('href')}`) : [],
 		};
@@ -776,10 +777,10 @@ ok('First screen 360: h1 takes <= 4 lines on /, kaufen, mieten', firstScreenPage
 	fsList((s) => s.h1Lines));
 // Inside the first screen = bottom <= 800 and not under the action bar (when there is one).
 const fsInside = (s, b) => !!b && b.top >= 0 && b.bottom <= Math.min(800, s.bar ? s.bar.top : 800);
-ok('First screen 360 (/): primary CTA, hero phone line and trust row end inside the first screen', ['/'].every((p) => {
+ok('First screen 360: primary CTA and white hero phone line (and on / the trust row) end inside the first screen', firstScreenPages.every((p) => {
 	const s = fs360[p];
-	return fsInside(s, s.cta) && fsInside(s, s.heroTel) && fsInside(s, s.trust);
-}), ['/'].map((p) => `${p} cta ${JSON.stringify(fs360[p].cta)} tel ${JSON.stringify(fs360[p].heroTel)} trust ${JSON.stringify(fs360[p].trust)} bar ${JSON.stringify(fs360[p].bar)}`).join(', '));
+	return fsInside(s, s.cta) && fsInside(s, s.heroTel) && s.heroTelColor === 'rgb(255, 255, 255)' && (p !== '/' || fsInside(s, s.trust));
+}), fsList((s) => `cta ${s.cta && s.cta.bottom} tel ${s.heroTel && s.heroTel.bottom} ${s.heroTelColor} trust ${s.trust && s.trust.bottom} bar ${s.bar && s.bar.top}`));
 await fsPage.close();
 const deskHeader = await browser.newPage({ viewport: { width: 1280, height: 800 } });
 await deskHeader.goto(BASE + '/', { waitUntil: 'load' });

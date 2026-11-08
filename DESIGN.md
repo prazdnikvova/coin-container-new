@@ -240,8 +240,12 @@ as on production (h1, button labels, trust row: `transmax-child/inc/hero-trust.p
 - Order: h1 (`--ccn-fs-h1`), optional subtitle, actions
   (`template-parts/hero-cta.php`: primary `.btn-primary` with a decorative
   «+», optional secondary `.btn-outline-light`, phone line), trust row
-  (`template-parts/trust-row.php`). The same actions partial sits in the
-  landing hero band.
+  (`template-parts/trust-row.php`). The landing hero band
+  (`template-parts/page-hero.php`, every landing template) prints the same
+  actions under its h1: the global button from Site Settings → Calls to
+  action (`hero_cta_text`, `hero_cta_url`, empty URL = `anfrage_url`) and
+  the phone line; on 360×800 kaufen and mieten show header, h1, CTA and
+  phone in the first screen (4 of 4).
 - Below 48rem (the 360×800 first screen): the photo box is `aspect-ratio: 4/5`
   and grows with its content; text starts 24px under the header row;
   buttons full width (primary 48px, secondary 44px); phone line and trust

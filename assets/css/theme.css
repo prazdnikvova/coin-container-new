@@ -330,7 +330,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-cta-btn{text-transform:uppercase;font-size:var(--ccn-fs-small);letter-spacing:.04em}
 
 /* Landing template: full-width hero band from the featured image + content/sidebar columns */
-.ccn-page-hero{position:relative;overflow:hidden;display:flex;align-items:flex-end;min-height:20rem;background:var(--ccn-color-dark)}
+.ccn-page-hero{position:relative;overflow:hidden;display:flex;align-items:flex-end;min-height:20rem;background:var(--ccn-color-dark);color:var(--ccn-color-white)}
 .ccn-page-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ccn-page-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,20,20,.35) 0%,rgba(20,20,20,.55) 100%)}
 .ccn-page-hero-inner{position:relative;z-index:2;padding-block:2.5rem;width:100%}

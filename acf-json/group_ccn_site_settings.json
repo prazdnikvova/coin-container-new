@@ -235,6 +235,30 @@
             "name": "badge_url",
             "type": "text",
             "instructions": "Path or URL, e.g. /ueber-uns/zertifikate/."
+        },
+        {
+            "key": "field_ccn_tab_cta",
+            "label": "Calls to action",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_hero_cta_text",
+            "label": "Landing hero button text",
+            "name": "hero_cta_text",
+            "type": "text",
+            "instructions": "Button under the h1 of every landing page (hero band), next to the phone line.",
+            "default_value": "Container anfragen"
+        },
+        {
+            "key": "field_ccn_hero_cta_url",
+            "label": "Landing hero button URL",
+            "name": "hero_cta_url",
+            "type": "text",
+            "instructions": "Empty = the request page URL below.",
+            "default_value": "/container-angebot-anfordern/"
         }
     ],
     "location": [
