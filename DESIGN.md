@@ -633,3 +633,15 @@ for reviewing content:
   counting once to the printed value, reduced motion and blocked `main.js`
   hiding nothing, sticky sentinel, `data-motion` on every block root.
   Lighthouse: `non-composited-animations` stays empty, CLS 0.
+- Smoke test, "Components (T-48)": no horizontal scroll on nine pages at
+  360/768/1280/1440; product card at 360 (one column, button 44–48px over
+  ≥ 90 % of the card, title ≤ 3 lines) and thumbnail `sizes`; focus ring
+  3px solid with a 2px gap after Tab; tap targets ≥ 44px (header icons,
+  mobile menu, footer); services text without hover; stats colours; ≥ 4
+  section backgrounds on the front page with no equal neighbours; one CTA
+  banner per page; text contrast on the six key pages at 360/1440 and with
+  dark/yellow section backgrounds switched on; WooCommerce add-to-cart on the
+  button system. Library probes: `reports/2026-11-08-data/t48_probe.cjs`
+  (overflow, focus, cards, sections, taps, hover, spacing),
+  `t48_cta_photo.cjs` (white text over the photo CTA, sampled pixels);
+  button states: `reports/2026-11-08-t48-shots/t48_states.cjs`.
