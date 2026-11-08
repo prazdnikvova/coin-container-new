@@ -111,3 +111,30 @@ function ccn_loop_product_thumbnail() {
 		array( 'loading' => 'lazy' )
 	);
 }
+
+/**
+ * Loop card titles one level down. WooCommerce prints them as h2, which is
+ * right on the shop (cards under the page h1) but too high inside the
+ * featured-products block when the block has its own h2 heading. The block
+ * swaps the title callback around its loop and swaps it back afterwards.
+ *
+ * @param bool $as_h3 True: card titles as h3; false: back to WooCommerce's h2.
+ */
+function ccn_loop_title_as_h3( $as_h3 ) {
+	$from     = $as_h3 ? 'woocommerce_template_loop_product_title' : 'ccn_loop_product_title_h3';
+	$to       = $as_h3 ? 'ccn_loop_product_title_h3' : 'woocommerce_template_loop_product_title';
+	$priority = has_action( 'woocommerce_shop_loop_item_title', $from );
+	if ( false === $priority ) {
+		return;
+	}
+	remove_action( 'woocommerce_shop_loop_item_title', $from, $priority );
+	add_action( 'woocommerce_shop_loop_item_title', $to, $priority );
+}
+
+/**
+ * Same markup and class filter as woocommerce_template_loop_product_title(),
+ * as an h3.
+ */
+function ccn_loop_product_title_h3() {
+	echo '<h3 class="' . esc_attr( apply_filters( 'woocommerce_product_loop_title_classes', 'woocommerce-loop-product__title' ) ) . '">' . wp_kses_post( get_the_title() ) . '</h3>';
+}

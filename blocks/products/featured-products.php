@@ -63,10 +63,19 @@ if ( ! $ccn_q->have_posts() ) {
 		<?php endif; ?>
 		<?php woocommerce_product_loop_start(); ?>
 			<?php
+			// Under this block's own h2 the card titles drop to h3 (here only:
+			// the shop keeps WooCommerce's h2 under its h1). Without a heading
+			// they stay h2, otherwise the page would jump from h1 to h3.
+			if ( $ccn_h ) {
+				ccn_loop_title_as_h3( true );
+			}
 			while ( $ccn_q->have_posts() ) :
 				$ccn_q->the_post();
 				wc_get_template_part( 'content', 'product' );
 			endwhile;
+			if ( $ccn_h ) {
+				ccn_loop_title_as_h3( false );
+			}
 			?>
 		<?php woocommerce_product_loop_end(); ?>
 	</div>

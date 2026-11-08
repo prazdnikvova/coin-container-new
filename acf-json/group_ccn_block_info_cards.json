@@ -3,6 +3,13 @@
     "title": "Block: Info cards",
     "fields": [
         {
+            "key": "field_ccn_ic_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional section heading (h2) above the cards. Fill it when the block opens a section, e.g. right after the page hero, so the h3 card titles never follow the page h1 directly."
+        },
+        {
             "key": "field_ccn_ic_cards",
             "label": "Cards",
             "name": "cards",

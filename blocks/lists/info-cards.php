@@ -2,10 +2,12 @@
 /**
  * Block: Info cards. White cards in a grid — photo, title, text — mirrors
  * the Twist Locks / Bridge Fittings / Stacking Cone trio of the original
- * Containerzubehör page.
+ * Containerzubehör page. The optional heading renders as the section h2
+ * above the grid, so the h3 card titles never follow the page h1 directly.
  */
 
-$ccn_cards = get_field( 'cards' );
+$ccn_heading = get_field( 'heading' );
+$ccn_cards   = get_field( 'cards' );
 
 if ( empty( $ccn_cards ) ) {
 	if ( ! empty( $is_preview ) ) {
@@ -15,6 +17,11 @@ if ( empty( $ccn_cards ) ) {
 }
 ?>
 <section class="ccn-info-cards"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+	<?php if ( $ccn_heading ) : ?>
+		<div class="section-inner">
+			<h2 class="section-heading"><?php echo esc_html( $ccn_heading ); ?></h2>
+		</div>
+	<?php endif; ?>
 	<div class="ccn-info-cards-inner">
 		<?php foreach ( $ccn_cards as $ccn_card ) : ?>
 			<div class="ccn-info-card">
