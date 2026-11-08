@@ -49,24 +49,27 @@
 			<h2 class="footer-heading"><?php esc_html_e( 'Folgen Sie uns', 'coin-container' ); ?></h2>
 			<ul class="footer-social-list">
 				<?php
+				// One icon set (ccn_icon), 44px targets, named by screen-reader text (DESIGN.md "Footer").
 				$ccn_socials = array(
-					'social_facebook'      => 'Facebook',
-					'social_instagram'     => 'Instagram',
-					'social_linkedin'      => 'LinkedIn',
-					'social_ebay'          => 'eBay',
-					'social_pinterest'     => 'Pinterest',
-					'social_xing'          => 'Xing',
-					'social_kleinanzeigen' => 'Kleinanzeigen',
+					'social_facebook'      => array( 'Facebook', 'facebook' ),
+					'social_instagram'     => array( 'Instagram', 'instagram' ),
+					'social_linkedin'      => array( 'LinkedIn', 'linkedin' ),
+					'social_ebay'          => array( 'eBay', 'ebay' ),
+					'social_pinterest'     => array( 'Pinterest', 'pinterest' ),
+					'social_xing'          => array( 'Xing', 'xing' ),
+					'social_kleinanzeigen' => array( 'Kleinanzeigen', 'kleinanzeigen' ),
 				);
-				foreach ( $ccn_socials as $ccn_key => $ccn_label ) :
+				foreach ( $ccn_socials as $ccn_key => $ccn_social ) :
 					$ccn_url = ccn_setting( $ccn_key );
 					if ( ! $ccn_url ) {
 						continue;
 					}
 					?>
-					<li><a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank"><?php echo esc_html( $ccn_label ); ?><span class="screen-reader-text"> <?php esc_html_e( '(öffnet in neuem Tab)', 'coin-container' ); ?></span></a></li>
+					<li><a href="<?php echo esc_url( $ccn_url ); ?>" rel="noopener" target="_blank"><?php echo ccn_icon( $ccn_social[1], 20 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?><span class="screen-reader-text"><?php echo esc_html( $ccn_social[0] ); ?> <?php esc_html_e( '(öffnet in neuem Tab)', 'coin-container' ); ?></span></a></li>
 				<?php endforeach; ?>
 			</ul>
+			<?php // Slot for the Trustpilot and Google badges (T-50); empty until then. ?>
+			<div class="footer-badges"></div>
 		</div>
 	</div>
 

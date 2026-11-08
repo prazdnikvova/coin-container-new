@@ -24,7 +24,7 @@ if ( empty( $ccn_cards ) ) {
 	<?php endif; ?>
 	<div class="ccn-info-cards-inner ccn-container" data-motion-stagger>
 		<?php foreach ( $ccn_cards as $ccn_card ) : ?>
-			<div class="ccn-info-card">
+			<div class="ccn-info-card ccn-card">
 				<?php if ( ! empty( $ccn_card['image'] ) ) : ?>
 					<?php echo wp_get_attachment_image( (int) $ccn_card['image'], 'medium', false, array( 'class' => 'ccn-info-card-img', 'loading' => 'lazy' ) ); ?>
 				<?php endif; ?>

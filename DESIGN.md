@@ -87,9 +87,9 @@ Rules:
   18px (`.site-header`, `ul.products`): the header stays at 16px by design
   (T-47, see Header); the grids are decided by the card/catalogue cards
   (T-48, T-49).
-- No text below 14px except badges, eyebrow labels and the top bar; the
-  existing 13.6px labels (news date, numbered-list text, catalogue
-  sub-filter) are fixed in the card pass (T-48).
+- No text below 14px except badges, eyebrow labels and the top bar (the
+  13.6px news date, numbered-list text and catalogue sub-filter are
+  `--ccn-fs-small` since T-48).
 
 ### Spacing, containers, shape
 
@@ -123,7 +123,30 @@ width; the brief's target 16 / 24 / 32px (<768 / 768–1279 / ≥1280) arrives
 with the layout cards.
 
 Breakpoints stay literal in `@media` (custom properties do not work there):
-`36rem` (576px), `48rem` (768px), `64rem` (1024px).
+`36rem` (576px), `48rem` (768px), `64rem` (1024px), `80rem` (1280px, product
+grid only).
+
+### Layout
+
+No page scrolls sideways at 360, 768, 1280 or 1440px (smoke "Components (a)":
+the six key pages, the blog index, the search results and Containerzubehör).
+
+- `img, svg, video, iframe` never exceed their box (`max-width: 100%`,
+  `height: auto` for images and video); `body` has `overflow-wrap:
+  break-word` for long unbreakable lines; cards break anywhere.
+- Grid tracks that hold content are `minmax(0, 1fr)`, never a bare `1fr`
+  (a `1fr` track grows to its widest child: the landing column was 378px
+  wide at 360).
+- Product grid (`ul.products`: shop, categories, product search, the
+  featured-products block): the theme's grid, not WooCommerce's float widths
+  (22 % / 48 % of a grid cell made 38–65px cards). At most 1 / 2 / 3 / 4
+  columns from 0 / 36 / 64 / 80rem (`--ccn-cols`), never a card under 16rem,
+  so the narrower landing column holds 2 columns at 1280–1440:
+  `repeat(auto-fill, minmax(min(100%, max(16rem, (100% - (cols - 1) × gap) / cols)), 1fr))`,
+  gap `--ccn-space-5`. WooCommerce's clearfix pseudo-elements are off (they
+  took grid cells); the grid clears the floated result count and ordering.
+- Posts, blog index and archives keep the 820px reading column; shop,
+  categories and product search use the full container.
 
 ## Editor parity
 
@@ -172,6 +195,10 @@ The block editor shows the same colours and sizes as the site.
    not estimated.
 5. Text over photos is checked separately (the colour-only probe cannot see the
    photo): overlay under the text, sample points under the heading.
+6. Hover on dark or grey surfaces (footer, top bar, dark contact card, dark
+   sections): white or `--ccn-color-light` plus an underline, never yellow
+   text (yellow on `#605e5e` is 3.99:1). Yellow on dark stays for large text,
+   numbers, icons and fills.
 
 ## Components
 
@@ -183,14 +210,14 @@ replaces its "planned" line with the implemented spec.
 | C1 | Hero (home) | h1 with the keyword (text as on production), 1 primary + 1 secondary CTA, phone link, rating line; on 360×800 h1 ≤ 4 lines and CTA, phone, rating inside 800px | T-47 | built — see Hero |
 | C2 | Mobile action bar | bottom bar 56px below 768px: Anrufen (`tel:`) + Anfrage, safe-area inset, targets ≥ 44px | T-47 | built — see Action bar |
 | C3 | Sticky header | ≤ 64px on 360; 80px → 64px after scroll with `--ccn-shadow-1`; phone icon 44×44 below 1024px; CLS 0 | T-47 | built — see Header |
-| C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | planned |
-| C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | planned |
+| C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | built — see Cards |
+| C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | built — see Buttons |
 | C6 | Section heading + eyebrow | eyebrow only where it carries information (category), 13px uppercase, `--ccn-color-primary-text-strong`; otherwise the accent tail of the heading | T-48 | planned |
 | C7 | Stats | real figures only, dark surface with yellow numbers; `tabular-nums`, count once and final values with reduced motion are in place (T-46, see Motion) | T-48 | planned |
 | C8 | Trust block | rating with count (live widgets as on production), quotes, partner logos, years/volume line; before the final CTA | T-50 | planned |
 | C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | planned |
 | C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
-| C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | planned |
+| C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | built (targets, icons, badge slot) — see Footer; the location/container-type columns come with the menu migration (T-53c) |
 | C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | planned |
 
 ## Header
@@ -311,6 +338,79 @@ and no JS.
   phones next to it (Quick Contact is T-58 and must take this bar into
   account).
 
+## Buttons
+
+`theme.css` "Buttons" (T-48, A6 C5 and §6.1-4): `.btn` plus one variant.
+WooCommerce (`.button`, `.single_add_to_cart_button`, `.checkout-button`,
+`.wc-block-components-button`) and CF7 (`.wpcf7-submit`) buttons take the same
+rules through extra selectors; on WooCommerce pages a
+`.woocommerce :is(a,button,input).button.button` rule beats WooCommerce's own
+`.woocommerce a.button` and the purple `.button.alt`.
+
+| Variant | Rest | Hover | Used for |
+|---|---|---|---|
+| `.btn-primary`, WooCommerce and CF7 buttons | `--ccn-color-primary` / `#202020` (10.11:1) | `#202020` / white (16.29:1) | the main action of a screen |
+| `.btn-secondary` | transparent, 2px `#202020` border, `#202020` text | `#202020` / white | second action (phone in the CTA band) |
+| `.btn-dark` | `--ccn-color-secondary` / white (6.44:1), uppercase 14px | yellow / `#202020` | intro, landing request card, "Anrufen", CTA band |
+| `.btn-light` | `--ccn-color-light` / `#202020`, uppercase 14px | yellow / `#202020` | text + image block |
+| `.btn-outline-light` | 2px white border, white text | white / `#202020` | over photos (hero, T-47) |
+
+States, every variant:
+
+- Size: `min-height: var(--ccn-tap)` (44px), padding `--ccn-space-3`
+  `--ccn-space-6`, 2px border, `--ccn-radius-sm`; `.btn-lg` 48px (hero and
+  action bar buttons are 48px, T-47). Product-card buttons fill the card
+  width on one line.
+- Hover and focus-visible: the colours above plus the lift (`translateY(-2px)`,
+  `--ccn-shadow-3`, `--ccn-dur-fast`, see Motion).
+- Focus-visible: `outline: 3px solid var(--ccn-color-focus)` with
+  `outline-offset: 2px` on every focusable element, not only buttons; white on
+  dark surfaces (footer, top bar, hero, landing hero band, dark contact card,
+  dark sections, stats, photo CTA). `main:focus` (skip-link target) has none.
+- Active: `filter: brightness(.92)` (8 % darker), no lift.
+- Disabled (`:disabled`, `.disabled`, `[aria-disabled="true"]`):
+  `--ccn-color-border` fill, `--ccn-color-secondary` text (5.11:1),
+  `cursor: not-allowed`, no lift.
+- `tel:` links: the reset is `a:where([href^="tel"]) { color: inherit }`
+  (specificity 0,0,1), so every button or class colour wins over it.
+- Labels are verbs and come from the content (texts as on production).
+
+## Cards
+
+`.ccn-card` (C4): white surface, `#202020` text, 1px `--ccn-color-border`,
+`--ccn-radius-md`, `--ccn-shadow-1`; on hover or focus-within it lifts 2px
+with `--ccn-shadow-3` (Motion). Used by news cards, info cards, service cards,
+the landing request card ("Jetzt anfragen") and product cards
+(`ul.products > li.product` shares the rule, no WooCommerce template override).
+
+- Product card: padding `--ccn-space-3`; image box 4:3, `object-fit: contain`
+  on `--ccn-color-surface` (renders now; real photos arrive with the
+  migration, OPEN #72); title at most 3 lines (`line-clamp`); price on one
+  line with `tabular-nums`; the button fills the width, stays on one line and
+  sits at the bottom; sale badge top left inside the image.
+- Service card: 48px yellow circle with an outline icon, `h3`, text always
+  visible (no numbers: the services carry no sequence).
+
+## Icons
+
+One outline set, `ccn_icon( $name, $size )` in `functions.php`: 24px grid,
+stroke 1.8, round caps and joins, `currentColor`, `aria-hidden`; the link or
+text next to it carries the name. Paths from Tabler Icons (MIT) plus two drawn
+monograms (eBay, Kleinanzeigen). Keys: `container`, `buy`, `rent`,
+`transport`, `modify` (select field `icon` of each service), `facebook`,
+`instagram`, `linkedin`, `ebay`, `pinterest`, `xing`, `kleinanzeigen` (footer).
+The header icons (phone, cart, search) share the style; the filled brand
+glyphs of the top bar (T-47) stay.
+
+## Footer
+
+C11: dark surface, `--ccn-color-text-on-dark` text, every link a 44px target
+(`inline-flex`, `min-height: var(--ccn-tap)`), hover white with an underline.
+Social links: 44×44 circles (1px `rgba(255,255,255,.18)`) with the icon, named
+by screen-reader text «Facebook (öffnet in neuem Tab)»; hover fills the circle
+yellow with a `#202020` icon. `div.footer-badges` is the empty slot for the
+Trustpilot and Google badges (T-50).
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the
@@ -381,17 +481,19 @@ inventory of the old site (A5 §4), principles from the design brief (A6
 - Every `transition` in `theme.css` lists its properties and takes its
   duration from a motion token; `transition: all` and literal durations fail
   the smoke test (the reduced-motion override is the one literal value).
-- `.btn` (`:hover`, `:focus-visible`) and the cards `li.product`,
-  `.ccn-news-card`, `.ccn-info-card`, `.ccn-service` (`:hover`,
+- Buttons (`.btn`, WooCommerce `.button`, `.wpcf7-submit`: `:hover`,
+  `:focus-visible`) and cards (`.ccn-card`, product cards: `:hover`,
   `:focus-within`) lift by `translateY(-2px)` with `--ccn-shadow-3` in
-  `--ccn-dur-fast`; `.btn:active` returns to `translateY(0)`. Card and button
-  looks (radius, rest shadow, focus ring) are T-48.
+  `--ccn-dur-fast`; `:active` returns to `translateY(0)` and darkens 8 %;
+  disabled never lifts. One rule for all of them (end of `theme.css`); looks
+  in Buttons and Cards.
 - Main menu (desktop): the yellow bar under the current/hovered item grows
   in (`scaleX` 0 → 1). Mobile menu: opens with opacity + `translateY(-.5rem)`
   in `--ccn-dur-base` via `@starting-style` (instant in browsers without it),
   closes at once; the focus logic of `main.js` is unchanged.
 - Services: the column text is always visible (no `max-height: 0` /
-  `opacity: 0` until hover any more, A1 F7); hover only lifts the column.
+  `opacity: 0` until hover any more, A1 F7); since T-48 each service is a
+  card and hover only lifts the card.
 
 ### Rail (carousel without a library)
 

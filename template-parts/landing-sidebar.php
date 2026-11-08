@@ -38,7 +38,7 @@ $ccn_card_btn_u = ccn_setting( 'landing_card_button_url' );
 	<?php endif; ?>
 
 	<?php if ( $ccn_card_title && $ccn_card_btn_t && $ccn_card_btn_u ) : ?>
-		<div class="ccn-sidebar-card">
+		<div class="ccn-sidebar-card ccn-card">
 			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="106" height="80" loading="lazy" alt="" aria-hidden="true">
 			<p class="ccn-sidebar-card-title"><?php echo esc_html( $ccn_card_title ); ?></p>
 			<a class="btn btn-dark" href="<?php echo esc_url( $ccn_card_btn_u ); ?>"><?php echo esc_html( $ccn_card_btn_t ); ?></a>

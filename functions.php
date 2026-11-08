@@ -210,6 +210,42 @@ function ccn_phone_icon( $size ) {
 }
 
 /**
+ * Outline icon set of the theme (24px grid, stroke 1.8, round caps and joins,
+ * currentColor, like the header icons): services and footer social links.
+ * Decorative: the text or screen-reader text next to it names the link.
+ * Paths adapted from Tabler Icons (MIT, https://tabler.io/icons); the eBay
+ * and Kleinanzeigen monograms are drawn for this theme.
+ *
+ * @param string $name Icon key.
+ * @param int    $size Width and height in px.
+ * @return string Static SVG markup; empty for an unknown key.
+ */
+function ccn_icon( $name, $size = 24 ) {
+	$paths = array(
+		'container'     => 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
+		'buy'           => 'M4 19a2 2 0 1 0 4 0a2 2 0 1 0-4 0M15 19a2 2 0 1 0 4 0a2 2 0 1 0-4 0M17 17H6V3H4M6 5l14 1-1 7H6',
+		'rent'          => 'M16.555 3.843l3.602 3.602a2.877 2.877 0 0 1 0 4.069l-2.643 2.643a2.877 2.877 0 0 1-4.069 0l-.301-.301-6.558 6.558a2 2 0 0 1-1.239.578l-.175.008h-1.172a1 1 0 0 1-.993-.883l-.007-.117v-1.172a2 2 0 0 1 .467-1.284l.119-.13.414-.414h2v-2h2v-2l2.144-2.144-.301-.301a2.877 2.877 0 0 1 0-4.069l2.643-2.643a2.877 2.877 0 0 1 4.069 0zM15 9h.01',
+		'transport'     => 'M5 17a2 2 0 1 0 4 0a2 2 0 1 0-4 0M15 17a2 2 0 1 0 4 0a2 2 0 1 0-4 0M5 17H3V6a1 1 0 0 1 1-1h9v12m-4 0h6m4 0h2v-6h-8m0-5h5l3 5',
+		'modify'        => 'M7 10h3V7L6.5 3.5a6 6 0 0 1 8 8l6 6a2 2 0 0 1-3 3l-6-6a6 6 0 0 1-8-8L7 10',
+		'facebook'      => 'M7 10v4h3v7h4v-7h3l1-4h-4V8a1 1 0 0 1 1-1h3V3h-3a5 5 0 0 0-5 5v2H7',
+		'instagram'     => 'M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM9 12a3 3 0 1 0 6 0a3 3 0 1 0-6 0M16.5 7.5v.01',
+		'linkedin'      => 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM8 11v5M8 8v.01M12 16v-5M16 16v-3a2 2 0 0 0-4 0',
+		'pinterest'     => 'M8 20l4-9M10.7 14c.437 1.263 1.43 2 2.55 2 2.071 0 3.75-1.554 3.75-4a5 5 0 1 0-9.7 1.7M3 12a9 9 0 1 0 18 0a9 9 0 1 0-18 0',
+		'xing'          => 'M16 21l-4-7 6.5-11M7 7l2 3.5L6 15',
+		'ebay'          => 'M7.5 12h9a4.5 4.5 0 1 0-1.32 3.18',
+		'kleinanzeigen' => 'M8.5 6v12M16 6l-7.5 6.5M11 10.5l5 7.5',
+	);
+	if ( ! isset( $paths[ $name ] ) ) {
+		return '';
+	}
+	return sprintf(
+		'<svg class="ccn-icon" width="%1$d" height="%1$d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="%2$s"/></svg>',
+		(int) $size,
+		esc_attr( $paths[ $name ] )
+	);
+}
+
+/**
  * Accessibility: skip link straight after <body>.
  */
 add_action( 'wp_body_open', 'ccn_skip_link', 5 );

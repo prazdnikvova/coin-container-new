@@ -130,7 +130,9 @@ ok('Sale badge styled (Angebot!)', await page.evaluate(() => {
 // Homepage: middle + bottom blocks (text-image, services, stats, CTA, news)
 ok('Text-image block with collage', await page.locator('.ccn-text-image .ccn-text-image-photo').count() === 2);
 ok('Services strip with 4 items', await page.locator('.ccn-services .ccn-service').count() === 4);
-ok('Services strip photo is lazy', (await page.locator('.ccn-services-bg').getAttribute('loading')) === 'lazy');
+// T-48: services are cards (icon, title, text); no number, no photo texture behind the text (A6 §6.5).
+ok('Services: 4 cards with an icon, no numbers, no photo behind the text', await page.locator('.ccn-services .ccn-service.ccn-card .ccn-service-icon svg[aria-hidden="true"]').count() === 4
+	&& await page.locator('.ccn-services .ccn-service-number, .ccn-services img').count() === 0);
 ok('Stats has 3 counters', await page.locator('.ccn-stats .ccn-stat-number[data-target]').count() === 3);
 ok('CTA banner heading + button', await page.locator('.ccn-cta .ccn-cta-heading').count() === 1
 	&& await page.locator('.ccn-cta .btn-primary').count() === 1);
@@ -836,6 +838,74 @@ for (const path of t48Pages) {
 	ok(`Components (a) ${path}: no horizontal scroll at 360/768/1280/1440`, !overflowed[path], (overflowed[path] || []).join(', '));
 }
 await ovPage.close();
+// (b) Product card at 360 (C4): one column, the button on one line (44-48px) across >= 90 % of the card,
+// the title on <= 3 lines, the .ccn-card surface (1px border, 8px radius, --ccn-shadow-1).
+const cardPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await cardPage.goto(BASE + '/container-kaufen/', { waitUntil: 'load' });
+const card360 = await cardPage.evaluate(() => {
+	const lis = [...document.querySelectorAll('ul.products > li.product')];
+	const li = lis[0];
+	const btn = li && li.querySelector('.button');
+	const title = li && li.querySelector('.woocommerce-loop-product__title');
+	if (!btn || !title) return null;
+	const r = (e) => e.getBoundingClientRect();
+	const s = getComputedStyle(li);
+	return { perRow: lis.filter((l) => Math.round(r(l).top) === Math.round(r(li).top)).length, btnH: Math.round(r(btn).height),
+		ratio: Math.round(100 * r(btn).width / r(li).width) / 100, titleLines: Math.round(r(title).height / parseFloat(getComputedStyle(title).lineHeight)),
+		look: `${s.borderTopWidth}|${s.borderTopLeftRadius}|${s.boxShadow.includes('0px 2px 8px')}` };
+});
+ok('Components (b) kaufen 360: 1 column, card button 44-48px and >= 90% of the card, title <= 3 lines, card surface', !!card360
+	&& card360.perRow === 1 && card360.btnH >= 44 && card360.btnH <= 48 && card360.ratio >= 0.9 && card360.titleLines <= 3 && card360.look === '1px|8px|true',
+	JSON.stringify(card360));
+// (h) Tap targets at 360: header icons, every link of the open mobile menu and of the footer >= 44px tall.
+const tall = (sel) => cardPage.evaluate((s) => {
+	const els = [...document.querySelectorAll(s)].filter((e) => { const cs = getComputedStyle(e); return e.getBoundingClientRect().width > 1 && cs.display !== 'none' && cs.visibility !== 'hidden'; });
+	return { n: els.length, small: els.filter((e) => e.getBoundingClientRect().height < 44).map((e) => `${(e.textContent || e.className).trim().slice(0, 24)}:${Math.round(e.getBoundingClientRect().height)}`) };
+}, sel);
+await cardPage.goto(BASE + '/', { waitUntil: 'load' });
+const tapHeader = await tall('#header .header-inner a, #header .header-inner button');
+const tapFooter = await tall('#footer a, #footer button');
+await cardPage.click('.nav-toggle');
+await cardPage.waitForTimeout(400);
+const tapMenu = await tall('#site-nav a');
+ok('Components (h) 360: header icons, mobile menu and footer links all >= 44px tall', tapHeader.n >= 5 && tapMenu.n >= 10 && tapFooter.n >= 10
+	&& [tapHeader, tapMenu, tapFooter].every((t) => t.small.length === 0), JSON.stringify({ header: tapHeader, menu: tapMenu, footer: tapFooter }));
+await cardPage.close();
+// (c) Keyboard focus (C5): Tab to the first .btn shows a 3px solid ring with a 2px gap.
+const focusPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const focusRing = {};
+for (const path of ['/', '/container-kaufen/', '/container-mieten/']) {
+	await focusPage.goto(BASE + path, { waitUntil: 'load' });
+	let ring = null;
+	for (let i = 0; i < 60 && !ring; i++) {
+		await focusPage.keyboard.press('Tab');
+		ring = await focusPage.evaluate(() => { const e = document.activeElement; if (!e || !e.matches('.btn')) return null; const s = getComputedStyle(e); return `${s.outlineStyle} ${s.outlineWidth} ${s.outlineOffset}`; });
+	}
+	focusRing[path] = ring;
+}
+ok('Components (c) focus: Tab to the first .btn shows a 3px solid ring with a 2px gap (/, kaufen, mieten)', Object.values(focusRing).every((r) => r === 'solid 3px 2px'), JSON.stringify(focusRing));
+// (f) Services at 1280: every text visible without hover. Row 118: the dark contact card link turns white +
+// underline on hover (yellow on its grey is 3.99:1). Footer social links: 44x44 icons named by screen-reader text.
+await focusPage.goto(BASE + '/', { waitUntil: 'load' });
+const services1280 = await focusPage.evaluate(() => [...document.querySelectorAll('.ccn-service-text')].map((e) => `${getComputedStyle(e).opacity}/${getComputedStyle(e).maxHeight}/${e.offsetHeight > 0}`));
+ok('Components (f) services at 1280: texts visible without hover', services1280.length === 4 && services1280.every((s) => s === '1/none/true'), services1280.join(', '));
+await focusPage.hover('.ccn-contact-card.is-dark a');
+await focusPage.waitForTimeout(300);
+const darkCardHover = await focusPage.evaluate(() => { const s = getComputedStyle(document.querySelector('.ccn-contact-card.is-dark a')); return `${s.color}|${s.textDecorationLine}`; });
+ok('Components: dark contact card link hover is white + underline, not yellow', darkCardHover === 'rgb(255, 255, 255)|underline', darkCardHover);
+const social = await focusPage.evaluate(() => [...document.querySelectorAll('.footer-social-list a')].map((a) => {
+	const b = a.getBoundingClientRect();
+	return `${Math.round(b.width)}x${Math.round(b.height)}|${a.querySelectorAll('svg[aria-hidden="true"]').length}|${(a.querySelector('.screen-reader-text') || {}).textContent || ''}`;
+}));
+ok('Components: footer social links are 44x44 icons (one aria-hidden svg) named by screen-reader text', social.length >= 4
+	&& social.every((s) => /^44x44\|1\|\S.+\(öffnet in neuem Tab\)$/.test(s)), social.join(', '));
+await focusPage.close();
+// WooCommerce buttons on the button system: the single-product add-to-cart is brand yellow with #202020 text
+// (WooCommerce's own is purple #7f54b3) and >= 44px tall.
+await page.goto(BASE + '/product/20-fuss-container-one-way/', { waitUntil: 'load' });
+const wcBtn = await page.evaluate(() => { const b = document.querySelector('.single_add_to_cart_button'); if (!b) return null; const s = getComputedStyle(b); return `${s.backgroundColor}|${s.color}|${Math.round(b.getBoundingClientRect().height)}`; });
+ok('Components: WooCommerce add-to-cart takes the primary button (yellow, #202020, >= 44px)', !!wcBtn
+	&& wcBtn.startsWith('rgb(247, 198, 0)|rgb(32, 32, 32)|') && parseInt(wcBtn.split('|')[2], 10) >= 44, String(wcBtn));
 
 await browser.close();
 console.log(results.join('\n'));

@@ -1,16 +1,16 @@
 <?php
 /**
- * Block: Services strip. Accent heading + intro, then a full-width photo
- * strip with numbered columns (01-04). Unlike the original, the column text
- * is always visible (no hover-only content, T-46); hover only lifts the
- * column. The photo is a lazy <img> — the strip sits below the fold and
- * must never join the LCP request chain.
+ * Block: Services. Accent heading + intro, then one card per service (icon,
+ * title, text) on a light grey band (T-48, DESIGN.md "Components" C4). The
+ * text is always visible (no hover-only content); the numbers 01-04 of the
+ * original are not printed (they carry no sequence) and the strip photo is no
+ * longer used as a texture behind text (A6 §6.5). Both fields stay in ACF for
+ * old content.
  */
 
 $ccn_heading = get_field( 'heading' );
 $ccn_accent  = get_field( 'heading_accent' );
 $ccn_intro   = get_field( 'intro' );
-$ccn_img     = (int) get_field( 'image' );
 
 if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
 	echo '<p><em>' . esc_html__( 'Services: add a heading and items in the block sidebar.', 'coin-container' ) . '</em></p>';
@@ -32,29 +32,22 @@ if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
 		<?php endif; ?>
 	</div>
 	<?php if ( have_rows( 'items' ) ) : ?>
-		<div class="ccn-services-strip">
+		<div class="ccn-services-grid ccn-container" data-motion-stagger>
 			<?php
-			if ( $ccn_img ) {
-				// Soft size, not a hard crop: keeps srcset populated. Cropping
-				// is done by object-fit: cover on .ccn-services-bg.
-				echo wp_get_attachment_image( $ccn_img, '1536x1536', false, array( 'class' => 'ccn-services-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
-			}
-			?>
-			<div class="ccn-services-grid" data-motion-stagger>
-				<?php while ( have_rows( 'items' ) ) : the_row(); ?>
-					<div class="ccn-service">
-						<?php if ( $ccn_num = get_sub_field( 'number' ) ) : ?>
-							<span class="ccn-service-number"><?php echo esc_html( $ccn_num ); ?></span>
-						<?php endif; ?>
-						<?php if ( $ccn_title = get_sub_field( 'title' ) ) : ?>
-							<h3 class="ccn-service-title"><?php echo esc_html( $ccn_title ); ?></h3>
-						<?php endif; ?>
-						<?php if ( $ccn_item_text = get_sub_field( 'text' ) ) : ?>
-							<p class="ccn-service-text"><?php echo esc_html( $ccn_item_text ); ?></p>
-						<?php endif; ?>
-					</div>
-				<?php endwhile; ?>
-			</div>
+			while ( have_rows( 'items' ) ) :
+				the_row();
+				$ccn_icon = (string) get_sub_field( 'icon' );
+				?>
+				<div class="ccn-service ccn-card">
+					<span class="ccn-service-icon"><?php echo ccn_icon( $ccn_icon ? $ccn_icon : 'container', 24 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?></span>
+					<?php if ( $ccn_title = get_sub_field( 'title' ) ) : ?>
+						<h3 class="ccn-service-title"><?php echo esc_html( $ccn_title ); ?></h3>
+					<?php endif; ?>
+					<?php if ( $ccn_item_text = get_sub_field( 'text' ) ) : ?>
+						<p class="ccn-service-text"><?php echo esc_html( $ccn_item_text ); ?></p>
+					<?php endif; ?>
+				</div>
+			<?php endwhile; ?>
 		</div>
 	<?php endif; ?>
 </section>

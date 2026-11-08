@@ -38,7 +38,7 @@ if ( ! $ccn_q->have_posts() ) {
 				$ccn_q->the_post();
 				$ccn_cat = get_the_category();
 				?>
-				<article class="ccn-news-card">
+				<article class="ccn-news-card ccn-card">
 					<a class="ccn-news-media" href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
 						<?php if ( has_post_thumbnail() ) : ?>
 							<?php the_post_thumbnail( 'medium_large', array( 'loading' => 'lazy' ) ); ?>

@@ -24,12 +24,12 @@
         },
         {
             "key": "field_ccn_sv_image",
-            "label": "Strip background photo",
+            "label": "Strip background photo (not displayed)",
             "name": "image",
             "type": "image",
             "return_format": "id",
             "preview_size": "medium",
-            "instructions": "WebP around 1920px, lazy-loaded."
+            "instructions": "Kept for old content: since T-48 the services are cards and no photo sits behind their text."
         },
         {
             "key": "field_ccn_sv_items",
@@ -40,26 +40,46 @@
             "button_label": "Add service",
             "sub_fields": [
                 {
+                    "key": "field_ccn_sv_item_icon",
+                    "label": "Icon",
+                    "name": "icon",
+                    "type": "select",
+                    "choices": {
+                        "container": "Container",
+                        "buy": "Buy (cart)",
+                        "rent": "Rent (key)",
+                        "transport": "Transport (truck)",
+                        "modify": "Modification (tool)"
+                    },
+                    "default_value": "container",
+                    "return_format": "value",
+                    "allow_null": 0,
+                    "multiple": 0,
+                    "ui": 0,
+                    "wrapper": { "width": "20" }
+                },
+                {
                     "key": "field_ccn_sv_item_number",
-                    "label": "Number",
+                    "label": "Number (not displayed)",
                     "name": "number",
                     "type": "text",
-                    "wrapper": { "width": "20" }
+                    "instructions": "Kept for old content: the cards carry no sequence.",
+                    "wrapper": { "width": "15" }
                 },
                 {
                     "key": "field_ccn_sv_item_title",
                     "label": "Title",
                     "name": "title",
                     "type": "text",
-                    "wrapper": { "width": "35" }
+                    "wrapper": { "width": "25" }
                 },
                 {
                     "key": "field_ccn_sv_item_text",
-                    "label": "Text (shown on hover)",
+                    "label": "Text",
                     "name": "text",
                     "type": "textarea",
                     "rows": 3,
-                    "wrapper": { "width": "45" }
+                    "wrapper": { "width": "40" }
                 }
             ]
         }
