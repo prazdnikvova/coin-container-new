@@ -439,7 +439,7 @@ const currentItem = await wide.evaluate(() => {
 ok('Menu current item: dark text + yellow bar, not yellow text', !!currentItem && currentItem.color === 'rgb(32, 32, 32)'
 	&& currentItem.bar === 'rgb(247, 198, 0)' && currentItem.height === '3px', JSON.stringify(currentItem));
 await wide.goto(BASE + '/kontakt-beratung/', { waitUntil: 'load' });
-const contentLinks = await wide.evaluate(() => [...document.querySelectorAll('.entry-content a:not(.btn):not(.button)')]
+const contentLinks = await wide.evaluate(() => [...document.querySelectorAll(':is(.entry-content, .wpcf7-form) a:not(.btn):not(.button)')]
 	.map((a) => `${getComputedStyle(a).color}|${getComputedStyle(a).textDecorationLine}`));
 ok('Content links: link token (#202020), underlined', contentLinks.length >= 1 && contentLinks.every((l) => l === 'rgb(32, 32, 32)|underline'),
 	[...new Set(contentLinks)].join(', '));
@@ -1372,8 +1372,8 @@ for (const path of [...T51_LANDINGS, ...T51_CONTACT, '/', '/containerzubehoer/']
 	t51Pages[path].cf7 = t51Req.filter((u) => /\/contact-form-7\//.test(u)).length;
 	t51Pages[path].forms = t51Req.filter((u) => /\/assets\/js\/forms\.js/.test(u)).length;
 }
-const t51CardPages = [...T51_LANDINGS];
-ok('Request form: the form card block on the landings, no hand-built ccn-form-card group left',
+const t51CardPages = [...T51_LANDINGS, ...T51_CONTACT];
+ok('Request form: the form card block on the 4 landings and the 2 contact pages, no hand-built ccn-form-card group left',
 	t51CardPages.every((p) => t51Pages[p].card === 1 && t51Pages[p].group === 0), JSON.stringify(t51CardPages.map((p) => [p, t51Pages[p].card, t51Pages[p].group])));
 ok('Request form: CF7 CSS/JS on every page with a form, no CF7 request on / and /containerzubehoer/',
 	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].cf7 >= 2) && ['/', '/containerzubehoer/'].every((p) => t51Pages[p].cf7 === 0),
@@ -1462,6 +1462,28 @@ const t51Post = await t51NoJsPage.evaluate(() => {
 ok('Request form without JS: renders and posts to its page (CF7 handles the POST with a reload)',
 	!!t51Post && t51Post.method === 'post' && /\/kontakt-beratung\//.test(t51Post.action || '') && t51Post.fields === 2 && t51Post.h > 200 && t51Post.submit, JSON.stringify(t51Post));
 await t51NoJs.close();
+// Contact pages (T-51): hero band (photo + h1) and the form card first; at 360x800 the h1 and the form (with its
+// first field) start in the first screen. The hero leaves its CTA button out when the page opens with the form
+// (decided by the first block, not by a slug), the phone line stays; a landing with the form further down keeps it.
+const t51First = {};
+for (const path of [...T51_CONTACT, '/container-kaufen/']) {
+	await t51.goto(`${BASE}${path}?cb=${Date.now()}`, { waitUntil: 'load' });
+	await t51.waitForSelector('h1', { timeout: 15000 }).catch(() => null);
+	t51First[path] = await t51.evaluate(() => {
+		const top = (s) => { const e = document.querySelector(s); return e ? Math.round(e.getBoundingClientRect().top + scrollY) : null; };
+		const hero = document.querySelector('.ccn-page-hero');
+		const col = document.querySelector('.ccn-landing-full, .ccn-landing-main');
+		const first = col && col.querySelector(':scope > section');
+		return { h1: top('.ccn-page-hero h1'), form: top('form.wpcf7-form'), field: top('form.wpcf7-form input[name="your-name"]'), photo: !!(hero && hero.querySelector('img.ccn-page-hero-img')),
+			cta: hero ? hero.querySelectorAll('.ccn-hero-cta .btn').length : -1, phone: hero ? hero.querySelectorAll('a.ccn-phone-line[href^="tel:"]').length : -1, first: first ? first.classList[0] : null };
+	});
+}
+ok('Contact pages 360x800: hero photo, h1, the form and its first field in the first screen, the form card first',
+	T51_CONTACT.every((p) => { const f = t51First[p]; return f.photo && f.h1 !== null && f.h1 <= 800 && f.form !== null && f.form <= 800 && f.field !== null && f.field <= 800 && f.first === 'ccn-form-card'; }),
+	JSON.stringify(t51First));
+ok('Hero CTA by content: pages that open with the form show no CTA button but the phone line; /container-kaufen/ keeps its CTA',
+	T51_CONTACT.every((p) => t51First[p].cta === 0 && t51First[p].phone === 1) && t51First['/container-kaufen/'].cta === 1 && t51First['/container-kaufen/'].phone === 1,
+	JSON.stringify(Object.entries(t51First).map(([p, f]) => [p, f.cta, f.phone])));
 await t51.close();
 
 await browser.close();

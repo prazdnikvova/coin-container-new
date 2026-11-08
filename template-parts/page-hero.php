@@ -4,7 +4,9 @@
  * responsive eager <img> (the page's LCP element, preloaded in
  * ccn_preload_hero) with the page title as the only H1, then the global
  * landing call to action and the phone line (Site Settings → Calls to action,
- * same partial as the home hero: template-parts/hero-cta.php). The
+ * same partial as the home hero: template-parts/hero-cta.php). A page that
+ * opens with the request form (first block acf/form-card, the contact pages)
+ * keeps only the phone line: the form is its call to action. The
  * breadcrumbs follow under the band, on white (inc/seo.php).
  */
 ?>
@@ -33,7 +35,7 @@
 			'template-parts/hero-cta',
 			null,
 			array(
-				'primary_text' => ccn_setting( 'hero_cta_text' ),
+				'primary_text' => ccn_page_leads_with_form() ? '' : ccn_setting( 'hero_cta_text' ),
 				'primary_url'  => ccn_setting( 'hero_cta_url', ccn_setting( 'anfrage_url' ) ),
 			)
 		);

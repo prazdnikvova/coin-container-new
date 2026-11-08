@@ -284,7 +284,10 @@ as on production (h1, button labels, trust row: `transmax-child/inc/hero-trust.p
   actions under its h1: the global button from Site Settings → Calls to
   action (`hero_cta_text`, `hero_cta_url`, empty URL = `anfrage_url`) and
   the phone line; on 360×800 kaufen and mieten show header, h1, CTA and
-  phone in the first screen (4 of 4).
+  phone in the first screen (4 of 4). A page whose first block is the form
+  card (`ccn_page_leads_with_form()`: decided by the content, not by a slug;
+  the contact pages) prints no button there, only the phone line: the form
+  right under the band is its call to action (T-51, see Forms).
 - Below 48rem (the 360×800 first screen): the photo box is `aspect-ratio: 4/5`
   and grows with its content; text starts 24px under the header row;
   buttons full width (primary 48px, secondary 44px); phone line and trust
@@ -681,6 +684,11 @@ JS.
   consent's wrapper, not its checkbox: the script passes the reference on.
 - **Texts**: messages in German with «Sie» (production form 5682), form
   language `de_DE` (`lang="de-DE"` on the form, CF7 had `en-US`).
+- **Contact pages** (`/kontakt-beratung/`, `/container-angebot-anfordern/`):
+  Landing (full width) template with the production hero photo, then the
+  form card first with the contacts beside it; at 360×800 the h1, the form
+  and its first field are in the first screen. The legal paragraph lives only
+  as the consent text of the checkbox.
 
 ## Motion
 

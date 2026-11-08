@@ -145,6 +145,27 @@ function ccn_action_bar() {
 	return $bar;
 }
 
+/**
+ * True when the current page opens with the request form (its first block is
+ * acf/form-card): the form is the call to action, so the hero band leaves its
+ * CTA button out (template-parts/page-hero.php). Decided by the content, not
+ * by a slug: a landing with the form further down keeps its CTA.
+ *
+ * @return bool
+ */
+function ccn_page_leads_with_form() {
+	$post = get_post();
+	if ( ! $post || ! has_block( 'acf/form-card', $post ) ) {
+		return false;
+	}
+	foreach ( parse_blocks( $post->post_content ) as $ccn_block ) {
+		if ( ! empty( $ccn_block['blockName'] ) ) {
+			return 'acf/form-card' === $ccn_block['blockName'];
+		}
+	}
+	return false;
+}
+
 add_filter( 'body_class', 'ccn_action_bar_body_class' );
 function ccn_action_bar_body_class( $classes ) {
 	if ( ccn_action_bar() ) {
