@@ -11,10 +11,11 @@
  * the readme will list any important changes.
  *
  * Theme override (Coin Container): identical to WooCommerce 11.2.1 except the
- * wrapper is a <div>, not a <header>: every page keeps exactly one <header>,
- * the site banner in header.php. The theme renders the shop and categories
- * through woocommerce.php (woocommerce_content() prints its own h1), so this
- * file only takes effect if the archive-product.php path is ever used.
+ * wrapper is a div, not a header element: every page keeps exactly one banner
+ * landmark, the site header in header.php. The theme renders the shop and
+ * categories through woocommerce.php (woocommerce_content() prints its own
+ * h1), so this file only takes effect if the archive-product.php path is
+ * ever used.
  *
  * @see     https://docs.woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
