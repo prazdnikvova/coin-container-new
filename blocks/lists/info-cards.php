@@ -16,7 +16,7 @@ if ( empty( $ccn_cards ) ) {
 	return;
 }
 ?>
-<section class="ccn-info-cards" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-info-cards <?php echo esc_attr( ccn_section_classes() ); ?>" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<?php if ( $ccn_heading ) : ?>
 		<div class="section-inner ccn-container">
 			<h2 class="section-heading"><?php echo esc_html( $ccn_heading ); ?></h2>

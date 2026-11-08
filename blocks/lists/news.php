@@ -26,7 +26,7 @@ if ( ! $ccn_q->have_posts() ) {
 	return;
 }
 ?>
-<section class="ccn-news" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-news <?php echo esc_attr( ccn_section_classes() ); ?>" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-news-inner ccn-container">
 		<?php if ( $ccn_heading ) : ?>
 			<h2 class="ccn-news-heading"><?php echo esc_html( $ccn_heading ); ?></h2>

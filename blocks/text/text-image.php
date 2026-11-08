@@ -18,7 +18,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 	return;
 }
 ?>
-<section class="ccn-text-image" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-text-image <?php echo esc_attr( ccn_section_classes() ); ?>" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-text-image-inner ccn-container">
 		<div class="ccn-text-image-body">
 			<?php if ( $ccn_heading ) : ?>

@@ -197,3 +197,18 @@ function ccn_register_blocks() {
 		acf_register_block_type( $args );
 	}
 }
+
+/**
+ * Classes for the root <section> of a block with the "background" field
+ * (T-48, DESIGN.md "Sections"): the shared vertical rhythm plus one of four
+ * backgrounds. Old content without the field renders as "default".
+ *
+ * @return string Class list.
+ */
+function ccn_section_classes() {
+	$ccn_bg = (string) get_field( 'background' );
+	if ( ! in_array( $ccn_bg, array( 'light', 'dark', 'yellow' ), true ) ) {
+		$ccn_bg = 'default';
+	}
+	return 'ccn-section ccn-section--' . $ccn_bg;
+}

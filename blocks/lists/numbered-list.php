@@ -17,7 +17,7 @@ if ( empty( $ccn_items ) ) {
 	return;
 }
 ?>
-<section class="ccn-numbered" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-numbered <?php echo esc_attr( ccn_section_classes() ); ?>" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-numbered-inner ccn-container">
 		<?php if ( $ccn_heading || $ccn_accent ) : ?>
 			<h2 class="ccn-numbered-heading">

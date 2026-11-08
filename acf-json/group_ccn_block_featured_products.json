@@ -31,6 +31,24 @@
             "name": "include",
             "type": "text",
             "instructions": "Optional. Overrides category/featured; products render in the given order."
+        },
+        {
+            "key": "field_ccn_fp_background",
+            "label": "Background",
+            "name": "background",
+            "type": "select",
+            "instructions": "Section background: alternate with the neighbouring sections; yellow only for short sections, at most one per screen (DESIGN.md, Sections).",
+            "choices": {
+                "default": "Default (white)",
+                "light": "Light grey",
+                "dark": "Dark",
+                "yellow": "Yellow"
+            },
+            "default_value": "default",
+            "return_format": "value",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 0
         }
     ],
     "location": [

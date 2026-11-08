@@ -51,7 +51,7 @@ reached 4.5:1 on both `#fff` and `#f7f7f7`:
 Reproduce: `node tests/contrast.cjs --darken '#c4511f' --on '#ffffff,#f7f7f7'`.
 
 Raw `rgba()` is allowed only for transparency effects that are not palette
-colours: photo overlays (`rgba(20,20,20,.1–.7)` gradients of the heroes),
+colours: photo overlays (`rgba(20,20,20,.1–.7)`: gradients of the heroes, `.65` over the photo CTA),
 hairlines and text on dark strips (`rgba(255,255,255,.12/.15/.18/.85/.9)`), the
 glass header (`rgba(255,255,255,.46)`) and the skip-link focus halo
 (`rgba(0,0,0,.6)`). Raw hex outside `:root`: none (the smoke test enforces it).
@@ -212,10 +212,10 @@ replaces its "planned" line with the implemented spec.
 | C3 | Sticky header | ≤ 64px on 360; 80px → 64px after scroll with `--ccn-shadow-1`; phone icon 44×44 below 1024px; CLS 0 | T-47 | built — see Header |
 | C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | built — see Cards |
 | C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | built — see Buttons |
-| C6 | Section heading + eyebrow | eyebrow only where it carries information (category), 13px uppercase, `--ccn-color-primary-text-strong`; otherwise the accent tail of the heading | T-48 | planned |
-| C7 | Stats | real figures only, dark surface with yellow numbers; `tabular-nums`, count once and final values with reduced motion are in place (T-46, see Motion) | T-48 | planned |
+| C6 | Section heading + eyebrow | eyebrow only where it carries information (category), 13px uppercase, `--ccn-color-primary-text-strong`; otherwise the accent tail of the heading | T-48 | rule in force: no section carries a category label today, so headings keep their accent tails and no eyebrow is printed |
+| C7 | Stats | real figures only, dark surface with yellow numbers; `tabular-nums`, count once and final values with reduced motion are in place (T-46, see Motion) | T-48 | built: `--ccn-color-dark` band, numbers `--ccn-color-primary` (11.43:1), labels `--ccn-color-light`, final value in the HTML; 2 columns at 360 (an odd last item spans both), 3 from 48rem, one row from 64rem; front page = the five production counters |
 | C8 | Trust block | rating with count (live widgets as on production), quotes, partner logos, years/volume line; before the final CTA | T-50 | planned |
-| C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | planned |
+| C9 | CTA banner | one per page, yellow band with `#202020` text, h2 + Anfrage + phone | T-48 | built: without a photo the yellow band, h2, the block's button (`.btn-dark`; empty → Site Settings `hero_cta_text` / `anfrage_url`) and the phone (`.btn-secondary`); with a photo the photo under `rgba(20,20,20,.65)` (white text ≥ 4.5:1 on any photo), optional logo, `.btn-primary` and `.btn-outline-light` |
 | C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
 | C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | built (targets, icons, badge slot) — see Footer; the location/container-type columns come with the menu migration (T-53c) |
 | C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | planned |
@@ -390,6 +390,44 @@ the landing request card ("Jetzt anfragen") and product cards
   sits at the bottom; sale badge top left inside the image.
 - Service card: 48px yellow circle with an outline icon, `h3`, text always
   visible (no numbers: the services carry no sequence).
+- Featured products at 360: one column, no rail (T-48 decision, measured on
+  the front page: stacked, the four offers take 1,732px and the page is
+  8,773px; a rail would save 1,267px (page 7,506px) but show one offer of
+  four at a time). The rail stays for the news cards.
+
+## Sections
+
+Every content block's root `<section>` carries `ccn-section`
+(`ccn_section_classes()`, `blocks/acf-blocks.php`) and, for the seven blocks
+with a `background` field (intro, text section, text + image, info cards,
+numbered list, news, featured products), `ccn-section--{default|light|dark|yellow}`
+(select field, default `default`; old content without the field renders as
+`default`). Services (`--ccn-color-light`), stats (`--ccn-color-dark`) and the
+CTA banner (yellow band or photo) have a fixed surface.
+
+| Background | Surface | Text | Use |
+|---|---|---|---|
+| `default` | page white | `#202020` | text sections |
+| `light` | `--ccn-color-light` | `#202020`; `.btn-light` turns white | product grids, services, breaks between white sections |
+| `dark` | `--ccn-color-dark` | white; muted text `--ccn-color-text-on-dark`, accent tails yellow, links white + underline on hover, white focus ring; cards inside stay white | stats, short emphasis |
+| `yellow` | `--ccn-color-primary` | `#202020` (muted text and accent tails too), primary button turns `#202020` | short sections only, at most one yellow fill per screen |
+
+- Rhythm: `padding-block: var(--ccn-space-7)` (48px), from 64rem
+  `var(--ccn-space-9)` (96px). Two neighbouring default sections share one gap
+  (`padding-top: 0` on the second). Inside the landing templates default
+  sections take no padding of their own (the column spacing applies: 32px
+  in the sidebar layout, 48px in the full-width one); a section with a
+  background keeps its padding and gets 24px inline padding in the sidebar
+  column.
+- Inside a section: heading → text 12px (`--ccn-space-3`); a section heading
+  over a grid 32px (`--ccn-space-6`); between groups 48px (`--ccn-space-7`).
+- Dark and yellow switch colours through two custom properties
+  (`--ccn-muted`, `--ccn-accent-c`) that the muted texts and accent tails
+  read with their light-surface colour as fallback.
+- Front page (content, T-48): hero, contact cards, intro (default), featured
+  products (light), text + image (default), services (light), stats (dark),
+  CTA banner (yellow band), news (default) — four surfaces, no two
+  neighbours alike.
 
 ## Icons
 
@@ -518,7 +556,7 @@ JS the row keeps its space but stays invisible — no dead controls, no layout
 shift. Buttons are 44×44px and named by screen-reader text (README "Markup
 standard"). No autoplay. A block decides where the rail turns back into a
 grid: `news` below 64rem (from 64rem a 4-column grid, buttons hidden);
-featured products on 360 is T-48's decision.
+featured products stay a one-column grid at 360 (T-48, see Cards).
 
 ### Not animated (A5 §4, A6 §6.6)
 

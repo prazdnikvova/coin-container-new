@@ -133,9 +133,14 @@ ok('Services strip with 4 items', await page.locator('.ccn-services .ccn-service
 // T-48: services are cards (icon, title, text); no number, no photo texture behind the text (A6 §6.5).
 ok('Services: 4 cards with an icon, no numbers, no photo behind the text', await page.locator('.ccn-services .ccn-service.ccn-card .ccn-service-icon svg[aria-hidden="true"]').count() === 4
 	&& await page.locator('.ccn-services .ccn-service-number, .ccn-services img').count() === 0);
-ok('Stats has 3 counters', await page.locator('.ccn-stats .ccn-stat-number[data-target]').count() === 3);
-ok('CTA banner heading + button', await page.locator('.ccn-cta .ccn-cta-heading').count() === 1
-	&& await page.locator('.ccn-cta .btn-primary').count() === 1);
+// T-48: the five counters of production (V 08.11.2026: figures as on production), final values in the HTML.
+const statsText = await page.evaluate(() => [...document.querySelectorAll('.ccn-stats .ccn-stat')].map((s) =>
+	`${s.querySelector('.ccn-stat-number[data-target]').textContent.trim()} ${s.querySelector('.ccn-stat-label').textContent.trim()}`).join(' | '));
+ok('Stats: the 5 production counters (100+, 830+, 7, 60+, 15)', statsText
+	=== '100+ Partnerunternehmen | 830+ zufriedene Kunden | 7 gesprochene Sprachen | 60+ Depots weltweit | 15 Jahre Erfahrung', statsText);
+// T-48 (C9): without a photo the CTA banner is the yellow band with its own button and the phone button.
+ok('CTA banner heading + button + phone', await page.locator('.ccn-cta .ccn-cta-heading').count() === 1
+	&& await page.locator('.ccn-cta .btn').count() === 2 && await page.locator('.ccn-cta .btn[href^="tel:"]').count() === 1);
 ok('News grid with 4 cards', await page.locator('.ccn-news .ccn-news-card').count() === 4);
 ok('News cards have category badges', await page.locator('.ccn-news .ccn-news-badge').count() >= 3);
 ok('Home is fully block-based (no flexible sections)', await page.locator('main .section-hero, main .section-cta, main .section-featured').count() === 0);
@@ -148,9 +153,12 @@ ok('All links/buttons have accessible names', await page.evaluate(() => {
 		|| el.hasAttribute('aria-labelledby')
 		|| [...el.querySelectorAll('img[alt]')].some((i) => i.alt.trim() !== ''));
 }));
-ok('Accent text is not raw brand yellow (contrast)', await page.evaluate(() => {
+// Yellow accent text only on a dark surface (T-48: the stats band); on light surfaces never raw yellow.
+ok('Accent text is not raw brand yellow on a light surface (contrast)', await page.evaluate(() => {
 	const els = document.querySelectorAll('.ccn-accent, .ccn-accent-inline, .ccn-news-heading');
-	return els.length >= 3 && [...els].every((el) => getComputedStyle(el).color !== 'rgb(247, 198, 0)');
+	const surface = (e) => { for (let p = e; p; p = p.parentElement) { const c = getComputedStyle(p).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c; } return 'rgb(255, 255, 255)'; };
+	const light = (c) => (c.match(/\d+/g) || []).slice(0, 3).reduce((a, v) => a + Number(v), 0) > 382;
+	return els.length >= 3 && [...els].every((el) => !light(surface(el)) || getComputedStyle(el).color !== 'rgb(247, 198, 0)');
 }));
 ok('Cart accessible name includes visible count', await page.evaluate(() => {
 	const a = document.querySelector('.header-cart');
@@ -196,7 +204,7 @@ ok('Zubehoer is full width (no sidebar)', await page.locator('.ccn-landing-full'
 ok('Zubehoer product grid', await page.locator('.ccn-featured li.product').count() === 4);
 ok('Zubehoer info cards', await page.locator('.ccn-info-card').count() === 3);
 ok('Zubehoer numbered list', await page.locator('.ccn-numbered-item').count() === 4);
-ok('Zubehoer CTA banner with button', await page.locator('.ccn-cta .btn').count() === 1);
+ok('Zubehoer CTA banner with button + phone', await page.locator('.ccn-cta .btn').count() === 2 && await page.locator('.ccn-cta .btn[href^="tel:"]').count() === 1);
 ok('Zubehoer has no flexible sections', await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
 
 // Pilot landing migrated to blocks (T-30a): hero band, sidebar, form card
@@ -234,7 +242,7 @@ for (const slug of textLandings) {
 	ok(`Landing ${slug} full width with hero`, await page.locator('.ccn-landing-full').count() === 1
 		&& await page.locator('.ccn-page-hero h1.ccn-page-hero-title').count() === 1
 		&& await page.locator('.ccn-landing-sidebar').count() === 0);
-	ok(`Landing ${slug} CTA banner`, await page.locator('.ccn-cta .btn').count() === 1);
+	ok(`Landing ${slug} CTA banner`, await page.locator('.ccn-cta .btn').count() === 2 && await page.locator('.ccn-cta .btn[href^="tel:"]').count() === 1);
 	ok(`Landing ${slug} no flexible sections`, await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
 	ok(`Landing ${slug} no raw markup leak`, await page.evaluate(() => !document.body.textContent.includes('u003c') && !document.body.textContent.includes('<p>')));
 }
@@ -842,6 +850,7 @@ await ovPage.close();
 // the title on <= 3 lines, the .ccn-card surface (1px border, 8px radius, --ccn-shadow-1).
 const cardPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
 await cardPage.goto(BASE + '/container-kaufen/', { waitUntil: 'load' });
+await cardPage.waitForSelector('ul.products > li.product .button').catch(() => null);
 const card360 = await cardPage.evaluate(() => {
 	const lis = [...document.querySelectorAll('ul.products > li.product')];
 	const li = lis[0];
@@ -863,6 +872,7 @@ const tall = (sel) => cardPage.evaluate((s) => {
 	return { n: els.length, small: els.filter((e) => e.getBoundingClientRect().height < 44).map((e) => `${(e.textContent || e.className).trim().slice(0, 24)}:${Math.round(e.getBoundingClientRect().height)}`) };
 }, sel);
 await cardPage.goto(BASE + '/', { waitUntil: 'load' });
+await cardPage.waitForSelector('#footer .footer-menu a').catch(() => null);
 const tapHeader = await tall('#header .header-inner a, #header .header-inner button');
 const tapFooter = await tall('#footer a, #footer button');
 await cardPage.click('.nav-toggle');
@@ -906,6 +916,111 @@ await page.goto(BASE + '/product/20-fuss-container-one-way/', { waitUntil: 'load
 const wcBtn = await page.evaluate(() => { const b = document.querySelector('.single_add_to_cart_button'); if (!b) return null; const s = getComputedStyle(b); return `${s.backgroundColor}|${s.color}|${Math.round(b.getBoundingClientRect().height)}`; });
 ok('Components: WooCommerce add-to-cart takes the primary button (yellow, #202020, >= 44px)', !!wcBtn
 	&& wcBtn.startsWith('rgb(247, 198, 0)|rgb(32, 32, 32)|') && parseInt(wcBtn.split('|')[2], 10) >= 44, String(wcBtn));
+// (d) Stats on the dark surface: #141414, yellow numbers, light labels (C7). (e) Home sections alternate:
+// >= 4 different backgrounds, neighbours never share one except white text sections. One CTA banner per page.
+const secPage = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+await secPage.goto(BASE + '/', { waitUntil: 'load' });
+await secPage.waitForSelector('.ccn-stats .ccn-stat-label').catch(() => null);
+const homeSections = await secPage.evaluate(() => {
+	const surface = (e) => { for (let p = e; p; p = p.parentElement) { const c = getComputedStyle(p).backgroundColor; if (c !== 'rgba(0, 0, 0, 0)') return c; } return 'rgb(255, 255, 255)'; };
+	const st = document.querySelector('.ccn-stats');
+	const num = st && st.querySelector('.ccn-stat-number');
+	const lab = st && st.querySelector('.ccn-stat-label');
+	return {
+		stats: st ? `${getComputedStyle(st).backgroundColor}|${getComputedStyle(num).color}|${getComputedStyle(lab).color}` : 'none',
+		list: [...document.querySelectorAll('main > section')].map((s) => ({ cls: s.className.split(' ')[0], bg: surface(s), text: s.matches('.ccn-section--default') })),
+	};
+});
+ok('Components (d) stats on #141414 with yellow numbers and light labels', homeSections.stats === 'rgb(20, 20, 20)|rgb(247, 198, 0)|rgb(247, 247, 247)', homeSections.stats);
+const homeBgs = homeSections.list;
+// Neighbours from the first block under the hero and contact cards (they form the first screen together).
+const flow = homeBgs.filter((s) => !/^ccn-(hero|contact-cards)$/.test(s.cls));
+const sameNeighbours = flow.slice(1).map((s, i) => [flow[i], s]).filter(([a, b]) => a.bg === b.bg && !(a.text && b.text)).map(([a, b]) => `${a.cls}->${b.cls}`);
+ok('Components (e) home: >= 4 different section backgrounds, neighbours differ', new Set(homeBgs.map((s) => s.bg)).size >= 4 && sameNeighbours.length === 0,
+	`${homeBgs.map((s) => `${s.cls}:${s.bg}`).join(', ')}${sameNeighbours.length ? ' | same: ' + sameNeighbours.join(', ') : ''}`);
+const ctaCount = {};
+for (const path of ['/', '/container-kaufen/', '/container-mieten/', '/containerzubehoer/', '/ueber-uns/', '/container-inspiration-ideen/']) {
+	await secPage.goto(BASE + path, { waitUntil: 'domcontentloaded' });
+	ctaCount[path] = await secPage.locator('.ccn-cta').count();
+}
+ok('Components: at most one CTA banner per page; without a photo it is the yellow band', Object.values(ctaCount).every((n) => n <= 1)
+	&& await secPage.evaluate(() => { const c = document.querySelector('.ccn-cta'); return !!c && c.matches('.ccn-cta--band') && getComputedStyle(c).backgroundColor === 'rgb(247, 198, 0)'; }), JSON.stringify(ctaCount));
+// (g) Contrast probe (T-45 method): every visible text on the six key pages at 360 and 1440 >= 4.5:1
+// (large text >= 3:1) against its composited background; text over photos is measured by the library probe.
+const contrastFails = (p) => p.evaluate(() => {
+	const parse = (s) => { const m = String(s).match(/rgba?\(([^)]+)\)/); if (!m) return null; const v = m[1].split(/[\s,/]+/).filter(Boolean).map(Number); return { r: v[0], g: v[1], b: v[2], a: v.length > 3 ? v[3] : 1 }; };
+	const lin = (c) => { const x = c / 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; };
+	const lum = (c) => 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+	const over = (t, u) => ({ r: t.r * t.a + u.r * (1 - t.a), g: t.g * t.a + u.g * (1 - t.a), b: t.b * t.a + u.b * (1 - t.a), a: 1 });
+	const out = [];
+	let n = 0;
+	for (const el of document.querySelectorAll('body *')) {
+		if (/^(SCRIPT|STYLE|NOSCRIPT|OPTION)$/.test(el.tagName) || el.closest('svg')) continue;
+		const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join('').trim();
+		const r = el.getBoundingClientRect();
+		if (!own || r.width <= 1 || r.height <= 1) continue;
+		let photo = false; let op = 1; const layers = [];
+		let hidden = false;
+		for (let e = el; e; e = e.parentElement) {
+			const s = getComputedStyle(e);
+			if (s.display === 'none' || s.visibility === 'hidden' || /inset\(50%\)/.test(s.clipPath)) { hidden = true; break; }
+			if (!layers.length || layers[layers.length - 1].a < 1) op *= parseFloat(s.opacity);
+			if (s.backgroundImage !== 'none' || [...e.children].some((c) => /^(IMG|PICTURE)$/.test(c.tagName) && /absolute|fixed/.test(getComputedStyle(c).position))
+				|| /gradient/.test(getComputedStyle(e, '::before').backgroundImage)) photo = true;
+			const c = parse(s.backgroundColor);
+			if (c && c.a > 0) { layers.push(c); if (c.a >= 1) break; }
+		}
+		if (hidden || photo || op <= 0.05) continue;
+		let bg = layers.length && layers[layers.length - 1].a >= 1 ? layers.pop() : { r: 255, g: 255, b: 255, a: 1 };
+		for (let i = layers.length - 1; i >= 0; i--) bg = over(layers[i], bg);
+		const s = getComputedStyle(el);
+		const fg0 = parse(s.color);
+		const fg = fg0.a * op < 1 ? over({ ...fg0, a: fg0.a * op }, bg) : fg0;
+		const ratio = (Math.max(lum(fg), lum(bg)) + 0.05) / (Math.min(lum(fg), lum(bg)) + 0.05);
+		const fs = parseFloat(s.fontSize);
+		const need = fs >= 24 || (fs >= 18.66 && parseInt(s.fontWeight, 10) >= 700) ? 3 : 4.5;
+		n++;
+		if (ratio < need) out.push(`${el.tagName.toLowerCase()}.${String(el.className).split(' ')[0]} "${own.slice(0, 24)}" ${ratio.toFixed(2)}`);
+	}
+	return { n, out };
+});
+const ctxRm = await browser.newContext({ reducedMotion: 'reduce' });
+const rmProbe = await ctxRm.newPage();
+for (const path of ['/', '/container-kaufen/', '/container-mieten/', '/container-shop/', '/kontakt-beratung/', '/product/20-fuss-container-gebraucht/']) {
+	const bad = [];
+	const counted = [];
+	for (const [w, h] of [[360, 800], [1440, 900]]) {
+		await rmProbe.setViewportSize({ width: w, height: h });
+		await rmProbe.goto(BASE + path, { waitUntil: 'load' });
+		const c = await contrastFails(rmProbe);
+		counted.push(c.n);
+		bad.push(...c.out.map((f) => `${w}: ${f}`));
+	}
+	ok(`Components (g) contrast ${path}: 0 texts under 4.5:1 (large 3:1) at 360 and 1440`, bad.length === 0 && Math.min(...counted) >= 20,
+		`${counted.join('/')} texts; ${bad.slice(0, 6).join(' | ')}`);
+}
+// Section backgrounds dark and yellow (no stored content uses them yet): switched on in the page, every text
+// of the intro, text + image and news sections keeps its contrast, links stay readable, the focus ring turns white.
+await rmProbe.setViewportSize({ width: 1280, height: 800 });
+await rmProbe.goto(BASE + '/', { waitUntil: 'load' });
+await rmProbe.waitForSelector('.ccn-intro .btn').catch(() => null);
+await rmProbe.evaluate(() => {
+	document.querySelectorAll('main > section').forEach((s) => { if (!s.matches('.ccn-intro, .ccn-text-image, .ccn-news')) s.style.display = 'none'; });
+	const set = (sel, cls) => { const e = document.querySelector(sel); if (e) e.className = cls; };
+	set('.ccn-intro', 'ccn-intro ccn-section ccn-section--dark');
+	set('.ccn-text-image', 'ccn-text-image ccn-section ccn-section--yellow');
+	set('.ccn-news', 'ccn-news ccn-section ccn-section--dark');
+});
+const variant = await contrastFails(rmProbe);
+const variantFails = variant.out;
+await rmProbe.focus('.ccn-intro .btn').catch(() => null);
+await rmProbe.keyboard.press('Shift+Tab');
+await rmProbe.keyboard.press('Tab');
+const darkRing = await rmProbe.evaluate(() => (document.activeElement && document.activeElement.matches('.ccn-intro .btn') ? getComputedStyle(document.activeElement).outlineColor : 'focus not on the intro button'));
+ok('Components: dark and yellow section backgrounds keep every text >= AA and a white focus ring on dark', variant.n >= 20 && variantFails.length === 0 && darkRing === 'rgb(255, 255, 255)',
+	`${variant.n} texts; ${variantFails.slice(0, 6).join(' | ')} ring ${darkRing}`);
+await ctxRm.close();
+await secPage.close();
 
 await browser.close();
 console.log(results.join('\n'));

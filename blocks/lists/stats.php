@@ -15,7 +15,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
 	return;
 }
 ?>
-<section class="ccn-stats" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
+<section class="ccn-stats ccn-section" data-motion="reveal"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<div class="ccn-stats-inner ccn-container">
 		<?php if ( $ccn_heading ) : ?>
 			<h2 class="ccn-stats-heading">
