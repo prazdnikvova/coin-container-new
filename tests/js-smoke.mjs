@@ -1036,12 +1036,18 @@ const T49_PRODUCT = '/product/20-fuss-container-gebraucht/';
 const wooPages = ['/container-shop/', '/product-category/cointainer/standardcontainer/', T49_PRODUCT, '/warenkorb/'];
 const jqPage = await browser.newPage();
 const jq = {};
+const wcCss = {};
 for (const path of [...wooPages, '/', '/container-kaufen/', '/containerzubehoer/', '/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/']) {
 	await jqPage.goto(BASE + path, { waitUntil: 'load' });
 	jq[path] = await jqPage.evaluate(() => `${typeof window.jQuery}|${(document.getElementById('jquery-core-js') || {}).defer === true ? 'defer' : 'blocking'}`);
+	wcCss[path] = await jqPage.locator('link[rel="stylesheet"][href*="/plugins/woocommerce/assets/css/woocommerce"]').count();
 }
 ok('Product & catalog: jQuery on the WooCommerce pages only (shop, category, product, cart), deferred on shop/category/product',
 	Object.entries(jq).every(([p, t]) => (wooPages.includes(p) ? t.startsWith('function') && (p === '/warenkorb/' || t.endsWith('defer')) : t.startsWith('undefined'))), JSON.stringify(jq));
+// WooCommerce's three stylesheets only where theme.css does not cover its markup yet (shop, category, cart); the product
+// page and the product cards of the front page and landings run on theme.css alone (same computed card styles, T-49 probe).
+ok('Product & catalog: WooCommerce stylesheets on shop, category and cart only (product page, front page, landings: 0)',
+	Object.entries(wcCss).every(([p, n]) => (['/container-shop/', '/product-category/cointainer/standardcontainer/', '/warenkorb/'].includes(p) ? n === 3 : n === 0)), JSON.stringify(wcCss));
 await jqPage.close();
 // Stock WooCommerce gallery (slider + lightbox, no zoom). 360: visible at once (WooCommerce sets opacity 0 inline until
 // its script ran), the slider started with arrows and no thumbnail strip (one request per photo), the first photo eager

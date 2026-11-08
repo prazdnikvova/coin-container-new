@@ -133,24 +133,19 @@ function ccn_drop_wc_blocks_style() {
 
 /**
  * WooCommerce stylesheets (general/layout/smallscreen, 3 requests) load only
- * where products can actually render: Woo pages and pages embedding the
- * featured-products block or a products shortcode. Landings, blog and legal
- * pages carry no product markup — dropping the styles there keeps them
- * within the request budget.
+ * where theme.css does not style WooCommerce's markup itself yet: the shop
+ * and product archives, cart, checkout and account. Product pages and the
+ * product cards of the front page and landings (featured-products block) live
+ * on theme.css alone: without the three files the cards compute the same
+ * styles (T-49 probe) and the product page takes its rules from the theme.
+ *
+ * @param array $styles WooCommerce's stylesheets.
+ * @return array
  */
-add_action( 'wp_enqueue_scripts', 'ccn_scope_wc_styles', 9998 );
-function ccn_scope_wc_styles() {
-	if ( ! class_exists( 'WooCommerce' ) ) {
-		return;
+add_filter( 'woocommerce_enqueue_styles', 'ccn_scope_wc_styles' );
+function ccn_scope_wc_styles( $styles ) {
+	if ( is_shop() || is_product_taxonomy() || is_cart() || is_checkout() || is_account_page() ) {
+		return $styles;
 	}
-	if ( is_woocommerce() || is_cart() || is_checkout() || is_account_page() ) {
-		return;
-	}
-	$post = get_post();
-	if ( $post && ( has_block( 'acf/featured-products', $post ) || has_shortcode( $post->post_content, 'products' ) ) ) {
-		return;
-	}
-	foreach ( array( 'woocommerce-general', 'woocommerce-layout', 'woocommerce-smallscreen' ) as $ccn_handle ) {
-		wp_dequeue_style( $ccn_handle );
-	}
+	return array();
 }
