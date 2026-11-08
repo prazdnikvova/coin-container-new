@@ -680,8 +680,10 @@ JS.
   `--ccn-color-error-surface` otherwise.
 - **Focus on the result** (`forms.js`): `wpcf7invalid` → the first invalid
   field; `wpcf7mailsent` / `wpcf7mailfailed` → the message (`tabindex="-1"`,
-  CF7's `aria-hidden` removed, so it is read once focused). CF7 describes the
-  consent's wrapper, not its checkbox: the script passes the reference on.
+  CF7's `aria-hidden` removed, so it is read once focused). CF7 resets a sent
+  form first and hides the message meanwhile, so after sending the focus
+  waits for `wpcf7reset`. CF7 describes the consent's wrapper, not its
+  checkbox: the script passes the reference on.
 - **Texts**: messages in German with «Sie» (production form 5682), form
   language `de_DE` (`lang="de-DE"` on the form, CF7 had `en-US`).
 - **Contact pages** (`/kontakt-beratung/`, `/container-angebot-anfordern/`):

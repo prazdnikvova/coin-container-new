@@ -1484,6 +1484,27 @@ ok('Contact pages 360x800: hero photo, h1, the form and its first field in the f
 ok('Hero CTA by content: pages that open with the form show no CTA button but the phone line; /container-kaufen/ keeps its CTA',
 	T51_CONTACT.every((p) => t51First[p].cta === 0 && t51First[p].phone === 1) && t51First['/container-kaufen/'].cta === 1 && t51First['/container-kaufen/'].phone === 1,
 	JSON.stringify(Object.entries(t51First).map(([p, f]) => [p, f.cta, f.phone])));
+// After sending (synthetic CF7 events, no submission): CF7 resets a sent form and hides the message meanwhile, so
+// forms.js waits for wpcf7reset and then moves the focus to the message (aria-hidden removed, tabindex -1).
+await t51.goto(`${BASE}/kontakt-beratung/?cb=${Date.now()}`, { waitUntil: 'load' });
+await t51.waitForFunction(() => { const f = document.querySelector('form.wpcf7-form'); return !!f && !!f.wpcf7; }, null, { timeout: 15000 }).catch(() => null);
+const t51Sent = await t51.evaluate(async () => {
+	const form = document.querySelector('form.wpcf7-form');
+	const out = form.querySelector('.wpcf7-response-output');
+	const tick = () => new Promise((r) => setTimeout(r, 80));
+	const status = (s) => { form.className = form.className.replace(/\b(init|resetting|sent)\b/g, '').trim() + ` ${s}`; form.setAttribute('data-status', s); };
+	out.textContent = 'Vielen Dank für Ihre Nachricht!';
+	status('resetting');
+	form.dispatchEvent(new CustomEvent('wpcf7mailsent', { bubbles: true, detail: { contactFormId: 340, status: 'mail_sent' } }));
+	await tick();
+	const whileResetting = document.activeElement === out;
+	status('sent');
+	form.dispatchEvent(new CustomEvent('wpcf7reset', { bubbles: true, detail: { contactFormId: 340 } }));
+	await tick();
+	return { whileResetting, after: document.activeElement === out, ariaHidden: out.getAttribute('aria-hidden'), tabindex: out.getAttribute('tabindex'), visible: out.getBoundingClientRect().height > 0 };
+});
+ok('Request form after sending (synthetic CF7 events): the focus moves to the message once CF7 has reset the form, no aria-hidden on it',
+	!t51Sent.whileResetting && t51Sent.after && t51Sent.ariaHidden === null && t51Sent.tabindex === '-1' && t51Sent.visible, JSON.stringify(t51Sent));
 await t51.close();
 
 await browser.close();
