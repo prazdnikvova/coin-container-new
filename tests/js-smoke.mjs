@@ -502,6 +502,21 @@ ok('Block editor styles: theme.css + editor.css, editor.css not on the front end
 ok('html5 theme support without the dead "style" argument (WP 7.0)', /add_theme_support\(\s*'html5'/.test(functionsPhp)
 	&& !/add_theme_support\(\s*'html5',[^;]*'style'/.test(functionsPhp));
 
+// Motion invariants (T-46, DESIGN.md "Motion"). Scrolls are instant: smooth
+// scrolling (no-preference) would still be moving when the check runs.
+const mainJs = themeFile('assets/js/main.js');
+const jump = (p, y) => p.evaluate((yy) => window.scrollTo({ top: yy, behavior: 'instant' }), y);
+await page.goto(BASE + '/', { waitUntil: 'load' });
+await jump(page, 300);
+await page.waitForTimeout(200);
+const stuckAt300 = await page.evaluate(() => document.getElementById('header').classList.contains('is-stuck'));
+await jump(page, 0);
+await page.waitForTimeout(200);
+const stuckAt0 = await page.evaluate(() => document.getElementById('header').classList.contains('is-stuck'));
+ok('Motion: #header.is-stuck after scrollTo(0, 300), gone at 0 (sentinel)', stuckAt300 && !stuckAt0
+	&& await page.locator('body > .ccn-header-sentinel[aria-hidden="true"]').count() === 1, `300: ${stuckAt300}, 0: ${stuckAt0}`);
+ok('Motion: main.js has no scroll listener', mainJs.length > 0 && !/addEventListener\(\s*['"]scroll['"]/.test(mainJs));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

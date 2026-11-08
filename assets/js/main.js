@@ -70,12 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Sticky header shadow once the page scrolls.
+	// Sticky header: solid background + shadow (.is-stuck) once the sentinel at
+	// the top of <body> (header.php) leaves the viewport. No scroll listener; it
+	// also runs with reduced motion (a state, not an animation).
 	const header = document.getElementById('header');
-	if (header) {
-		const onScroll = () => header.classList.toggle('is-stuck', window.scrollY > 8);
-		onScroll();
-		window.addEventListener('scroll', onScroll, { passive: true });
+	const sentinel = document.querySelector('.ccn-header-sentinel');
+	if (header && sentinel && 'IntersectionObserver' in window) {
+		new IntersectionObserver((es) => header.classList.toggle('is-stuck', !es[es.length - 1].isIntersecting)).observe(sentinel);
 	}
 
 	// Stats block: count numbers up once the block scrolls into view.

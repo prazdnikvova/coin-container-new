@@ -7,6 +7,8 @@
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>
+<?php // Sticky-header sentinel: main.js sets #header.is-stuck once it leaves the viewport (IntersectionObserver, no scroll listener). ?>
+<div class="ccn-header-sentinel" aria-hidden="true"></div>
 <header id="header" class="site-header">
 	<div class="ccn-topbar">
 		<div class="ccn-topbar-inner ccn-container">

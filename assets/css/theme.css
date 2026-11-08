@@ -102,9 +102,11 @@ em,i{font-style:italic}
 html{scroll-padding-top:calc(var(--ccn-header-h) + 1rem)}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 /* 16px metrics kept for the header (T-47) */
-.site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000;font-size:1rem;transition:background-color .25s ease,box-shadow .25s ease}
+.site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000;font-size:1rem;transition:background-color var(--ccn-dur-base) var(--ccn-ease-out),box-shadow var(--ccn-dur-base) var(--ccn-ease-out)}
 .site-header a{text-decoration:none}
 .site-header.is-stuck{box-shadow:var(--ccn-shadow-1)}
+/* header.php sentinel: .is-stuck once it scrolls out, i.e. after 8px as before */
+.ccn-header-sentinel{position:absolute;top:8px;left:0;width:1px;height:1px}
 
 /* Over a hero the header starts as translucent glass (original: rgba(255,255,255,.46)
  * + backdrop blur) and turns solid white as soon as the page scrolls (.is-stuck). */
