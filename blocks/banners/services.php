@@ -1,9 +1,10 @@
 <?php
 /**
  * Block: Services strip. Accent heading + intro, then a full-width photo
- * strip with numbered columns (01-04); each column reveals its text on
- * hover, like the original. The photo is a lazy <img> — the strip sits
- * below the fold and must never join the LCP request chain.
+ * strip with numbered columns (01-04). Unlike the original, the column text
+ * is always visible (no hover-only content, T-46); hover only lifts the
+ * column. The photo is a lazy <img> — the strip sits below the fold and
+ * must never join the LCP request chain.
  */
 
 $ccn_heading = get_field( 'heading' );

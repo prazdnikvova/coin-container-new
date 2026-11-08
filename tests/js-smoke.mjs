@@ -553,11 +553,12 @@ ok('Motion: hero, hero image, contact cards and header carry no data-motion, opa
 	lcpMoving.bad.join(', ') || `${lcpMoving.n} elements`);
 await jump(page, 300);
 await page.waitForTimeout(200);
-const stuckAt300 = await page.evaluate(() => document.getElementById('header').classList.contains('is-stuck'));
+const isStuck = () => page.evaluate(() => { const h = document.getElementById('header'); return h ? h.classList.contains('is-stuck') : 'no #header'; });
+const stuckAt300 = await isStuck();
 await jump(page, 0);
 await page.waitForTimeout(200);
-const stuckAt0 = await page.evaluate(() => document.getElementById('header').classList.contains('is-stuck'));
-ok('Motion: #header.is-stuck after scrollTo(0, 300), gone at 0 (sentinel)', stuckAt300 && !stuckAt0
+const stuckAt0 = await isStuck();
+ok('Motion: #header.is-stuck after scrollTo(0, 300), gone at 0 (sentinel)', stuckAt300 === true && stuckAt0 === false
 	&& await page.locator('body > .ccn-header-sentinel[aria-hidden="true"]').count() === 1, `300: ${stuckAt300}, 0: ${stuckAt0}`);
 ok('Motion: main.js has no scroll listener', mainJs.length > 0 && !/addEventListener\(\s*['"]scroll['"]/.test(mainJs));
 // Counters: the HTML carries the final number; on reveal it counts up from 0 and lands on
@@ -626,6 +627,51 @@ const staticMotion = ['template-parts/page-hero.php', 'header.php', 'footer.php'
 ok('Motion: data-motion="reveal" on every block root except home-hero/contact-cards; grids stagger',
 	blockTemplates.length >= 12 && badMotionRoots.length === 0 && missingStagger.length === 0 && staticMotion.length === 0,
 	[...badMotionRoots, ...missingStagger, ...staticMotion].join(', ') || `${blockTemplates.length - motionNever.length} reveal, ${motionStagger.length} stagger`);
+// (d) Transitions: never "all", durations only from the motion tokens (the reduced-motion
+// override is the one literal value).
+const cssNoComments = themeCss.replace(/\/\*[\s\S]*?\*\//g, '');
+const transitionDecls = cssNoComments.replace(/@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{[^{}]*\{[^}]*\}\s*\}/g, '')
+	.match(/transition(?:-duration|-delay)?\s*:[^;}]+/g) || [];
+const rawDurations = transitionDecls.filter((d) => /(?<![\w-])\d*\.?\d+m?s\b/.test(d.replace(/var\([^)]*\)/g, '')));
+ok('theme.css: no "transition: all", every duration a motion token', !/transition(-property)?\s*:\s*all\b/.test(themeCss)
+	&& transitionDecls.length >= 5 && rawDurations.length === 0, rawDurations.join(' | ') || `${transitionDecls.length} declarations`);
+// Hover/focus on the tokens: cards lift 2px with --ccn-shadow-3, menu bar grows in, service texts
+// visible without hover (F7), mobile menu animates open and closes at once.
+const deskPage = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await deskPage.goto(BASE + '/', { waitUntil: 'load' });
+const serviceTexts = await deskPage.evaluate(() => [...document.querySelectorAll('.ccn-service-text')]
+	.map((e) => `${getComputedStyle(e).opacity}/${e.offsetHeight > 0}/${getComputedStyle(e).maxHeight}`));
+ok('Services: texts visible at 1440 without hover (no max-height:0/opacity:0)', serviceTexts.length === 4
+	&& serviceTexts.every((s) => s === '1/true/none'), serviceTexts.join(', '));
+await deskPage.evaluate(() => document.querySelector('.ccn-news-grid').scrollIntoView({ block: 'center', behavior: 'instant' }));
+await deskPage.waitForTimeout(1100);
+await deskPage.hover('.ccn-news-card');
+await deskPage.waitForTimeout(350);
+const cardHover = await deskPage.evaluate(() => {
+	const s = getComputedStyle(document.querySelector('.ccn-news-card'));
+	const b = getComputedStyle(document.querySelector('.btn'));
+	return { transform: s.transform, shadow: s.boxShadow, btn: `${b.transitionProperty}|${b.transitionDuration}|${b.transitionTimingFunction}` };
+});
+ok('Hover: card lifts 2px with --ccn-shadow-3; .btn transitions listed, 200ms, ease-out token',
+	cardHover.transform === 'matrix(1, 0, 0, 1, 0, -2)' && cardHover.shadow.includes('0px 8px 24px')
+	&& cardHover.btn === 'color, background-color, border-color, box-shadow, transform|0.2s|cubic-bezier(0.2, 0.7, 0.2, 1)', JSON.stringify(cardHover));
+await jump(deskPage, 0);
+const barOf = (sel) => deskPage.evaluate((s) => getComputedStyle(document.querySelector(s), '::before').transform, sel);
+const menuItem = '.site-menu > li:not(.current-menu-item):not(.current-menu-ancestor) > a';
+const barRest = await barOf(menuItem);
+await deskPage.hover(menuItem);
+await deskPage.waitForTimeout(350);
+const barHover = await barOf(menuItem);
+ok('Hover: main menu bar grows in (scaleX 0 -> 1)', barRest === 'matrix(0, 0, 0, 1, 0, 0)' && barHover === 'none', `${barRest} -> ${barHover}`);
+await deskPage.close();
+const mobMenu = await browser.newPage({ viewport: { width: 375, height: 720 } });
+await mobMenu.goto(BASE + '/', { waitUntil: 'load' });
+await mobMenu.click('.nav-toggle');
+const menuOpen = await mobMenu.evaluate(() => document.getElementById('site-nav').getAnimations().map((a) => a.transitionProperty).sort().join(','));
+await mobMenu.keyboard.press('Escape');
+const menuClosed = await mobMenu.evaluate(() => getComputedStyle(document.getElementById('site-nav')).display);
+ok('Mobile menu: opens with an opacity/transform transition, closes at once', menuOpen === 'opacity,transform' && menuClosed === 'none', `${menuOpen} / ${menuClosed}`);
+await mobMenu.close();
 ok('Motion: prefers-reduced-motion handled in theme.css and main.js', /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\*,\s*\*::before,\s*\*::after\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important;\s*animation-duration:\s*0\.01ms\s*!important/.test(themeCss)
 	&& /matchMedia\(\s*'\(prefers-reduced-motion: no-preference\)'\s*\)/.test(mainJs));
 

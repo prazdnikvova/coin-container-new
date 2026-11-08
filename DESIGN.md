@@ -253,6 +253,23 @@ inventory of the old site (A5 §4), principles from the design brief (A6
    animation to 0.01ms; `scroll-behavior: smooth` applies only under
    `no-preference`.
 
+### Hover, focus and menus
+
+- Every `transition` in `theme.css` lists its properties and takes its
+  duration from a motion token; `transition: all` and literal durations fail
+  the smoke test (the reduced-motion override is the one literal value).
+- `.btn` (`:hover`, `:focus-visible`) and the cards `li.product`,
+  `.ccn-news-card`, `.ccn-info-card`, `.ccn-service` (`:hover`,
+  `:focus-within`) lift by `translateY(-2px)` with `--ccn-shadow-3` in
+  `--ccn-dur-fast`; `.btn:active` returns to `translateY(0)`. Card and button
+  looks (radius, rest shadow, focus ring) are T-48.
+- Main menu (desktop): the yellow bar under the current/hovered item grows
+  in (`scaleX` 0 → 1). Mobile menu: opens with opacity + `translateY(-.5rem)`
+  in `--ccn-dur-base` via `@starting-style` (instant in browsers without it),
+  closes at once; the focus logic of `main.js` is unchanged.
+- Services: the column text is always visible (no `max-height: 0` /
+  `opacity: 0` until hover any more, A1 F7); hover only lifts the column.
+
 ### Not animated (A5 §4, A6 §6.6)
 
 Hero image and title, contact cards, the landing hero band, the header

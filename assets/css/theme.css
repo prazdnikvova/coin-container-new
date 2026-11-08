@@ -105,7 +105,7 @@ html{scroll-padding-top:calc(var(--ccn-header-h) + 1rem)}
 .site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000;font-size:1rem;transition:background-color var(--ccn-dur-base) var(--ccn-ease-out),box-shadow var(--ccn-dur-base) var(--ccn-ease-out)}
 .site-header a{text-decoration:none}
 .site-header.is-stuck{box-shadow:var(--ccn-shadow-1)}
-/* header.php sentinel: .is-stuck once it scrolls out, i.e. after 8px as before */
+/* Sentinel (header.php): .is-stuck after 8px of scroll */
 .ccn-header-sentinel{position:absolute;top:8px;left:0;width:1px;height:1px}
 
 /* Over a hero the header starts as translucent glass (original: rgba(255,255,255,.46)
@@ -144,7 +144,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .header-search-form .btn{padding:.6rem 1rem}
 
 .nav-toggle{display:block;order:9;background:none;border:0;padding:.75rem;cursor:pointer}
-.nav-toggle-bar,.nav-toggle-bar::before,.nav-toggle-bar::after{display:block;width:24px;height:2px;background:var(--ccn-color-text);transition:transform .2s}
+.nav-toggle-bar,.nav-toggle-bar::before,.nav-toggle-bar::after{display:block;width:24px;height:2px;background:var(--ccn-color-text);transition:transform var(--ccn-dur-fast) var(--ccn-ease-out)}
 .nav-toggle-bar{position:relative}
 .nav-toggle-bar::before,.nav-toggle-bar::after{content:'';position:absolute;left:0}
 .nav-toggle-bar::before{top:-7px}
@@ -154,7 +154,9 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .nav-open .nav-toggle-bar::after{opacity:0}
 
 .site-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);z-index:100}
-.nav-open .site-nav{display:block}
+.nav-open .site-nav{display:block;transition:opacity var(--ccn-dur-base) var(--ccn-ease-out),transform var(--ccn-dur-base) var(--ccn-ease-out)}
+/* Mobile menu: animated open, instant close */
+@starting-style{.nav-open .site-nav{opacity:0;transform:translateY(-.5rem)}}
 .site-menu a{display:block;padding:.75rem 1rem;font-family:var(--ccn-font-heading);font-weight:700}
 .site-menu .sub-menu a{padding-left:2rem;font-weight:400}
 
@@ -167,9 +169,10 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 	.site-menu{display:flex;gap:.25rem}
 	.site-menu a{padding:.5rem .75rem}
 	.site-menu>li{position:relative}
-	/* Current/hovered item: dark text + yellow bar (::after is the submenu caret) */
+	/* Current/hovered item: dark text + yellow bar that grows in (::after is the submenu caret) */
 	.site-menu>li>a:hover,.site-menu>li.current-menu-item>a,.site-menu>li.current-menu-ancestor>a{color:var(--ccn-color-text)}
-	.site-menu>li>a:hover::before,.site-menu>li.current-menu-item>a::before,.site-menu>li.current-menu-ancestor>a::before{content:'';position:absolute;left:.75rem;right:.75rem;bottom:0;height:3px;background:var(--ccn-color-primary)}
+	.site-menu>li>a::before{content:'';position:absolute;left:.75rem;right:.75rem;bottom:0;height:3px;background:var(--ccn-color-primary);transform:scaleX(0);transition:transform var(--ccn-dur-fast) var(--ccn-ease-out)}
+	.site-menu>li>a:hover::before,.site-menu>li.current-menu-item>a::before,.site-menu>li.current-menu-ancestor>a::before{transform:none}
 	.site-menu>li.menu-item-has-children>a::after{content:'';display:inline-block;margin-left:.4rem;vertical-align:.15em;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor}
 	.site-menu .sub-menu{display:none;position:absolute;top:100%;left:0;min-width:16rem;background:var(--ccn-color-white);border:1px solid var(--ccn-color-light);box-shadow:var(--ccn-shadow-2);z-index:100}
 	.site-menu li:hover>.sub-menu,.site-menu li:focus-within>.sub-menu{display:block}
@@ -194,7 +197,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 /* --------------------------------------------------------------------------
  * Buttons
  * ------------------------------------------------------------------------ */
-.btn{display:inline-block;padding:.85rem 1.75rem;font-family:var(--ccn-font-heading);font-weight:700;line-height:1.2;border-radius:4px;border:2px solid transparent;cursor:pointer;transition:background .15s,color .15s}
+.btn{display:inline-block;padding:.85rem 1.75rem;font-family:var(--ccn-font-heading);font-weight:700;line-height:1.2;border-radius:4px;border:2px solid transparent;cursor:pointer}
 .btn-primary{background:var(--ccn-color-primary);color:var(--ccn-color-text)}
 .btn-primary:hover{background:var(--ccn-color-text);color:var(--ccn-color-white)}
 
@@ -279,10 +282,6 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-service-number{color:var(--ccn-color-primary);font-family:var(--ccn-font-heading);font-weight:700;font-size:1.25rem}
 .ccn-service-title{color:var(--ccn-color-white);margin:.25rem 0 0}
 .ccn-service-text{font-size:.9rem;color:rgba(255,255,255,.85);margin-top:.75rem}
-@media (min-width:64rem){
-	.ccn-service-text{max-height:0;overflow:hidden;opacity:0;transition:max-height .3s ease,opacity .3s ease;margin-top:0}
-	.ccn-service:hover .ccn-service-text,.ccn-service:focus-within .ccn-service-text{max-height:12rem;opacity:1;margin-top:.75rem}
-}
 
 /* Block: stats — centered heading + counters */
 .ccn-stats{padding:4.5rem 0 3rem;background:var(--ccn-color-white)}
@@ -420,7 +419,7 @@ ul.products li.product img{width:100%;height:auto;border-radius:6px;margin-botto
 ul.products li.product .woocommerce-loop-product__title{font-family:var(--ccn-font-heading);font-size:1.05rem;font-weight:700;padding:0;margin-bottom:.4rem}
 ul.products li.product .price{display:block;color:var(--ccn-color-text);font-weight:700;margin-bottom:.6rem}
 ul.products li.product .price del{color:var(--ccn-color-secondary);font-weight:400;margin-right:.35rem}
-ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{display:inline-block;background:var(--ccn-color-primary);color:var(--ccn-color-text);font-family:var(--ccn-font-heading);font-weight:700;padding:.6rem 1.1rem;border:0;border-radius:4px;cursor:pointer;transition:background .15s,color .15s}
+ul.products li.product .button,.woocommerce a.button,.woocommerce button.button{display:inline-block;background:var(--ccn-color-primary);color:var(--ccn-color-text);font-family:var(--ccn-font-heading);font-weight:700;padding:.6rem 1.1rem;border:0;border-radius:4px;cursor:pointer}
 .woocommerce a.button:hover,.woocommerce button.button:hover,ul.products li.product .button:hover{background:var(--ccn-color-text);color:var(--ccn-color-white)}
 .onsale{display:inline-block;background:var(--ccn-color-primary);color:var(--ccn-color-text);padding:.2rem .6rem;border-radius:2px;font-size:.75rem;font-weight:700;text-transform:uppercase}
 .woocommerce-result-count{color:var(--ccn-color-secondary)}
@@ -518,4 +517,8 @@ body .is-layout-flex{display:flex}.is-layout-flex{flex-wrap:wrap;align-items:cen
 .ccn-motion .is-anim[data-motion],.ccn-motion .is-anim[data-motion-stagger]>*{animation:ccn-reveal var(--ccn-dur-reveal) var(--ccn-ease-out) backwards}
 @keyframes ccn-reveal{from{opacity:0;transform:translateY(20px)}}
 }
+/* Hover/focus feedback: listed properties (never "all") on the motion tokens */
+.btn,.woocommerce a.button,.woocommerce button.button,ul.products li.product .button,li.product,.ccn-news-card,.ccn-info-card,.ccn-service{transition-property:color,background-color,border-color,box-shadow,transform;transition-duration:var(--ccn-dur-fast);transition-timing-function:var(--ccn-ease-out)}
+.btn:is(:hover,:focus-visible),ul.products li.product:is(:hover,:focus-within),:is(.ccn-news-card,.ccn-info-card,.ccn-service):is(:hover,:focus-within){transform:translateY(-2px);box-shadow:var(--ccn-shadow-3)}
+.btn:active{transform:translateY(0)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
