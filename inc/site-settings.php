@@ -48,3 +48,14 @@ function ccn_setting( $name, $default = '' ) {
 		? $settings[ $name ]
 		: $default;
 }
+
+/**
+ * The Site Settings phone as a tel: URL (digits and + only), '' without a phone.
+ * The number itself is printed as typed in Site Settings.
+ *
+ * @return string
+ */
+function ccn_phone_href() {
+	$digits = preg_replace( '/[^0-9+]/', '', (string) ccn_setting( 'phone' ) );
+	return $digits ? 'tel:' . $digits : '';
+}

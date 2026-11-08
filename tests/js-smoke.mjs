@@ -50,8 +50,8 @@ ok('Header phone link', await page.locator('.header-phone[href^="tel:"]').count(
 ok('Topbar visible on desktop', await page.locator('.ccn-topbar').isVisible());
 ok('Topbar email link', await page.locator('.ccn-topbar-email[href^="mailto:"]').count() === 1);
 ok('Topbar social icons', await page.locator('.ccn-topbar-social a[href^="https://"]').count() >= 3);
-ok('Header is sticky', await page.evaluate(() =>
-	getComputedStyle(document.querySelector('.site-header')).position === 'sticky'));
+ok('Header is fixed (T-47: one element, body reserves its height)', await page.evaluate(() =>
+	getComputedStyle(document.querySelector('.site-header')).position === 'fixed'));
 ok('Topbar is grey (secondary)', await page.evaluate(() =>
 	getComputedStyle(document.querySelector('.ccn-topbar')).backgroundColor === 'rgb(96, 94, 94)'));
 ok('Header glass over hero, white after scroll', await page.evaluate(async () => {
@@ -733,6 +733,65 @@ await noJsRail.close();
 ok('Motion: main.js <= 7 KB raw', Buffer.byteLength(mainJs) <= 7168, `${Buffer.byteLength(mainJs)} B`);
 ok('Motion: prefers-reduced-motion handled in theme.css and main.js', /@media\s*\(prefers-reduced-motion:\s*reduce\)\s*\{\s*\*,\s*\*::before,\s*\*::after\s*\{[^}]*transition-duration:\s*0\.01ms\s*!important;\s*animation-duration:\s*0\.01ms\s*!important/.test(themeCss)
 	&& /matchMedia\(\s*'\(prefers-reduced-motion: no-preference\)'\s*\)/.test(mainJs));
+
+// First screen (T-47, DESIGN.md "Header", "Hero", "Action bar"; A6 §6.7). At 360x800 the fixed
+// header stays <= 64px with a 44x44 phone link, the h1 takes <= 4 lines, and the primary CTA, the
+// hero phone line and (front page) the trust row end inside the first screen, above the action
+// bar. From 64rem the header row is 80px under the top bar and compacts to one 64px row once
+// scrolled. Smooth scrolling is switched off before every geometry probe.
+const noSmooth = 'html,body{scroll-behavior:auto !important}';
+const firstScreenPages = ['/', '/container-kaufen/', '/container-mieten/'];
+const fsPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+const fs360 = {};
+for (const path of firstScreenPages) {
+	await fsPage.goto(BASE + path, { waitUntil: 'load' });
+	await fsPage.addStyleTag({ content: noSmooth });
+	await fsPage.waitForSelector('#header');
+	await fsPage.evaluate(() => document.fonts.ready);
+	fs360[path] = await fsPage.evaluate(() => {
+		const vis = (e) => !!e && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden' && e.getBoundingClientRect().width > 0;
+		const box = (e) => { if (!vis(e)) return null; const b = e.getBoundingClientRect(); return { top: Math.round(b.top), bottom: Math.round(b.bottom), w: Math.round(b.width), h: Math.round(b.height) }; };
+		const header = document.getElementById('header');
+		const h1 = document.querySelector('h1');
+		const bar = document.querySelector('.ccn-action-bar');
+		return {
+			header: header ? Math.round(header.getBoundingClientRect().height) : -1,
+			tel: box(header && [...header.querySelectorAll('a[href^="tel:"]')].find(vis)),
+			h1Lines: h1 ? Math.round(h1.getBoundingClientRect().height / parseFloat(getComputedStyle(h1).lineHeight)) : -1,
+			cta: box(document.querySelector('.ccn-hero .btn-primary, .ccn-page-hero .btn-primary')),
+			heroTel: box([...document.querySelectorAll('.ccn-hero a[href^="tel:"], .ccn-page-hero a[href^="tel:"]')].find(vis)),
+			trust: box(document.querySelector('.ccn-trust')),
+			bar: box(bar), barLinks: bar ? [...bar.querySelectorAll('a')].map((a) => `${a.textContent.trim()}|${a.getAttribute('href')}`) : [],
+		};
+	});
+}
+const fsList = (fn) => firstScreenPages.map((p) => `${p} ${fn(fs360[p])}`).join(', ');
+ok('First screen 360: #header <= 64px on /, kaufen, mieten', firstScreenPages.every((p) => fs360[p].header > 0 && fs360[p].header <= 64),
+	fsList((s) => s.header));
+ok('First screen 360: phone link in the header, visible, >= 44x44, inside the 64px row', firstScreenPages.every((p) => {
+	const t = fs360[p].tel;
+	return !!t && t.w >= 44 && t.h >= 44 && t.bottom <= 64;
+}), fsList((s) => JSON.stringify(s.tel)));
+await fsPage.close();
+const deskHeader = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+await deskHeader.goto(BASE + '/', { waitUntil: 'load' });
+await deskHeader.addStyleTag({ content: noSmooth });
+await deskHeader.waitForSelector('#header');
+const deskState = () => deskHeader.evaluate(() => {
+	const h = (sel) => { const e = document.querySelector(sel); return e ? Math.round(e.getBoundingClientRect().height) : -1; };
+	const tb = document.querySelector('.ccn-topbar');
+	const bar = document.querySelector('.ccn-action-bar');
+	return { header: h('#header'), row: h('.header-inner'), topbar: h('.ccn-topbar'), topbarVis: tb ? getComputedStyle(tb).visibility : 'none',
+		bar: bar ? getComputedStyle(bar).display : 'absent' };
+});
+const deskRest = await deskState();
+await deskHeader.evaluate(() => window.scrollTo(0, 300));
+await deskHeader.waitForTimeout(500);
+const deskScrolled = await deskState();
+ok('Header 1280: 80px row under the 40px top bar at rest; after scrollTo(0, 300) <= 64px, top bar folded and hidden',
+	deskRest.row === 80 && deskRest.topbar === 40 && deskRest.header === 120 && deskScrolled.header <= 64
+	&& deskScrolled.topbar === 0 && deskScrolled.topbarVis === 'hidden', JSON.stringify({ rest: deskRest, scrolled: deskScrolled }));
+await deskHeader.close();
 
 await browser.close();
 console.log(results.join('\n'));

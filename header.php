@@ -15,8 +15,8 @@
 			<div class="ccn-topbar-contacts">
 				<?php $ccn_phone = ccn_setting( 'phone' ); ?>
 				<?php if ( $ccn_phone ) : ?>
-					<a class="header-phone" href="tel:<?php echo esc_attr( preg_replace( '/[^0-9+]/', '', $ccn_phone ) ); ?>">
-						<svg class="ccn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.9 1.9 0 0 1-2.1 1.9 19 19 0 0 1-8.3-3 18.7 18.7 0 0 1-5.7-5.7 19 19 0 0 1-3-8.3A1.9 1.9 0 0 1 3.8 2h2.6a1.9 1.9 0 0 1 1.9 1.6c.12.92.34 1.83.65 2.7a1.9 1.9 0 0 1-.43 2L7.4 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.12a1.9 1.9 0 0 1 2-.43c.87.31 1.78.53 2.7.65a1.9 1.9 0 0 1 1.6 1.9Z"/></svg>
+					<a class="header-phone" href="<?php echo esc_url( ccn_phone_href() ); ?>">
+						<?php echo ccn_phone_icon( 14 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
 						<?php echo esc_html( $ccn_phone ); ?>
 					</a>
 				<?php endif; ?>
@@ -67,11 +67,6 @@
 			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="106" height="80" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 		</a>
 
-		<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
-			<span class="nav-toggle-bar" aria-hidden="true"></span>
-			<span class="screen-reader-text"><?php esc_html_e( 'Menü', 'coin-container' ); ?></span>
-		</button>
-
 		<nav id="site-nav" class="site-nav" aria-label="<?php esc_attr_e( 'Hauptmenü', 'coin-container' ); ?>">
 			<?php
 			wp_nav_menu(
@@ -85,7 +80,15 @@
 			?>
 		</nav>
 
+		<?php // DOM = visual order: phone, cart, search, burger (the burger moves focus into the menu, main.js). ?>
 		<div class="header-actions">
+			<?php if ( $ccn_phone ) : ?>
+				<?php // Below 64rem only (from 64rem the top bar shows the number); named by screen-reader text. ?>
+				<a class="site-phone" href="<?php echo esc_url( ccn_phone_href() ); ?>">
+					<?php echo ccn_phone_icon( 22 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG. ?>
+					<span class="screen-reader-text"><?php echo esc_html( sprintf( /* translators: %s: phone number */ __( 'Anrufen: %s', 'coin-container' ), $ccn_phone ) ); ?></span>
+				</a>
+			<?php endif; ?>
 			<?php if ( class_exists( 'WooCommerce' ) && function_exists( 'wc_get_cart_url' ) ) : ?>
 				<?php $ccn_cart_count = ( WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0; ?>
 				<?php // No aria-label here: it would override the content and hide the visible count from the accessible name (axe label-content-name-mismatch); the screen-reader-text span below names the link. ?>
@@ -107,6 +110,11 @@
 					<button type="submit" class="btn btn-primary"><?php esc_html_e( 'Suchen', 'coin-container' ); ?></button>
 				</form>
 			</div>
+
+			<button class="nav-toggle" aria-expanded="false" aria-controls="site-nav">
+				<span class="nav-toggle-bar" aria-hidden="true"></span>
+				<span class="screen-reader-text"><?php esc_html_e( 'Menü', 'coin-container' ); ?></span>
+			</button>
 		</div>
 	</div>
 </header>

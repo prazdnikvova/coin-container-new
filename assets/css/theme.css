@@ -92,24 +92,29 @@ em,i{font-style:italic}
 .ccn-container--prose{max-width:var(--ccn-container-prose)}
 
 /* --------------------------------------------------------------------------
- * Header + navigation (mobile-first; burger below 64rem)
- * Mirrors the original: dark top bar (contacts + social) that scrolls away,
- * sticky white main row (logo, menu, cart, search).
+ * Header + navigation (mobile-first; burger below 64rem), DESIGN.md "Header".
+ * One fixed element: a 64px row below 64rem; from 64rem the grey top bar
+ * (contacts + social) over an 80px row, folding to one 64px row once
+ * .is-stuck. Fixed, so its height never moves the page: body reserves
+ * --ccn-header-total.
  * ------------------------------------------------------------------------ */
-:root{--ccn-topbar-h:2.5rem;--ccn-header-h:5rem;--ccn-header-h-compact:4rem}
-/* Anchor jumps and the skip link land below the sticky main row; smooth
+:root{--ccn-topbar-h:2.5rem;--ccn-header-h:4rem;--ccn-header-h-compact:4rem;--ccn-header-total:var(--ccn-header-h);--ccn-tap:2.75rem}
+@media (min-width:64rem){:root{--ccn-header-h:5rem;--ccn-header-total:calc(var(--ccn-topbar-h) + var(--ccn-header-h))}}
+/* Anchor jumps and the skip link land below the header; smooth
  * scrolling only when the visitor has not asked for reduced motion. */
-html{scroll-padding-top:calc(var(--ccn-header-h) + 1rem)}
+html{scroll-padding-top:calc(var(--ccn-header-total) + 1rem)}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
-/* 16px metrics kept for the header (T-47) */
-.site-header{background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);position:sticky;top:0;z-index:1000;font-size:1rem;transition:background-color var(--ccn-dur-base) var(--ccn-ease-out),box-shadow var(--ccn-dur-base) var(--ccn-ease-out)}
+body{padding-top:var(--ccn-header-total)}
+/* 16px metrics; the hairline is a shadow so the header stays exactly 64px */
+.site-header{position:fixed;top:0;inset-inline:0;z-index:1000;background:var(--ccn-color-white);box-shadow:0 1px 0 var(--ccn-color-light);font-size:1rem;transition:background-color var(--ccn-dur-base) var(--ccn-ease-out),box-shadow var(--ccn-dur-base) var(--ccn-ease-out)}
+.admin-bar .site-header{top:var(--wp-admin--admin-bar--height,0)}
 .site-header a{text-decoration:none}
 .site-header.is-stuck{box-shadow:var(--ccn-shadow-1)}
 .ccn-header-sentinel{position:absolute;top:8px;left:0;width:1px;height:1px}
 
 /* Over a hero the header starts as translucent glass (original: rgba(255,255,255,.46)
  * + backdrop blur) and turns solid white as soon as the page scrolls (.is-stuck). */
-body.ccn-transparent-header .site-header:not(.is-stuck){background:rgba(255,255,255,.46);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom-color:transparent}
+body.ccn-transparent-header .site-header:not(.is-stuck){background:rgba(255,255,255,.46);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:none}
 body.ccn-transparent-header .ccn-hero,body.ccn-transparent-header .ccn-page-hero{margin-top:calc(-1 * var(--ccn-header-h))}
 body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-header-h))}
 @media (max-width:48rem){body.ccn-transparent-header .ccn-page-hero{min-height:calc(14rem + var(--ccn-header-h))}}
@@ -126,23 +131,23 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-topbar-social a:hover{color:var(--ccn-color-white)}
 .ccn-icon{flex-shrink:0}
 
-.header-inner{display:flex;align-items:center;gap:1rem;min-height:var(--ccn-header-h)}
-.site-logo{display:flex;flex-shrink:0}
-.site-logo img{width:auto;height:3.5rem}
-.header-actions{display:flex;align-items:center;gap:.5rem;margin-left:auto}
+/* Row: logo, menu, then phone, cart, search, burger (DOM = visual order); 44px targets */
+.header-inner{display:flex;align-items:center;gap:1rem;min-height:var(--ccn-header-h-compact)}
+.site-logo{display:flex;align-items:center;flex-shrink:0;height:var(--ccn-header-h-compact)}
+.site-logo img{width:auto;height:2.5rem}
+.header-actions{display:flex;align-items:center;gap:.25rem;margin-left:auto}
 .header-phone{font-weight:700;white-space:nowrap}
-.header-cart{position:relative;display:flex;align-items:center;padding:.5rem}
-.header-cart-count{position:absolute;top:0;right:0;min-width:1.05rem;height:1.05rem;padding:0 .2rem;background:var(--ccn-color-primary);color:var(--ccn-color-text);font-size:.6875rem;font-weight:700;line-height:1.05rem;text-align:center;border-radius:50%}
+.site-phone,.header-cart,.search-toggle,.nav-toggle{display:flex;align-items:center;justify-content:center;width:var(--ccn-tap);height:var(--ccn-tap);padding:0;background:none;border:0;color:var(--ccn-color-text);cursor:pointer}
+.header-cart{position:relative}
+.header-cart-count{position:absolute;top:.2rem;right:.2rem;min-width:1.05rem;height:1.05rem;padding:0 .2rem;background:var(--ccn-color-primary);color:var(--ccn-color-text);font-size:.6875rem;font-weight:700;line-height:1.05rem;text-align:center;border-radius:50%}
 
 .header-search{position:relative}
-.search-toggle{display:flex;align-items:center;background:none;border:0;padding:.5rem;cursor:pointer;color:var(--ccn-color-text)}
 .search-toggle:hover,.search-toggle[aria-expanded="true"]{color:var(--ccn-color-accent-text)}
 .header-search-form{position:absolute;top:calc(100% + .75rem);right:0;z-index:110;display:flex;gap:.5rem;padding:.75rem;background:var(--ccn-color-white);border:1px solid var(--ccn-color-light);box-shadow:var(--ccn-shadow-2)}
 .header-search-form[hidden]{display:none}
 .header-search-form input[type="search"]{width:14rem;padding:.6rem .75rem;border:1px solid var(--ccn-color-secondary);font-family:var(--ccn-font-body);font-size:.9375rem}
 .header-search-form .btn{padding:.6rem 1rem}
 
-.nav-toggle{display:block;order:9;background:none;border:0;padding:.75rem;cursor:pointer}
 .nav-toggle-bar,.nav-toggle-bar::before,.nav-toggle-bar::after{display:block;width:24px;height:2px;background:var(--ccn-color-text);transition:transform var(--ccn-dur-fast) var(--ccn-ease-out)}
 .nav-toggle-bar{position:relative}
 .nav-toggle-bar::before,.nav-toggle-bar::after{content:'';position:absolute;left:0}
@@ -152,18 +157,24 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .nav-open .nav-toggle-bar::before{transform:rotate(-90deg) translateX(-7px);top:0}
 .nav-open .nav-toggle-bar::after{opacity:0}
 
-.site-nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);z-index:100}
+/* Mobile menu panel: scrolls inside itself (the header is fixed), above the action bar */
+.site-nav{display:none;position:absolute;top:100%;left:0;right:0;max-height:calc(100vh - var(--ccn-header-h));max-height:calc(100dvh - var(--ccn-header-h));overflow-y:auto;overscroll-behavior:contain;background:var(--ccn-color-white);border-bottom:1px solid var(--ccn-color-light);z-index:100}
 .nav-open .site-nav{display:block;transition:opacity var(--ccn-dur-base) var(--ccn-ease-out),transform var(--ccn-dur-base) var(--ccn-ease-out)}
 @starting-style{.nav-open .site-nav{opacity:0;transform:translateY(-.5rem)}}
 .site-menu a{display:block;padding:.75rem 1rem;font-family:var(--ccn-font-heading);font-weight:700}
 .site-menu .sub-menu a{padding-left:2rem;font-weight:400}
 
 @media (min-width:64rem){
-	/* Top bar is desktop-only; the sticky header hides it by sticking above it. */
-	.ccn-topbar{display:block}
-	.site-header{top:calc(-1 * var(--ccn-topbar-h))}
-	.nav-toggle{display:none}
-	.site-nav{display:block;position:static;border:0;background:none;margin-left:1.5rem}
+	/* Desktop-only top bar; .is-stuck folds it away and compacts the row 80 -> 64px.
+	 * Height moves here on purpose (DESIGN.md "Header"): the header is fixed, the page never shifts. */
+	.ccn-topbar{display:block;max-height:var(--ccn-topbar-h);overflow:hidden;transition:max-height var(--ccn-dur-base) var(--ccn-ease-out),opacity var(--ccn-dur-base) var(--ccn-ease-out),visibility var(--ccn-dur-base)}
+	.is-stuck .ccn-topbar{max-height:0;opacity:0;visibility:hidden}
+	.header-inner{padding-block:var(--ccn-space-2);transition:padding var(--ccn-dur-base) var(--ccn-ease-out)}
+	.is-stuck .header-inner{padding-block:0}
+	.site-logo img{height:3.5rem;transform-origin:left center;transition:transform var(--ccn-dur-base) var(--ccn-ease-out)}
+	.is-stuck .site-logo img{transform:scale(.8)}
+	.site-phone,.nav-toggle{display:none}
+	.site-nav{display:block;position:static;max-height:none;overflow:visible;border:0;background:none;margin-left:1.5rem}
 	.site-menu{display:flex;gap:.25rem}
 	.site-menu a{padding:.5rem .75rem}
 	.site-menu>li{position:relative}
@@ -212,7 +223,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-hero{position:relative;overflow:hidden;color:var(--ccn-color-white)}
 .ccn-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ccn-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(20,20,20,.6) 0%,rgba(20,20,20,.25) 60%,rgba(20,20,20,.15) 100%)}
-.ccn-hero-inner{position:relative;z-index:2;padding-block:5rem;min-height:calc(100svh - var(--ccn-header-h) - var(--ccn-topbar-h));display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
+.ccn-hero-inner{position:relative;z-index:2;padding-block:5rem;min-height:calc(100svh - var(--ccn-header-total));display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
 /* h1 or h2 (editor): always sized as a page title */
 .ccn-hero-title{color:var(--ccn-color-white);font-size:var(--ccn-fs-h1);line-height:var(--ccn-lh-tight);max-width:56rem}
 .ccn-hero-subtitle{font-size:var(--ccn-fs-lead);max-width:38rem;margin-top:1.25rem}

@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			const open = toggle.getAttribute('aria-expanded') === 'true';
 			toggle.setAttribute('aria-expanded', String(!open));
 			document.body.classList.toggle('nav-open', !open);
+			// The burger comes after the menu in the DOM: opening moves focus into it.
+			const first = !open && nav.querySelector('a');
+			if (first) first.focus();
 		});
 
 		document.addEventListener('keydown', (e) => {

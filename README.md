@@ -48,8 +48,9 @@ mobile emulation) and the numbers go into the commit body.
 - Motion: blocks opt in with `data-motion="reveal"` / `data-motion-stagger`;
   one IntersectionObserver in `main.js` and the "Motion" block at the end of
   `theme.css` do the rest. Content is visible without JS and with
-  `prefers-reduced-motion`; hero, contact cards and header never move
-  ([`DESIGN.md`](DESIGN.md) "Motion").
+  `prefers-reduced-motion`; hero and contact cards never move, the fixed
+  header only compacts once scrolled ([`DESIGN.md`](DESIGN.md) "Motion",
+  "Header").
 - Design values are tokens in `assets/css/theme.css` (`:root`) — colours with
   measured contrast, one type scale, spacing, containers, radius, shadows,
   motion — documented in [`DESIGN.md`](DESIGN.md); `tests/contrast.cjs` is the
@@ -72,7 +73,7 @@ Every page renders:
   `<header>`/`<footer>`: they use `<div class="entry-header">` and
   `<div class="entry-footer">`, and `woocommerce/loop/header.php` does the
   same for WooCommerce. There is no second header for mobile or for the
-  sticky state — it is the same element.
+  fixed/compact state — it is the same element.
 - exactly one `<h1>`, then `h2` per section and `h3` inside it, without
   skipping a level. Footer and sidebar headings are fixed `h2`.
 - a name on every `<nav>`, unique on the page and without the word
@@ -84,8 +85,9 @@ Every page renders:
 - no `aria-label` on an element with visible text (it replaces the text for
   screen readers). Icon-only links are named by screen-reader text, and
   links that open a new tab say so ("(öffnet in neuem Tab)").
-- anchor targets clear the sticky header (`scroll-padding-top`); smooth
-  scrolling only when the visitor has not asked for reduced motion.
+- anchor targets clear the fixed header (`scroll-padding-top` from
+  `--ccn-header-total`); smooth scrolling only when the visitor has not asked
+  for reduced motion.
 - fewer than 800 DOM nodes in `<body>`.
 
 Where the `<h1>` comes from:

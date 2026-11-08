@@ -157,6 +157,19 @@ function ccn_preload_hero() {
 }
 
 /**
+ * Phone icon of the header icon set (stroke, currentColor), decorative.
+ *
+ * @param int $size Width and height in px.
+ * @return string Static SVG markup.
+ */
+function ccn_phone_icon( $size ) {
+	return sprintf(
+		'<svg class="ccn-icon" width="%1$d" height="%1$d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16.5v2.6a1.9 1.9 0 0 1-2.1 1.9 19 19 0 0 1-8.3-3 18.7 18.7 0 0 1-5.7-5.7 19 19 0 0 1-3-8.3A1.9 1.9 0 0 1 3.8 2h2.6a1.9 1.9 0 0 1 1.9 1.6c.12.92.34 1.83.65 2.7a1.9 1.9 0 0 1-.43 2L7.4 9.4a15.2 15.2 0 0 0 5.7 5.7l1.1-1.12a1.9 1.9 0 0 1 2-.43c.87.31 1.78.53 2.7.65a1.9 1.9 0 0 1 1.6 1.9Z"/></svg>',
+		(int) $size
+	);
+}
+
+/**
  * Accessibility: skip link straight after <body>.
  */
 add_action( 'wp_body_open', 'ccn_skip_link', 5 );

@@ -84,8 +84,9 @@ Rules:
   quotes and headings directly inside `.entry-content`); grids, tables, forms
   and WooCommerce markup are never capped.
 - The header and the product grids keep 16px metrics when body text grows to
-  18px (`.site-header`, `ul.products`): their sizes are decided by the header
-  card (T-47) and the card/catalogue cards (T-48, T-49).
+  18px (`.site-header`, `ul.products`): the header stays at 16px by design
+  (T-47, see Header); the grids are decided by the card/catalogue cards
+  (T-48, T-49).
 - No text below 14px except badges, eyebrow labels and the top bar; the
   existing 13.6px labels (news date, numbered-list text, catalogue
   sub-filter) are fixed in the card pass (T-48).
@@ -102,7 +103,10 @@ Rules:
 | `--ccn-shadow-1` | `0 2px 8px rgba(0,0,0,.06)` — sticky header |
 | `--ccn-shadow-2` | `0 6px 24px rgba(0,0,0,.08)` — cards, contact cards, sidebar and form cards, dropdowns |
 | `--ccn-shadow-3` | `0 8px 24px rgba(0,0,0,.12)` — photo collage, hover lift |
-| `--ccn-topbar-h` / `--ccn-header-h` / `--ccn-header-h-compact` | 2.5rem / 5rem / 4rem |
+| `--ccn-topbar-h` | 2.5rem — desktop top bar |
+| `--ccn-header-h` / `--ccn-header-h-compact` | header row: 4rem below 64rem, 5rem from 64rem / 4rem once scrolled |
+| `--ccn-header-total` | space the fixed header takes at the top of the page: `= --ccn-header-h` below 64rem (64px), top bar + row from 64rem (120px) |
+| `--ccn-tap` | 2.75rem — 44px tap target (header icons, hero phone line, trust links) |
 
 Container utility (`theme.css`, "Layout primitives"):
 
@@ -178,7 +182,7 @@ replaces its "planned" line with the implemented spec.
 |---|---|---|---|---|
 | C1 | Hero (home) | h1 with the keyword (text as on production), 1 primary + 1 secondary CTA, phone link, rating line; on 360×800 h1 ≤ 4 lines and CTA, phone, rating inside 800px | T-47 | planned |
 | C2 | Mobile action bar | bottom bar 56px below 768px: Anrufen (`tel:`) + Anfrage, safe-area inset, targets ≥ 44px | T-47 | planned |
-| C3 | Sticky header | ≤ 64px on 360; 80px → 64px after scroll with `--ccn-shadow-1`; phone icon 44×44 below 1024px; CLS 0 | T-47 | planned |
+| C3 | Sticky header | ≤ 64px on 360; 80px → 64px after scroll with `--ccn-shadow-1`; phone icon 44×44 below 1024px; CLS 0 | T-47 | built — see Header |
 | C4 | Product/service cards | radius 8–12px, rest `--ccn-shadow-1` + 1px border, hover/focus lift 2px + `--ccn-shadow-3`, image 4:3, title ≤ 3 lines, button ≥ 44px and on one line at 360 | T-48 | planned |
 | C5 | Buttons | rest/hover/focus-visible (+ active/disabled), height ≥ 44px, verb labels, one primary per screen | T-48 | planned |
 | C6 | Section heading + eyebrow | eyebrow only where it carries information (category), 13px uppercase, `--ccn-color-primary-text-strong`; otherwise the accent tail of the heading | T-48 | planned |
@@ -188,6 +192,45 @@ replaces its "planned" line with the implemented spec.
 | C10 | Request form | ≤ 4 required fields, visible labels, errors under the field with `aria-describedby`, consent after the fields, submit ≥ 48px | T-51 | planned |
 | C11 | Footer | dark, location/container-type columns, one icon set, targets ≥ 44px, text ≥ 4.5:1 | T-48 | planned |
 | C12 | Single product (360) | gallery visible at once, h1/price/CTA in the first 760px, badge/price/button on tokens | T-49 | planned |
+
+## Header
+
+`header.php`: one fixed `<header id="header">` on every page (T-47, A6 C3).
+
+| State | Below 64rem | From 64rem |
+|---|---|---|
+| Top of the page | 64px row: logo 40px high, phone, cart, search, burger | grey top bar 40px (phone, e-mail, social) over an 80px row: logo 56px, menu, cart, search |
+| `.is-stuck` (scrolled more than 8px) | the same 64px row, white, `--ccn-shadow-1` | one 64px row: top bar folded (`max-height` 0, `opacity` 0, then `visibility: hidden`), row padding 8px → 0, logo `scale(.8)`; white, `--ccn-shadow-1` |
+
+- `position: fixed` plus `body { padding-top: var(--ccn-header-total) }`
+  (64px below 64rem, 120px from 64rem): the header changes height without
+  moving the page, so the compact state shifts no layout (Lighthouse CLS 0).
+  The hairline under the white header is a 1px shadow, so the row is exactly
+  64px.
+- **Exception to the motion rule** (only `opacity`/`transform` move): the
+  top bar's `max-height` and the row's `padding` transition in
+  `--ccn-dur-base` / `--ccn-ease-out`. Allowed only here, because the header
+  is fixed and nothing else reflows; the logo shrinks with `transform`.
+- State comes from the sentinel observer of `main.js` (see Motion, Runtime 5);
+  no scroll listener.
+- Over a hero (`body.ccn-transparent-header`: front page and both landing
+  templates) the header starts as glass — `rgba(255,255,255,.46)` +
+  `blur(8px)` — and turns white with `.is-stuck`. Hero sections slide under
+  the row (`margin-top: calc(-1 * var(--ccn-header-h))`); from 64rem the solid
+  top bar stays above the photo.
+- Tap targets: phone, cart, search and burger are 44×44px (`--ccn-tap`).
+- DOM order = visual order: logo, menu, phone, cart, search, burger. The
+  burger sits after the menu, so opening it moves focus to the first menu
+  link; Escape closes the menu and returns focus to the burger.
+- Phone link `a.site-phone` (below 64rem; from 64rem the number is in the top
+  bar): icon only, named by screen-reader text «Anrufen: <number>»; `tel:`
+  keeps the digits and `+` of the Site Settings phone (`ccn_phone_href()`).
+- Mobile menu: drops below the row and scrolls inside itself
+  (`max-height: 100dvh − row`, `overscroll-behavior: contain`), so every item
+  is reachable under a fixed header.
+- Anchors: `scroll-padding-top: calc(var(--ccn-header-total) + 1rem)`.
+  Logged in: `top: var(--wp-admin--admin-bar--height)` keeps the header below
+  the admin bar.
 
 ## Motion
 
@@ -201,7 +244,7 @@ inventory of the old site (A5 §4), principles from the design brief (A6
 | Effect | Value | Where |
 |---|---|---|
 | Hover/focus feedback (colour, background, border, shadow, transform) | 200ms ease-out | `--ccn-dur-fast`, `--ccn-ease-out` |
-| Sticky header background and shadow | 250ms ease-out, after 8px of scroll | `--ccn-dur-base`; compact height: T-47 |
+| Header: background, shadow, top bar fold, row 80 → 64px, logo scale | 250ms ease-out, after 8px of scroll | `--ccn-dur-base` (see Header) |
 | Section reveal | 500ms ease-out, 20px rise, at 10 % visibility (root margin −5 % at the bottom) | `--ccn-dur-reveal`, `@keyframes ccn-reveal` |
 | Reveal stagger | 80ms per child, 400ms at most | `main.js` |
 | Counters | 1200ms easeOutCubic, de-DE format | `main.js` |
@@ -247,8 +290,9 @@ inventory of the old site (A5 §4), principles from the design brief (A6
    number stays as printed.
 5. Sticky header: a 1px `aria-hidden` sentinel after `wp_body_open()`
    (`top: 8px`); when it leaves the viewport `#header` gets `.is-stuck`
-   (solid background + `--ccn-shadow-1`). No scroll listener. This observer
-   also runs with reduced motion: it is a state, not an animation.
+   (solid background + `--ccn-shadow-1`, compact row, folded top bar — see
+   Header). No scroll listener. This observer also runs with reduced motion:
+   it is a state, not an animation.
 6. `@media (prefers-reduced-motion: reduce)` cuts every transition and
    animation to 0.01ms; `scroll-behavior: smooth` applies only under
    `no-preference`.
@@ -297,8 +341,9 @@ featured products on 360 is T-48's decision.
 
 ### Not animated (A5 §4, A6 §6.6)
 
-Hero image and title, contact cards, the landing hero band, the header
-height (T-47), forms and running text beyond the block reveal. No parallax,
+Hero image and title, contact cards, the landing hero band, forms and
+running text beyond the block reveal. The header's compact state is the one
+layout transition, allowed because the header is fixed (see Header). No parallax,
 no image layers, no autoplay carousels, no hover-only content. Scroll-driven
 CSS (`animation-timeline: view()`, ~89 % support in 10/2026) is an idea for
 a later version, not used in v1.
