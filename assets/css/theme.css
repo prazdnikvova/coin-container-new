@@ -511,7 +511,9 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
 .single-product .flex-direction-nav .flex-disabled{visibility:hidden}
 @media (min-width:48rem){.single-product div.product .woocommerce-product-gallery__image img,.single-product .flex-direction-nav{aspect-ratio:4/3}}
 .single-product div.product .woocommerce-product-gallery__image a{display:block}
-.single-product .flex-viewport{touch-action:pan-y pinch-zoom}
+/* FlexSlider sizes the slides 100ms after it widened their row (2000 % for 10 photos): until then a slide is capped at the window, no 4100px flash */
+.single-product .flex-viewport{container-type:inline-size;touch-action:pan-y pinch-zoom}
+.single-product .flex-viewport .woocommerce-product-gallery__image{max-width:100cqw}
 .single-product .flex-control-thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--ccn-space-2);margin-top:var(--ccn-space-2)}
 .single-product .flex-control-thumbs img{display:block;width:100%;height:auto;aspect-ratio:1;object-fit:contain;background:var(--ccn-color-surface);border:2px solid transparent;border-radius:var(--ccn-radius-sm);cursor:pointer;opacity:.6}
 .single-product .flex-control-thumbs img:is(.flex-active,:hover){opacity:1;border-color:var(--ccn-color-primary)}
