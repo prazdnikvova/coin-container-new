@@ -10,7 +10,10 @@ function ccn_setup() {
 	add_theme_support( 'automatic-feed-links' );
 	add_theme_support( 'post-thumbnails' );
 	add_theme_support( 'custom-logo' );
-	add_theme_support( 'html5', array( 'search-form', 'comment-list', 'comment-form', 'gallery', 'caption', 'style', 'script', 'navigation-widgets' ) );
+	// 'style' left out: deprecated and read by nothing since WP 7.0. 'script' is
+	// ignored by core since 7.0 too, but WooCommerce's wc_no_js() still reads it
+	// (without it the inline no-js script gets type='text/javascript').
+	add_theme_support( 'html5', array( 'search-form', 'comment-list', 'comment-form', 'gallery', 'caption', 'script', 'navigation-widgets' ) );
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'woocommerce' );

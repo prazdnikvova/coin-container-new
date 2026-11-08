@@ -499,6 +499,8 @@ ok('ACF blocks register as v3 (api_version, acf_block_version), no inline edit m
 ok('Block editor styles: theme.css + editor.css, editor.css not on the front end', /add_theme_support\(\s*'editor-styles'\s*\)/.test(functionsPhp)
 	&& /add_editor_style\(\s*array\(\s*'assets\/css\/theme\.css',\s*'assets\/css\/editor\.css'\s*\)\s*\)/.test(functionsPhp)
 	&& themeFile('assets/css/editor.css').includes('[data-type^="acf/"]{max-width:none}') && !homeHtml.includes('assets/css/editor.css'));
+ok('html5 theme support without the dead "style" argument (WP 7.0)', /add_theme_support\(\s*'html5'/.test(functionsPhp)
+	&& !/add_theme_support\(\s*'html5',[^;]*'style'/.test(functionsPhp));
 
 await browser.close();
 console.log(results.join('\n'));
