@@ -219,6 +219,10 @@ replaces its "planned" line with the implemented spec.
   the row (`margin-top: calc(-1 * var(--ccn-header-h))`); from 64rem the solid
   top bar stays above the photo.
 - Tap targets: phone, cart, search and burger are 44×44px (`--ccn-tap`).
+- Top bar links: white on `--ccn-color-secondary` (6.44:1); hover underlines
+  instead of turning yellow (yellow on that grey is 3.99:1, below 4.5:1 for
+  13px text). The social icons stay yellow (UI graphics, ≥ 3:1) and turn
+  white on hover.
 - DOM order = visual order: logo, menu, phone, cart, search, burger. The
   burger sits after the menu, so opening it moves focus to the first menu
   link; Escape closes the menu and returns focus to the burger.

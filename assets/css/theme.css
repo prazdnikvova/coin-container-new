@@ -121,7 +121,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 
 .ccn-topbar{display:none;background:var(--ccn-color-secondary);color:var(--ccn-color-white);font-size:.8125rem}
 .ccn-topbar a{display:inline-flex;align-items:center;gap:.4rem;color:var(--ccn-color-white)}
-.ccn-topbar a:hover{color:var(--ccn-color-primary)}
+.ccn-topbar a:hover{text-decoration:underline} /* not yellow: 3.99:1 on the grey bar */
 .ccn-topbar-inner{display:flex;align-items:center;justify-content:flex-end;gap:2rem;min-height:var(--ccn-topbar-h)}
 .ccn-topbar-contacts{display:flex;align-items:center;gap:1.5rem}
 .ccn-topbar-social{display:flex;align-items:stretch}

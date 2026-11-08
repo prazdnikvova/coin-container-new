@@ -794,11 +794,15 @@ const deskState = () => deskHeader.evaluate(() => {
 		bar: bar ? getComputedStyle(bar).display : 'absent' };
 });
 const deskRest = await deskState();
+await deskHeader.hover('.ccn-topbar .header-phone');
+await deskHeader.waitForTimeout(250);
+deskRest.topbarHover = await deskHeader.evaluate(() => { const s = getComputedStyle(document.querySelector('.ccn-topbar .header-phone')); return `${s.color}|${s.textDecorationLine}`; });
+await deskHeader.mouse.move(640, 600);
 await deskHeader.evaluate(() => window.scrollTo(0, 300));
 await deskHeader.waitForTimeout(500);
 const deskScrolled = await deskState();
-ok('Header 1280: 80px row under the 40px top bar at rest; after scrollTo(0, 300) <= 64px, top bar folded and hidden',
-	deskRest.row === 80 && deskRest.topbar === 40 && deskRest.header === 120 && deskScrolled.header <= 64
+ok('Header 1280: 80px row under the 40px top bar (hover: white underlined, not yellow 3.99:1); after scrollTo(0, 300) <= 64px, top bar folded and hidden',
+	deskRest.row === 80 && deskRest.topbar === 40 && deskRest.header === 120 && deskRest.topbarHover === 'rgb(255, 255, 255)|underline' && deskScrolled.header <= 64
 	&& deskScrolled.topbar === 0 && deskScrolled.topbarVis === 'hidden', JSON.stringify({ rest: deskRest, scrolled: deskScrolled }));
 await deskHeader.close();
 // Action bar (DESIGN.md "Action bar"): a bottom bar below 48rem with "Anrufen" (tel:) and "Anfrage"
