@@ -160,3 +160,50 @@ function ccn_loop_title_as_h3( $as_h3 ) {
 function ccn_loop_product_title_h3() {
 	echo '<h3 class="' . esc_attr( apply_filters( 'woocommerce_product_loop_title_classes', 'woocommerce-loop-product__title' ) ) . '">' . wp_kses_post( get_the_title() ) . '</h3>';
 }
+
+/**
+ * "Ähnliche Produkte" in a fixed order. WooCommerce shuffles the candidates
+ * before it picks four and then sorts the four by "rand", so every load of a
+ * product page showed other cards (T-44 note 7). Now the candidates (same
+ * categories, as before) are sorted by menu order, then title, and the first
+ * four keep that order: the same products on every load.
+ */
+add_filter( 'woocommerce_product_related_posts_shuffle', '__return_false' );
+add_filter( 'woocommerce_related_products', 'ccn_related_products_order' );
+add_filter( 'woocommerce_output_related_products_args', 'ccn_related_products_args' );
+
+/**
+ * @param int[] $ids Related product IDs (all candidates, before the limit).
+ * @return int[]
+ */
+function ccn_related_products_order( $ids ) {
+	if ( empty( $ids ) ) {
+		return $ids;
+	}
+	return get_posts(
+		array(
+			'post_type'      => 'product',
+			'post__in'       => array_map( 'absint', (array) $ids ),
+			'orderby'        => array(
+				'menu_order' => 'ASC',
+				'title'      => 'ASC',
+			),
+			'posts_per_page' => count( $ids ),
+			'fields'         => 'ids',
+			'no_found_rows'  => true,
+		)
+	);
+}
+
+/**
+ * Keep that order: "none" skips WooCommerce's shuffle ("rand" is its default)
+ * and "asc" its final reverse.
+ *
+ * @param array $args Related products arguments.
+ * @return array
+ */
+function ccn_related_products_args( $args ) {
+	$args['orderby'] = 'none';
+	$args['order']   = 'asc';
+	return $args;
+}
