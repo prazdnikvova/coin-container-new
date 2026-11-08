@@ -1189,6 +1189,25 @@ await fsProduct.waitForTimeout(1500);
 const productCls = await fsProduct.evaluate(() => Math.round(window.__ccnCls * 10000) / 10000);
 ok('Product 360: no layout shift while the page and the gallery start (CLS <= 0.01)', productCls <= 0.01, String(productCls));
 await fsProduct.close();
+// Breadcrumbs (DESIGN.md "Breadcrumbs"): from the SEO plugin, one <nav aria-label="Brotkrumen"> on products, categories,
+// the shop, landings, posts and pages; the current page last and not linked; 14px --ccn-color-secondary; none on the front page.
+const bcPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+const crumbs = {};
+for (const path of [T49_PRODUCT, '/product-category/cointainer/standardcontainer/', '/container-shop/', '/container-kaufen/', '/containerzubehoer/',
+	'/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/', '/']) {
+	await bcPage.goto(BASE + path, { waitUntil: 'load' });
+	crumbs[path] = await bcPage.evaluate(() => {
+		const navs = document.querySelectorAll('nav[aria-label="Brotkrumen"]');
+		if (navs.length !== 1) return `${navs.length} navs`;
+		const items = [...navs[0].querySelectorAll('li')];
+		const last = items[items.length - 1];
+		const s = getComputedStyle(navs[0]);
+		return `${items.length}|${!!last && !last.querySelector('a') && last.getAttribute('aria-current') === 'page'}|${s.fontSize}|${s.color}`;
+	});
+}
+ok('Breadcrumbs: one nav "Brotkrumen" on product, category, shop, landings, post and page (current page last, not linked, 14px #605e5e), none on the front page',
+	Object.entries(crumbs).every(([p, v]) => (p === '/' ? v === '0 navs' : /^[2-9]\|true\|14px\|rgb\(96, 94, 94\)$/.test(v))), JSON.stringify(crumbs));
+await bcPage.close();
 
 await browser.close();
 console.log(results.join('\n'));

@@ -1,6 +1,7 @@
 <?php get_header(); ?>
 
 <?php
+ccn_breadcrumbs();
 while ( have_posts() ) :
 	the_post();
 	get_template_part( 'entry' );

@@ -504,6 +504,30 @@ pages (`inc/assets-cleanup.php`), so every rule is the theme's.
 - Related products: product cards (see Cards), always the same four (menu
   order, then title).
 
+## Breadcrumbs
+
+`ccn_breadcrumbs()` in `inc/seo.php` (T-49). The trail and its BreadcrumbList
+schema come from the SEO plugin: Rank Math (`rank_math_the_breadcrumbs()`)
+once it is installed (T-54), Yoast (`yoast_breadcrumb()`, theme support
+`yoast-seo-breadcrumbs`) until then. The theme prints the trail only, no
+schema of its own.
+
+- Markup: `<nav class="ccn-breadcrumbs" aria-label="Brotkrumen">` with an
+  `<ol>` (Yoast filters for the list and item tags, no text separator); the
+  current page last, not linked, `aria-current="page"`.
+- Where: products, the shop and product categories (above the h1,
+  `woocommerce.php`), landings (under the hero band, on white,
+  `template-parts/page-hero.php`), posts (`single.php`) and pages
+  (`page.php`); never on the front page.
+- Look: 14px `--ccn-color-secondary` (6.44:1), links underlined with the
+  accent-text hover, 44px tall targets, separator `›` as `::before` (not
+  read out: `content: "›" / ""`); one line, the current page cut off with
+  an ellipsis.
+- Texts and levels follow the plugin's settings. Yoast gives «Home › Shop ›
+  20 Fuß Container …» today; production shows «Startseite › Container
+  kaufen › Standardcontainer › …» — settled with Rank Math in T-54, which
+  also checks the look of its own markup (a `<p>` with separator spans).
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the

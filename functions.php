@@ -280,6 +280,7 @@ require_once get_template_directory() . '/inc/disable-comments.php';
 require_once get_template_directory() . '/inc/assets-cleanup.php';
 require_once get_template_directory() . '/inc/site-settings.php';
 require_once get_template_directory() . '/inc/schema.php';
+require_once get_template_directory() . '/inc/seo.php';
 if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
 }
