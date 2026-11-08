@@ -250,7 +250,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-section--dark,.ccn-stats{--ccn-muted:var(--ccn-color-text-on-dark);--ccn-accent-c:var(--ccn-color-primary);background:var(--ccn-color-dark);color:var(--ccn-color-white)}
 .ccn-section--yellow,.ccn-cta--band{--ccn-muted:currentColor;--ccn-accent-c:currentColor;background:var(--ccn-color-primary);color:var(--ccn-color-text)}
 :where(.ccn-section--dark,.ccn-section--yellow,.ccn-cta--band) a:not(.btn):hover{color:inherit;text-decoration:underline}
-:is(.ccn-section--yellow,.ccn-cta--band) :is(.btn-primary,.btn-dark:hover){background:var(--ccn-color-text);color:var(--ccn-color-white)}
+:is(.ccn-section--yellow,.ccn-cta--band) :is(.btn-primary,.btn-dark:hover,.btn-light:hover){background:var(--ccn-color-text);color:var(--ccn-color-white)}
 
 /* Hero */
 /* Block: home hero (acf/home-hero), DESIGN.md "Hero" */
@@ -581,5 +581,5 @@ body .is-layout-flex{display:flex}.is-layout-flex{flex-wrap:wrap;align-items:cen
 .btn,.button,.wpcf7-submit,.ccn-card,ul.products>li.product{transition-property:color,background-color,border-color,box-shadow,transform;transition-duration:var(--ccn-dur-fast);transition-timing-function:var(--ccn-ease-out)}
 :is(.btn,.button,.wpcf7-submit):is(:hover,:focus-visible),:is(.ccn-card,ul.products>li.product):is(:hover,:focus-within){transform:translateY(-2px);box-shadow:var(--ccn-shadow-3)}
 :is(.btn,.button,.wpcf7-submit):active{transform:translateY(0);filter:brightness(.92)}
-:is(.btn,.button,.wpcf7-submit):is(:disabled,.disabled,[aria-disabled="true"]),.woocommerce :is(a,button,input).button.button:is(:disabled,.disabled)[class]{background:var(--ccn-color-border);border-color:var(--ccn-color-border);color:var(--ccn-color-secondary);cursor:not-allowed;filter:none;transform:none;box-shadow:none;opacity:1}
+:is(.btn,.button,.wpcf7-submit)[class]:is(:disabled,.disabled,[aria-disabled="true"]),.woocommerce :is(a,button,input).button.button:is(:disabled,.disabled)[class]{background:var(--ccn-color-border);border-color:var(--ccn-color-border);color:var(--ccn-color-secondary);cursor:not-allowed;filter:none;transform:none;box-shadow:none;opacity:1}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0.01ms!important;animation-duration:0.01ms!important}}
