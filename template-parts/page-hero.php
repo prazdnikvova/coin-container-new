@@ -23,7 +23,7 @@
 		);
 	}
 	?>
-	<div class="ccn-page-hero-inner">
+	<div class="ccn-page-hero-inner ccn-container">
 		<h1 class="ccn-page-hero-title"><?php the_title(); ?></h1>
 	</div>
 </section>

@@ -1,7 +1,7 @@
 </main>
 
 <footer id="footer" class="site-footer">
-	<div class="footer-inner">
+	<div class="footer-inner ccn-container">
 		<div class="footer-col footer-about">
 			<img class="footer-logo" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="79" height="60" alt="" loading="lazy">
 			<?php $ccn_tagline = ccn_setting( 'footer_tagline' ); ?>

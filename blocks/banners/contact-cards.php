@@ -17,7 +17,7 @@ if ( ! $ccn_email && ! $ccn_phone && ! $ccn_address ) {
 }
 ?>
 <section class="ccn-contact-cards"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
-	<div class="ccn-contact-cards-inner">
+	<div class="ccn-contact-cards-inner ccn-container">
 		<?php if ( $ccn_email ) : ?>
 			<div class="ccn-contact-card">
 				<svg class="ccn-icon" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5-8-5V6l8 5 8-5v2Z"/></svg>

@@ -9,7 +9,7 @@
 <?php wp_body_open(); ?>
 <header id="header" class="site-header">
 	<div class="ccn-topbar">
-		<div class="ccn-topbar-inner">
+		<div class="ccn-topbar-inner ccn-container">
 			<div class="ccn-topbar-contacts">
 				<?php $ccn_phone = ccn_setting( 'phone' ); ?>
 				<?php if ( $ccn_phone ) : ?>
@@ -60,7 +60,7 @@
 		</div>
 	</div>
 
-	<div class="header-inner">
+	<div class="header-inner ccn-container">
 		<a class="site-logo" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
 			<img src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="106" height="80" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 		</a>

@@ -15,7 +15,7 @@ while ( have_posts() ) :
 	the_post();
 	get_template_part( 'template-parts/page-hero' );
 	?>
-	<div class="ccn-landing">
+	<div class="ccn-landing ccn-container">
 		<div class="ccn-landing-main">
 			<?php the_content(); ?>
 		</div>

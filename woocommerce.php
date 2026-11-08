@@ -7,7 +7,7 @@
 get_header();
 ?>
 <div class="section">
-	<div class="section-inner woocommerce-page-inner">
+	<div class="section-inner woocommerce-page-inner ccn-container">
 		<?php woocommerce_content(); ?>
 	</div>
 </div>

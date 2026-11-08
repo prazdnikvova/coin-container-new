@@ -44,7 +44,7 @@ endif;
 		);
 	}
 	?>
-	<div class="ccn-hero-inner">
+	<div class="ccn-hero-inner ccn-container">
 		<?php if ( $ccn_title ) : ?>
 			<<?php echo $ccn_tag; // phpcs:ignore WordPress.Security.EscapeOutput -- fixed h1/h2. ?> class="ccn-hero-title"><?php echo esc_html( $ccn_title ); ?></<?php echo $ccn_tag; // phpcs:ignore WordPress.Security.EscapeOutput ?>>
 		<?php endif; ?>

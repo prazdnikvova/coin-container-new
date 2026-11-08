@@ -18,11 +18,11 @@ if ( empty( $ccn_cards ) ) {
 ?>
 <section class="ccn-info-cards"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<?php if ( $ccn_heading ) : ?>
-		<div class="section-inner">
+		<div class="section-inner ccn-container">
 			<h2 class="section-heading"><?php echo esc_html( $ccn_heading ); ?></h2>
 		</div>
 	<?php endif; ?>
-	<div class="ccn-info-cards-inner">
+	<div class="ccn-info-cards-inner ccn-container">
 		<?php foreach ( $ccn_cards as $ccn_card ) : ?>
 			<div class="ccn-info-card">
 				<?php if ( ! empty( $ccn_card['image'] ) ) : ?>

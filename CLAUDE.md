@@ -32,6 +32,9 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 - Admin-editable globals: single ACF "Site Settings" options page (tabs), read
   via the cached `ccn_setting()` helper only.
 - ACF: field groups sync to `acf-json/` — commit together with templates.
+- Design: every colour/size/space/shadow/duration is a token from `theme.css`
+  `:root`, documented in `DESIGN.md`; no raw hex outside `:root`; yellow and
+  orange never as text on light (smoke "Design tokens").
 - Markup: one `<header>`, `<main>`, `<footer>` and `<h1>` per page, every
   `<nav>` named, no skipped heading levels — README "Markup standard",
   enforced by the smoke test ("Structure invariants").

@@ -2,6 +2,7 @@
 // Requires a local WordPress site running this theme.
 import { chromium } from 'playwright';
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 
 const BASE = process.env.CCN_BASE_URL || 'http://coin-container-new.local';
 
@@ -390,6 +391,71 @@ const anchorless = blockTemplates.filter((t) => {
 });
 ok('Every block root prints the HTML anchor', blockTemplates.length >= 12 && anchorless.length === 0,
 	`${blockTemplates.length - anchorless.length}/${blockTemplates.length}${anchorless.length ? ' missing: ' + anchorless.join(', ') : ''}`);
+
+// Design tokens (T-45, DESIGN.md): one type scale on every page type (sizes read
+// with getComputedStyle at 360 and 1440), links and the current menu item on the
+// contrast-checked tokens, no raw hex outside :root, and the text tokens meeting
+// WCAG AA on the backgrounds they are documented for.
+const { ratio } = createRequire(import.meta.url)('./contrast.cjs');
+const themeCss = readFileSync(new URL('assets/css/theme.css', themeDir), 'utf8');
+const narrow = await browser.newPage({ viewport: { width: 360, height: 800 } });
+const wide = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const h1Size = async (p, path) => {
+	await p.goto(BASE + path, { waitUntil: 'load' });
+	return p.evaluate(() => getComputedStyle(document.querySelector('h1')).fontSize);
+};
+const wideH1 = [];
+for (const path of ['/', '/container-kaufen/', '/kontakt-beratung/', '/product/20-fuss-container-gebraucht/']) {
+	const size = await h1Size(narrow, path);
+	ok(`Type scale ${path}: h1 is 32px at 360`, size === '32px', size);
+	wideH1.push(`${await h1Size(wide, path)}`);
+}
+ok('Type scale: h1 one formula at 1440 (<= 52px)', new Set(wideH1).size === 1 && parseFloat(wideH1[0]) <= 52, wideH1.join(', '));
+await narrow.goto(BASE + '/', { waitUntil: 'load' });
+await wide.goto(BASE + '/', { waitUntil: 'load' });
+const sectionH2 = (p) => p.evaluate(() => [...new Set([...document.querySelectorAll('main section h2:not(.woocommerce-loop-product__title)')]
+	.map((h) => getComputedStyle(h).fontSize))]);
+const [h2Narrow, h2Wide] = [await sectionH2(narrow), await sectionH2(wide)];
+ok('Type scale: section h2 one formula (26px at 360, 40px at 1440)', h2Narrow.join() === '26px' && h2Wide.join() === '40px', `${h2Narrow} / ${h2Wide}`);
+const [bodyNarrow, bodyWide] = [await narrow.evaluate(() => getComputedStyle(document.body).fontSize), await wide.evaluate(() => getComputedStyle(document.body).fontSize)];
+ok('Type scale: body 16px at 360, 18px at 1440', bodyNarrow === '16px' && bodyWide === '18px', `${bodyNarrow} / ${bodyWide}`);
+const currentItem = await wide.evaluate(() => {
+	const a = document.querySelector('.site-menu > li.current-menu-item > a');
+	if (!a) return null;
+	const bar = getComputedStyle(a, '::before');
+	return { color: getComputedStyle(a).color, bar: bar.backgroundColor, height: bar.height };
+});
+ok('Menu current item: dark text + yellow bar, not yellow text', !!currentItem && currentItem.color === 'rgb(32, 32, 32)'
+	&& currentItem.bar === 'rgb(247, 198, 0)' && currentItem.height === '3px', JSON.stringify(currentItem));
+await wide.goto(BASE + '/kontakt-beratung/', { waitUntil: 'load' });
+const contentLinks = await wide.evaluate(() => [...document.querySelectorAll('.entry-content a:not(.btn):not(.button)')]
+	.map((a) => `${getComputedStyle(a).color}|${getComputedStyle(a).textDecorationLine}`));
+ok('Content links: link token (#202020), underlined', contentLinks.length >= 1 && contentLinks.every((l) => l === 'rgb(32, 32, 32)|underline'),
+	[...new Set(contentLinks)].join(', '));
+await narrow.close();
+await wide.close();
+const cssOutsideRoot = themeCss.replace(/\/\*[\s\S]*?\*\//g, '').replace(/:root\{[^}]*\}/g, '');
+const rawHex = cssOutsideRoot.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+ok('theme.css: no raw hex outside :root', rawHex.length === 0, rawHex.join(' '));
+const colourTokens = Object.fromEntries([...themeCss.matchAll(/--(ccn-color-[a-z-]+):(#[0-9a-fA-F]{3,6})\b/g)].map((m) => [m[1], m[2]]));
+const lightBgs = [colourTokens['ccn-color-white'], colourTokens['ccn-color-light']];
+const weakTokens = [];
+for (const [name, bgs, need] of [
+	['ccn-color-text', [...lightBgs, colourTokens['ccn-color-primary']], 4.5],
+	['ccn-color-secondary', lightBgs, 4.5],
+	['ccn-color-primary-text-strong', lightBgs, 4.5],
+	['ccn-color-accent-text', lightBgs, 4.5],
+	['ccn-color-primary-text', lightBgs, 3], // large text only
+	['ccn-color-text-on-dark', [colourTokens['ccn-color-dark']], 4.5],
+	['ccn-color-text-on-dark-muted', [colourTokens['ccn-color-dark']], 4.5],
+]) {
+	for (const bg of bgs) {
+		const r = colourTokens[name] && bg ? ratio(colourTokens[name], bg) : 0;
+		if (!(r >= need)) weakTokens.push(`${name} on ${bg} ${r.toFixed(2)}:1`);
+	}
+}
+ok('Text tokens meet WCAG AA on their backgrounds', Object.keys(colourTokens).length >= 14 && weakTokens.length === 0,
+	weakTokens.join(', ') || `${Object.keys(colourTokens).length} colour tokens`);
 
 await browser.close();
 console.log(results.join('\n'));

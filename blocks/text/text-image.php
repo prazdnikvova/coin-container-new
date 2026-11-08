@@ -19,7 +19,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 }
 ?>
 <section class="ccn-text-image"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
-	<div class="ccn-text-image-inner">
+	<div class="ccn-text-image-inner ccn-container">
 		<div class="ccn-text-image-body">
 			<?php if ( $ccn_heading ) : ?>
 				<h2 class="ccn-text-image-heading"><?php echo esc_html( $ccn_heading ); ?></h2>

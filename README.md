@@ -43,6 +43,10 @@ mobile emulation) and the numbers go into the commit body.
   that contain the block.
 - Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
   no jQuery.
+- Design values are tokens in `assets/css/theme.css` (`:root`) — colours with
+  measured contrast, one type scale, spacing, containers, radius, shadows,
+  motion — documented in [`DESIGN.md`](DESIGN.md); `tests/contrast.cjs` is the
+  WCAG calculator behind its tables.
 - All strings wrapped in gettext with the `coin-container` text domain
   (WPML-ready); site content is German, code and docs are English.
 - ACF field groups sync to `acf-json/` and are committed together with the

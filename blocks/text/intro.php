@@ -18,7 +18,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 }
 ?>
 <section class="ccn-intro"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
-	<div class="ccn-intro-inner">
+	<div class="ccn-intro-inner ccn-container">
 		<div class="ccn-intro-body">
 			<?php if ( $ccn_heading ) : ?>
 				<h2 class="ccn-intro-heading">

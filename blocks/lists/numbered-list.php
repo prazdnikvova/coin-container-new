@@ -18,7 +18,7 @@ if ( empty( $ccn_items ) ) {
 }
 ?>
 <section class="ccn-numbered"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
-	<div class="ccn-numbered-inner">
+	<div class="ccn-numbered-inner ccn-container">
 		<?php if ( $ccn_heading || $ccn_accent ) : ?>
 			<h2 class="ccn-numbered-heading">
 				<?php echo esc_html( $ccn_heading ); ?>

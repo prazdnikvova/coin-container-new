@@ -25,7 +25,7 @@ if ( ! $ccn_q->have_posts() ) {
 }
 ?>
 <section class="ccn-news"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
-	<div class="ccn-news-inner">
+	<div class="ccn-news-inner ccn-container">
 		<?php if ( $ccn_heading ) : ?>
 			<h2 class="ccn-news-heading"><?php echo esc_html( $ccn_heading ); ?></h2>
 		<?php endif; ?>

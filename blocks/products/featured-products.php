@@ -56,7 +56,7 @@ if ( ! $ccn_q->have_posts() ) {
 }
 ?>
 <section class="section ccn-featured"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
-	<div class="section-inner">
+	<div class="section-inner ccn-container">
 		<?php $ccn_h = get_field( 'heading' ); ?>
 		<?php if ( $ccn_h ) : ?>
 			<h2 class="section-heading"><?php echo esc_html( $ccn_h ); ?></h2>

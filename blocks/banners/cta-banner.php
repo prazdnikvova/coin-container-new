@@ -26,7 +26,7 @@ if ( ! empty( $is_preview ) && ! $ccn_heading ) {
 		echo wp_get_attachment_image( $ccn_img, '1536x1536', false, array( 'class' => 'ccn-cta-bg', 'loading' => 'lazy', 'sizes' => '100vw' ) );
 	}
 	?>
-	<div class="ccn-cta-inner">
+	<div class="ccn-cta-inner ccn-container">
 		<?php if ( $ccn_logo ) : ?>
 			<img class="ccn-cta-logo" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.webp' ); ?>" width="106" height="80" alt="" loading="lazy">
 		<?php endif; ?>
