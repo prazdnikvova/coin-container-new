@@ -41,7 +41,26 @@ add_filter( 'woocommerce_gallery_image_html_attachment_image_params', 'ccn_galle
 function ccn_gallery_image_params( $params, $attachment_id = 0, $image_size = '', $main_image = false ) {
 	$params['loading']       = $main_image ? 'eager' : 'lazy';
 	$params['fetchpriority'] = $main_image ? 'high' : 'low';
+	$params['sizes']         = ccn_gallery_image_sizes( (int) $attachment_id );
 	return $params;
+}
+
+/**
+ * "sizes" of a gallery photo as drawn: the photo is contained in a 16:10 box
+ * across the content width below 48rem and in a 4:3 box in the left column
+ * from 48rem (half the container minus the gaps, 560px at most), so a square
+ * photo is drawn at 5/8 or 3/4 of the box width (a phone loads the 500px
+ * file instead of the 768px one; the first photo is the LCP image).
+ *
+ * @param int $attachment_id Attachment ID.
+ * @return string
+ */
+function ccn_gallery_image_sizes( $attachment_id ) {
+	$meta  = wp_get_attachment_metadata( $attachment_id );
+	$ratio = ( is_array( $meta ) && ! empty( $meta['width'] ) && ! empty( $meta['height'] ) ) ? $meta['width'] / $meta['height'] : 1;
+	$phone = round( min( 1, $ratio / 1.6 ), 3 );
+	$wide  = round( min( 1, $ratio / ( 4 / 3 ) ), 3 );
+	return sprintf( '(max-width: 47.99rem) calc((100vw - 32px) * %1$s), (max-width: 75rem) calc((50vw - 40px) * %2$s), %3$dpx', $phone, $wide, (int) round( 560 * $wide ) );
 }
 
 /**
