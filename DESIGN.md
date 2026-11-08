@@ -261,10 +261,13 @@ as on production (h1, button labels, trust row: `transmax-child/inc/hero-trust.p
 - Overlay: from 48rem the horizontal gradient (`.6 → .15`); below 48rem a
   vertical one — `.1` at the very top (the glass header carries a dark logo
   and dark icons, so the photo under it stays light), `.6` at the bottom of
-  the header row, `.7` at the bottom (white text). Sampled with the texts
-  hidden (20 points each): white text ≥ 11:1 on 360 and ≥ 5:1 on 1440 at the
-  worst point; logo grey `#605e5e` against the glass ≥ 3.6:1 on average on
-  the three glass pages. A dark top gradient (`.45 → 0` over the top
+  the header row, `.7` at the bottom (white text); the landing hero band uses
+  the same overlay below 48rem (its h1 sits higher once the band carries the
+  button and the phone line). Sampled with the texts hidden (20 points each),
+  white text at the worst point: home ≥ 11:1 on 360 and ≥ 5:1 on 1440,
+  landing band ≥ 5.1:1 on 360 and ≥ 4.3:1 on 1440 (h1, large text); logo
+  grey `#605e5e` against the glass ≥ 3.6:1 on average on the three glass
+  pages. A dark top gradient (`.45 → 0` over the top
   quarter) was measured and dropped: it lowers the logo contrast (360:
   4.52 → 4.43, 1440: 3.92 → 3.65), the logo being dark on light glass.
 - Trust row (Site Settings → Vertrauen, each item only from filled values):

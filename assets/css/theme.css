@@ -336,7 +336,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-page-hero::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(20,20,20,.35) 0%,rgba(20,20,20,.55) 100%)}
 .ccn-page-hero-inner{position:relative;z-index:2;padding-block:2.5rem;width:100%}
 .ccn-page-hero-title{color:var(--ccn-color-white)}
-@media (max-width:48rem){.ccn-page-hero{min-height:14rem}}
+@media (max-width:48rem){.ccn-page-hero{min-height:14rem}.ccn-page-hero::before{background:linear-gradient(180deg,rgba(20,20,20,.1) 0,rgba(20,20,20,.6) var(--ccn-header-h),rgba(20,20,20,.7) 100%)}}
 .ccn-landing{padding-block:3rem 3.5rem;display:grid;gap:2.5rem;grid-template-columns:1fr}
 @media (min-width:64rem){.ccn-landing{grid-template-columns:minmax(0,1fr) 19rem;gap:3.5rem;align-items:start}}
 .ccn-landing-main>*+*{margin-top:2rem}
