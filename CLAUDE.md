@@ -12,9 +12,9 @@ Custom WooCommerce theme for the coin-container.de rebuild, running on the
 Everything about the project lives OUTSIDE this repo, in the project library:
 `C:\Users\user\Documents\work\coin-container-new\`
 
-- `задачі\00-роадмап.md` — task queue (T-XX) with statuses and dependencies
-- `задачі\README.md` — execution protocol and task-card template
-- `план-робіт.md` — overall stage plan; `звіти\`, `рішення\`, `питання\` — reports, decisions, open questions
+- `tasks\00-roadmap.md` — task queue (T-XX) with statuses and dependencies
+- `tasks\README.md` — execution protocol and task-card template
+- `work-plan.md` — overall stage plan; `reports\`, `decisions\`, `questions\` — reports, decisions, open questions
 
 Entry-point skill: **ccn-task**. Related skills: ccn-verify (run after any change,
 always before commit), ccn-perf (before/after every perf change), ccn-commit
@@ -32,6 +32,9 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 - Admin-editable globals: single ACF "Site Settings" options page (tabs), read
   via the cached `ccn_setting()` helper only.
 - ACF: field groups sync to `acf-json/` — commit together with templates.
+- Markup: one `<header>`, `<main>`, `<footer>` and `<h1>` per page, every
+  `<nav>` named, no skipped heading levels — README "Markup standard",
+  enforced by the smoke test ("Structure invariants").
 
 ## Tests
 

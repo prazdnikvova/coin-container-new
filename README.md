@@ -33,9 +33,14 @@ mobile emulation) and the numbers go into the commit body.
 - Content blocks are ACF blocks registered in `blocks/acf-blocks.php` under
   custom inserter categories (COIN Banners / Lists / Products / Text); each
   block template lives in `blocks/<category>/<name>.php`, its fields in
-  `acf-json/`, and per-block assets are enqueued only where the block is used.
-  Legacy flexible-content sections (`sections/`) remain on the Sections
-  template landings until they are migrated to blocks.
+  `acf-json/`. Every page is built from these blocks (front page, landings) or
+  rendered by a plain template (legal pages, posts, shop); there is no
+  flexible-content layer any more.
+- Scoped assets: all block CSS lives in `assets/css/theme.css` and all theme
+  JS in `assets/js/main.js` (none of the 12 blocks ships its own file today).
+  A block that ever needs one registers a script/style handle and lists it
+  under `'assets'` in the registry; the handle is then enqueued only on pages
+  that contain the block.
 - Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
   no jQuery.
 - All strings wrapped in gettext with the `coin-container` text domain
@@ -46,9 +51,59 @@ mobile emulation) and the numbers go into the commit body.
   single cached helper — editable content must never add render-blocking or
   external requests.
 
+## Markup standard
+
+Every page renders:
+
+- exactly one `<header>` (the site banner in `header.php`), one
+  `<main id="content" tabindex="-1">` (the skip-link target) and one
+  `<footer>` (`footer.php`). Templates never wrap entry titles or meta in
+  `<header>`/`<footer>`: they use `<div class="entry-header">` and
+  `<div class="entry-footer">`, and `woocommerce/loop/header.php` does the
+  same for WooCommerce. There is no second header for mobile or for the
+  sticky state — it is the same element.
+- exactly one `<h1>`, then `h2` per section and `h3` inside it, without
+  skipping a level. Footer and sidebar headings are fixed `h2`.
+- a name on every `<nav>`, unique on the page and without the word
+  "navigation" (screen readers add the role): `Hauptmenü` (header),
+  `Rechtliches` (footer), `Kategorien` (catalogue filter), the landing
+  sidebar via `aria-labelledby` on its visible heading; WordPress and
+  WooCommerce pagination bring their own labels. Search stays a
+  `<form role="search">`.
+- no `aria-label` on an element with visible text (it replaces the text for
+  screen readers). Icon-only links are named by screen-reader text, and
+  links that open a new tab say so ("(öffnet in neuem Tab)").
+- anchor targets clear the sticky header (`scroll-padding-top`); smooth
+  scrolling only when the visitor has not asked for reduced motion.
+- fewer than 800 DOM nodes in `<body>`.
+
+Where the `<h1>` comes from:
+
+| Page | Template | `<h1>` |
+|---|---|---|
+| Front page | `front-page.php` | title of the `home-hero` block (an `h2` wherever else the block is used) |
+| Landing pages | `template-landing.php`, `template-landing-full.php` | page title in `template-parts/page-hero.php` |
+| Other pages | `page.php` | page title |
+| Post | `single.php` → `entry.php` | post title |
+| Blog index | `home.php` | title of the page set as "Posts page" |
+| Archives | `archive.php` | `the_archive_title()` |
+| Search, 404 | `search.php`, `404.php` | fixed, translatable title |
+| Shop, product categories | `woocommerce.php` → `woocommerce_content()` | WooCommerce page title |
+| Product | `woocommerce.php` → `content-single-product.php` | product title |
+
+Blocks: the root of every block template is a `<section>` that prints the
+editor's "HTML anchor" as its `id`. A block's own heading is an `h2` and its
+items are `h3`; `featured-products` cards turn `h3` only when the block has a
+heading (without one they keep WooCommerce's `h2`), and `info-cards` has an
+optional `h2` heading for when it opens a section right after the hero.
+
+`tests/js-smoke.mjs` ("Structure invariants") enforces this on one page per
+template; a new template adds its page there.
+
 ## Tests
 
-Playwright smoke test (rendering, a11y basics, security hardening, zero JS errors):
+Playwright smoke test (rendering, a11y basics, markup structure, security
+hardening, zero JS errors):
 
 ```bash
 cd tests
