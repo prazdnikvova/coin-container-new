@@ -2096,6 +2096,178 @@ ok('Main menu (T-53c) 360: the burger shows all three levels (7 / 24 / 10 items,
 	[0, 1, 2].every((d) => !!t53cLevels[d] && t53cLevels[d].shown === t53cLevels[d].n) && t53cLevels[0].n === 7 && t53cLevels[1].n === 24 && t53cLevels[2].n === 10
 	&& JSON.stringify([0, 1, 2].map((d) => t53cLevels[d].pads)) === JSON.stringify([['16px'], ['32px'], ['48px']]), JSON.stringify(t53cLevels));
 
+// TranslatePress (T-55, DESIGN.md "Languages"): English at /en/ through TranslatePress free with the pilot's settings,
+// the SEO layer of inc/trp-seo-en.php (title, description, og, canonical from _coin_en_*, og:locale en_GB,
+// /sitemap-en.xml), hreflang de / en / x-default from TranslatePress alone, the theme's own switcher without any
+// TranslatePress request, the German theme strings of languages/ and the formal locale (Sie in WooCommerce and CF7).
+const T55_PRODUCT = '/product/20-fuss-container-gebraucht/';
+const T55_EN = ['/en/', `/en${CAT_BASE}`, '/en/kontakt-beratung/', `/en${T55_PRODUCT}`];
+const t55Doc = {};
+for (const p of ['/', '/kontakt-beratung/', ...T55_EN]) {
+	const r = await t56Get(p);
+	t55Doc[p] = { status: r.res.status, html: r.text, bytes: Buffer.byteLength(r.text) };
+}
+const t55Attr = (html, re) => ((html.match(re) || [])[1] || '').replace(/&amp;/g, '&');
+const t55Lang = (html) => t55Attr(html, /<html[^>]*\slang="([^"]*)"/);
+ok('TranslatePress (T-55): /en/, /en/container-kaufen/, /en/kontakt-beratung/ and an /en/ product answer 200 with <html lang="en"> and a body over 10 KB (no empty 200); the German front page keeps lang="de"',
+	T55_EN.every((p) => t55Doc[p].status === 200 && t55Lang(t55Doc[p].html) === 'en' && t55Doc[p].bytes > 10240) && t55Lang(t55Doc['/'].html) === 'de',
+	JSON.stringify(Object.fromEntries(Object.entries(t55Doc).map(([p, d]) => [p, `${d.status} ${t55Lang(d.html)} ${d.bytes}`]))));
+const t55Hreflang = (html) => [...html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)"\s*\/?>/g)].map((m) => [m[1], m[2]]);
+const t55HreflangOk = (html, dePath, enPath) => {
+	const pairs = t55Hreflang(html);
+	return pairs.length === 3 && JSON.stringify(pairs.map((p) => p[0]).sort()) === JSON.stringify(['de', 'en', 'x-default'])
+		&& pairs.every(([code, href]) => href === BASE + (code === 'en' ? enPath : dePath));
+};
+ok('TranslatePress (T-55): hreflang on / and /en/ and on the contact page in both languages — de, en and x-default once each, no country locale, x-default the German address',
+	t55HreflangOk(t55Doc['/'].html, '/', '/en/') && t55HreflangOk(t55Doc['/en/'].html, '/', '/en/')
+	&& t55HreflangOk(t55Doc['/kontakt-beratung/'].html, '/kontakt-beratung/', '/en/kontakt-beratung/')
+	&& t55HreflangOk(t55Doc['/en/kontakt-beratung/'].html, '/kontakt-beratung/', '/en/kontakt-beratung/'),
+	JSON.stringify({ home: t55Hreflang(t55Doc['/'].html), en: t55Hreflang(t55Doc['/en/'].html).map((p) => p[0]) }));
+const t55Meta = (html) => ({
+	title: t55Attr(html, /<title>([^<]*)<\/title>/),
+	description: t55Attr(html, /<meta name="description" content="([^"]*)"/),
+	ogTitle: t55Attr(html, /<meta property="og:title" content="([^"]*)"/),
+	ogDescription: t55Attr(html, /<meta property="og:description" content="([^"]*)"/),
+	twTitle: t55Attr(html, /<meta name="twitter:title" content="([^"]*)"/),
+	ogLocale: t55Attr(html, /<meta property="og:locale" content="([^"]*)"/),
+	canonical: t55Attr(html, /<link rel="canonical" href="([^"]*)"/),
+	ogUrl: t55Attr(html, /<meta property="og:url" content="([^"]*)"/),
+});
+const t55Seo = {};
+for (const [de, en] of [['/', '/en/'], ['/kontakt-beratung/', '/en/kontakt-beratung/']]) t55Seo[en] = { de: t55Meta(t55Doc[de].html), en: t55Meta(t55Doc[en].html) };
+ok('TranslatePress (T-55): English SEO layer on /en/ and /en/kontakt-beratung/ — title and description from _coin_en_* (not empty, not the German ones), og:/twitter: the same texts, og:locale en_GB (German pages de_DE), canonical and og:url the /en/ address',
+	Object.entries(t55Seo).every(([en, s]) => s.en.title && s.en.title !== s.de.title && s.en.description && s.en.description !== s.de.description
+		&& s.en.ogTitle === s.en.title && s.en.twTitle === s.en.title && s.en.ogDescription === s.en.description
+		&& s.en.ogLocale === 'en_GB' && s.de.ogLocale === 'de_DE' && s.en.canonical === BASE + en && s.en.ogUrl === BASE + en),
+	JSON.stringify(Object.fromEntries(Object.entries(t55Seo).map(([en, s]) => [en, { title: s.en.title, de: s.de.title, locale: s.en.ogLocale, canonical: s.en.canonical }]))));
+const t55Prices = [...t55Doc[`/en${T55_PRODUCT}`].html.matchAll(/woocommerce-Price-amount amount"><bdi>([^<]*)<span class="woocommerce-Price-currencySymbol"[^>]*>([^<]*)</g)]
+	.map((m) => m[1].replace(/&nbsp;/g, ' ') + m[2]);
+ok('TranslatePress (T-55): prices on an /en/ product stay in the German format (1.800,00 €)',
+	t55Prices.length >= 1 && t55Prices.every((p) => /^\d{1,3}(\.\d{3})*,\d{2} &euro;$/.test(p)), JSON.stringify(t55Prices.slice(0, 4)));
+// Sitemap: every URL of the German child sitemaps (unique; Rank Math lists the shop page and one shadowed path twice)
+// has its /en/ entry, the legal pages included (decision T-55 until OPEN #74).
+const t55Index = (await t56Get('/sitemap_index.xml')).text;
+const t55DeLocs = new Set();
+for (const m of t55Index.matchAll(/<loc>([^<]*-sitemap\d*\.xml)<\/loc>/g)) {
+	const xml = await (await fetch(`${m[1]}?cb=${Date.now()}`)).text();
+	for (const l of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) t55DeLocs.add(l[1]);
+}
+const t55En = await t56Get('/sitemap-en.xml');
+const t55EnLocs = [...t55En.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+const t55Missing = [...t55DeLocs].map((u) => u.replace(`${BASE}/`, `${BASE}/en/`)).filter((u) => !t55EnLocs.includes(u));
+const t55Robots = (await t56Get('/robots.txt')).text;
+ok('TranslatePress (T-55): /sitemap-en.xml (200, XML, noindex) lists the /en/ address of every German sitemap URL with de/en alternates, sitemap_index.xml names it, robots.txt still points to the index only',
+	t55En.res.status === 200 && /xml/.test(t55En.res.headers.get('content-type') || '') && /noindex/.test(t55En.res.headers.get('x-robots-tag') || '')
+	&& t55DeLocs.size > 100 && t55EnLocs.length === t55DeLocs.size && t55Missing.length === 0
+	&& (t55En.text.match(/<xhtml:link rel="alternate" hreflang="(de|en)"/g) || []).length === 2 * t55EnLocs.length
+	&& t55Index.includes(`<loc>${BASE}/sitemap-en.xml</loc>`)
+	&& t55Robots.includes(`Sitemap: ${BASE}/sitemap_index.xml`) && !/sitemap-en/.test(t55Robots),
+	JSON.stringify({ de: t55DeLocs.size, en: t55EnLocs.length, missing: t55Missing.slice(0, 5), legal: t55EnLocs.filter((u) => /impressum|datenschutz|agb/.test(u)).length }));
+// The switcher: desktop (top bar), phone (end of the open menu), English page (the German link is not rewritten).
+const t55Desk = await browser.newPage({ viewport: { width: 1280, height: 800 } });
+const t55Reqs = [];
+t55Desk.on('request', (r) => t55Reqs.push(r.url()));
+await t55Desk.goto(`${BASE}/`, { waitUntil: 'load' });
+const t55DeskState = await t55Desk.evaluate(() => {
+	const a = document.querySelector('.ccn-topbar a[hreflang="en"]');
+	const r = a ? a.getBoundingClientRect() : null;
+	const cur = document.querySelector('.ccn-topbar .ccn-lang [aria-current]');
+	const nav = document.querySelector('#site-nav .ccn-lang');
+	return {
+		href: a ? a.getAttribute('href') : null, lang: a ? a.getAttribute('lang') : null, text: a ? a.textContent : '', visible: !!r && r.width > 0 && r.height > 0,
+		current: cur ? cur.textContent : '', menuCopy: nav ? getComputedStyle(nav).display : 'missing',
+		trpTags: document.querySelectorAll('link[href*="translatepress"], script[src*="translatepress"], #tp-language, .trp-language-switcher, [class*="trp-floater"], [class*="trp-ls-"]').length,
+	};
+});
+await t55Desk.goto(`${BASE}/en/kontakt-beratung/`, { waitUntil: 'load' });
+const t55DeskEn = await t55Desk.evaluate(() => {
+	const a = document.querySelector('.ccn-topbar a[hreflang="de"]');
+	const cur = document.querySelector('.ccn-topbar .ccn-lang [aria-current]');
+	return { href: a ? a.getAttribute('href') : null, lang: a ? a.getAttribute('lang') : null, current: cur ? cur.textContent : '' };
+});
+await t55Desk.close();
+const t55Mob = await browser.newPage({ viewport: { width: 360, height: 800 }, isMobile: true, hasTouch: true });
+await t55Mob.goto(`${BASE}/`, { waitUntil: 'load' });
+await t55Mob.click('.nav-toggle');
+await t55Mob.waitForTimeout(400);
+const t55MobState = await t55Mob.evaluate(() => {
+	const a = document.querySelector('#site-nav a[hreflang="en"]');
+	const r = a ? a.getBoundingClientRect() : null;
+	return { href: a ? a.getAttribute('href') : null, h: r ? Math.round(r.height) : 0, w: r ? Math.round(r.width) : 0, topbar: getComputedStyle(document.querySelector('.ccn-topbar')).display };
+});
+await t55Mob.close();
+ok('Language switcher (T-55): «DE | EN» in the top bar at 1280 (EN links /en/ with hreflang and lang, DE current), its menu copy hidden there; at 360 at the end of the open menu, the EN link >= 44px tall; on /en/kontakt-beratung/ the DE link is the German address (not rewritten by TranslatePress)',
+	t55DeskState.visible && t55DeskState.href === `${BASE}/en/` && t55DeskState.lang === 'en' && t55DeskState.text === 'EN' && t55DeskState.current === 'DE' && t55DeskState.menuCopy === 'none'
+	&& t55MobState.href === `${BASE}/en/` && t55MobState.h >= 44 && t55MobState.topbar === 'none'
+	&& t55DeskEn.href === `${BASE}/kontakt-beratung/` && t55DeskEn.lang === 'de' && t55DeskEn.current === 'EN',
+	JSON.stringify({ desk: t55DeskState, mob: t55MobState, en: t55DeskEn }));
+ok('TranslatePress (T-55): the front page requests nothing of TranslatePress (no stylesheet, script or floater) and its document carries no TranslatePress tags (#tp-language included)',
+	t55DeskState.trpTags === 0 && !t55Reqs.some((u) => u.includes('translatepress')), JSON.stringify({ tags: t55DeskState.trpTags, requests: t55Reqs.filter((u) => u.includes('translatepress')) }));
+const t55Woo = await browser.newPage();
+const t55WooErrors = [];
+t55Woo.on('pageerror', (e) => t55WooErrors.push(e.message));
+const t55CartResp = await t55Woo.goto(`${BASE}/en/warenkorb/`, { waitUntil: 'load' });
+const t55CartJq = await t55Woo.evaluate(() => typeof window.jQuery);
+const t55EnResp = await t55Woo.goto(`${BASE}/en/`, { waitUntil: 'load' });
+const t55EnJq = await t55Woo.evaluate(() => typeof window.jQuery);
+await t55Woo.close();
+ok('TranslatePress (T-55): /en/warenkorb/ answers 200 with jQuery (a WooCommerce page), /en/ stays without jQuery, no JS errors on either',
+	t55CartResp.status() === 200 && t55CartJq === 'function' && t55EnResp.status() === 200 && t55EnJq === 'undefined' && t55WooErrors.length === 0,
+	JSON.stringify({ cart: [t55CartResp.status(), t55CartJq], en: [t55EnResp.status(), t55EnJq], errors: t55WooErrors }));
+// Theme translations: the .pot, the German .po/.mo and the copy for the formal locale.
+const t55File = (name) => { try { return readFileSync(new URL(`../languages/${name}`, import.meta.url)); } catch (e) { return null; } };
+const t55Pot = (t55File('coin-container.pot') || '').toString().replace(/\r\n/g, '\n');
+const t55Po = (t55File('de_DE.po') || '').toString().replace(/\r\n/g, '\n');
+const t55MoDe = t55File('de_DE.mo');
+const t55MoFormal = t55File('de_DE_formal.mo');
+const t55Ids = (txt) => (txt.match(/^msgid ".+"$/gm) || []).length;
+ok('Theme translations (T-55): coin-container.pot has >= 73 msgids, de_DE.po covers the same entries, de_DE.mo and de_DE_formal.mo exist and are identical',
+	t55Ids(t55Pot) >= 73 && t55Ids(t55Po) === t55Ids(t55Pot) && !!t55MoDe && !!t55MoFormal && Buffer.compare(t55MoDe, t55MoFormal) === 0,
+	JSON.stringify({ pot: t55Ids(t55Pot), po: t55Ids(t55Po), mo: t55MoDe ? t55MoDe.length : null, formal: t55MoFormal ? t55MoFormal.length : null }));
+// German theme strings on the pages that showed English ones (T-44): every English msgid that de_DE.po translates.
+const t55Translated = [...t55Po.matchAll(/^msgid "(.+)"\n(?:msgid_plural ".*"\n)?msgstr(?:\[0\])? "(.+)"$/gm)].filter((m) => m[1] !== m[2])
+	.map((m) => m[1].split(/%(?:\d\$)?[sd]/).sort((a, b) => b.length - a.length)[0]).filter((s) => s.trim().length >= 5);
+const t55Text = (html) => html.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&#8217;/g, "'");
+const t55UiPages = {};
+for (const p of ['/kein-solcher-pfad/', '/?s=zzqxjv', '/?s=container', t56PostPath || '/iso-container-einfach-erklaert/']) {
+	const r = await t56Get(p);
+	t55UiPages[p] = { status: r.res.status, text: t55Text(r.text), html: r.text };
+}
+const t55English = Object.fromEntries(Object.entries(t55UiPages).map(([p, d]) => [p, t55Translated.filter((s) => d.text.includes(s))]));
+ok('Theme translations (T-55): the 404, the search pages and a post show the German theme strings, 0 English ones (de_DE_formal locale active: «Seite nicht gefunden», «Nichts gefunden», «Zum Inhalt springen»)',
+	t55Translated.length >= 10 && Object.values(t55English).every((l) => l.length === 0)
+	&& t55UiPages['/kein-solcher-pfad/'].status === 404 && t55UiPages['/kein-solcher-pfad/'].text.includes('Seite nicht gefunden')
+	&& t55UiPages['/?s=zzqxjv'].text.includes('Nichts gefunden') && Object.values(t55UiPages).every((d) => d.text.includes('Zum Inhalt springen'))
+	&& t55Doc['/'].html.includes('translatepress-de_DE_formal'),
+	JSON.stringify({ checked: t55Translated.length, english: t55English }));
+// Sie everywhere (Olga 24.10.2026): theme strings, the WooCommerce cart and checkout, Contact Form 7 messages.
+const t55Du = /\b(du|dein|deine|deinem|deinen|deiner|deines|dich|dir)\b/i;
+const t55PoDu = [...t55Po.matchAll(/^msgstr(?:\[\d\])? "(.*)"$/gm)].map((m) => m[1]).filter((s) => t55Du.test(s));
+const t55Shop = await browser.newContext();
+const t55ShopPage = await t55Shop.newPage();
+await t55ShopPage.goto(`${BASE}${T55_PRODUCT}`, { waitUntil: 'load' });
+const t55Pid = await t55ShopPage.evaluate(() => (document.querySelector('button[name="add-to-cart"]') || {}).value || '');
+await t55ShopPage.goto(`${BASE}/warenkorb/?add-to-cart=${t55Pid}`, { waitUntil: 'load' });
+const t55CartText = await t55ShopPage.evaluate(() => document.body.innerText);
+await t55ShopPage.goto(`${BASE}/kasse/`, { waitUntil: 'load' });
+const t55CheckoutText = await t55ShopPage.evaluate(() => document.body.innerText);
+await t55Shop.close();
+const t55Form = t55Doc['/kontakt-beratung/'].html;
+const t55FormId = t55Attr(t55Form, /name="_wpcf7" value="(\d+)"/);
+const t55Fd = new FormData();
+for (const n of ['_wpcf7', '_wpcf7_version', '_wpcf7_locale', '_wpcf7_unit_tag', '_wpcf7_container_post']) t55Fd.append(n, t55Attr(t55Form, new RegExp(`name="${n}" value="([^"]*)"`)));
+const t55Cf7 = await (await fetch(`${BASE}/wp-json/contact-form-7/v1/contact-forms/${t55FormId}/feedback`, { method: 'POST', body: t55Fd })).json().catch(() => ({}));
+const t55Cf7Msgs = [t55Cf7.message || '', ...(t55Cf7.invalid_fields || []).map((f) => f.message || '')];
+ok('Sie (T-55, de_DE_formal): no «du/dein/…» in the theme strings, the cart after adding a product («… wurde Ihrem Warenkorb hinzugefügt»), the checkout and the Contact Form 7 messages of an empty submit',
+	t55PoDu.length === 0 && /Ihrem Warenkorb hinzugefügt/.test(t55CartText) && !t55Du.test(t55CartText) && !t55Du.test(t55CheckoutText)
+	&& t55Cf7.status === 'validation_failed' && t55Cf7Msgs.length >= 3 && !t55Cf7Msgs.some((m) => t55Du.test(m)),
+	JSON.stringify({ po: t55PoDu, cart: (t55CartText.match(t55Du) || [])[0] || '', checkout: (t55CheckoutText.match(t55Du) || [])[0] || '', cf7: t55Cf7Msgs.slice(0, 2) }));
+const t55RestGet = await fetch(`${BASE}/wp-json/coin/v1/trp-strings?lang=en_US&cb=${Date.now()}`);
+const t55RestPost = await fetch(`${BASE}/wp-json/coin/v1/trp-strings`, { method: 'POST' });
+const t55RestPostBody = await t55RestPost.json().catch(() => ({}));
+ok('TranslatePress (T-55): GET coin/v1/trp-strings (dictionary, read only) closed to anonymous visitors (401), no write route (POST -> rest_no_route)',
+	t55RestGet.status === 401 && t55RestPost.status === 404 && t55RestPostBody.code === 'rest_no_route', JSON.stringify({ get: t55RestGet.status, post: [t55RestPost.status, t55RestPostBody.code] }));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
