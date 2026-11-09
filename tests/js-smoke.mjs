@@ -1,8 +1,10 @@
 // Coin Container smoke test: rendering, accessibility basics, security hardening.
 // Requires a local WordPress site running this theme.
 import { chromium } from 'playwright';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const BASE = process.env.CCN_BASE_URL || 'http://coin-container-new.local';
 // Product categories live under the production base since T-53a (woocommerce_permalinks.category_base).
@@ -2268,8 +2270,147 @@ const t55RestPostBody = await t55RestPost.json().catch(() => ({}));
 ok('TranslatePress (T-55): GET coin/v1/trp-strings (dictionary, read only) closed to anonymous visitors (401), no write route (POST -> rest_no_route)',
 	t55RestGet.status === 401 && t55RestPost.status === 404 && t55RestPostBody.code === 'rest_no_route', JSON.stringify({ get: t55RestGet.status, post: [t55RestPost.status, t55RestPostBody.code] }));
 
+// Editor patterns and guardrails (T-52, README "Patterns" and "Editor", DESIGN.md "Editor"). The editor needs a login
+// (the T-52 editor probe of the project library checks the inserter); here the files, the code and the public side,
+// without writing to the database: the four pattern files with their headers and php -l, the editor rules of
+// inc/editor.php, inserter examples only for blocks that render from their own fields, core block styles dropped in
+// the editor only, the patterns route closed to visitors, no pattern placeholder on a published page. With
+// CCN_PATTERN_TEST=1 (and CCN_WP_AUTH=<user>:<application password>) a page is built from each pattern through the
+// REST API, checked on the front end and deleted again; otherwise that step is skipped with a note.
+const T52_PATTERNS = { 'landing-service': 'page', 'landing-product': 'page', contact: 'page', article: 'post, page' };
+const t52Notes = [];
+const t52Dir = new URL('patterns/', themeDir);
+const t52Files = (() => { try { return readdirSync(t52Dir).filter((f) => f.endsWith('.php')).sort(); } catch { return []; } })();
+const t52Head = (src, key) => ((src.match(new RegExp(`^[ \\t/*#@]*${key}:(.*)$`, 'mi')) || [])[1] || '').trim();
+const t52Headers = Object.fromEntries(Object.keys(T52_PATTERNS).map((name) => {
+	const src = themeFile(`patterns/${name}.php`);
+	return [name, Object.fromEntries(['Title', 'Slug', 'Categories', 'Block Types', 'Post Types', 'Viewport Width'].map((k) => [k, t52Head(src, k)]))];
+}));
+const t52BadHeaders = Object.entries(t52Headers).filter(([name, h]) => !/^Coin: \S/.test(h.Title) || h.Slug !== `coin-container/${name}`
+	|| h.Categories !== 'coin-container' || h['Block Types'] !== 'core/post-content' || h['Post Types'] !== T52_PATTERNS[name]
+	|| h['Viewport Width'] !== '1200').map(([name]) => name);
+ok('Patterns (T-52): patterns/ holds exactly the 4 theme patterns (landing-service, landing-product, contact, article), each with Title «Coin: …», Slug coin-container/<file>, Categories coin-container, Block Types core/post-content, Post Types and Viewport Width 1200',
+	JSON.stringify(t52Files) === JSON.stringify(Object.keys(T52_PATTERNS).map((n) => `${n}.php`).sort()) && t52BadHeaders.length === 0,
+	JSON.stringify({ files: t52Files, bad: t52BadHeaders, titles: Object.values(t52Headers).map((h) => h.Title) }));
+// php -l: CCN_PHP, else the newest PHP 8 of Local by Flywheel, else php from PATH (-n: no php.ini needed for a lint).
+const t52Php = process.env.CCN_PHP || (() => {
+	const root = `${process.env.APPDATA || ''}/Local/lightning-services`;
+	try {
+		return readdirSync(root).filter((d) => /^php-8\./.test(d)).sort().reverse().map((d) => `${root}/${d}/bin/win64/php.exe`).find((p) => existsSync(p)) || 'php';
+	} catch { return 'php'; }
+})();
+const t52Lint = Object.keys(T52_PATTERNS).map((name) => {
+	try {
+		return /No syntax errors detected/.test(execFileSync(t52Php, ['-n', '-l', fileURLToPath(new URL(`${name}.php`, t52Dir))], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })) ? null : name;
+	} catch (e) { return `${name}: ${String(e.message).split('\n')[0].slice(0, 120)}`; }
+}).filter(Boolean);
+ok('Patterns (T-52): php -l passes on the 4 pattern files', t52Lint.length === 0,
+	JSON.stringify({ php: t52Php.replace(/^.*[\\/](php-[^\\/]+)[\\/].*$/, '$1'), failed: t52Lint }));
+// Editor rules (code level). Inserter strings: block categories, block titles and descriptions, pattern titles, the
+// pattern category label — the brand as «Coin», never «COIN».
+// Line endings normalised: a Windows checkout (core.autocrlf) has CRLF, the entry parser below splits on LF.
+const t52Editor = themeFile('inc/editor.php').replace(/\r\n/g, '\n');
+const t52Registry = themeFile('blocks/acf-blocks.php').replace(/\r\n/g, '\n');
+const t52CatSrc = t52Registry.slice(t52Registry.indexOf('function ccn_block_categories'), t52Registry.indexOf("add_action( 'acf/init'"));
+const t52CatTitles = [...t52CatSrc.matchAll(/__\(\s*'([^']+)',\s*'coin-container'\s*\)/g)].map((m) => m[1]);
+const t52Strings = [...(t52Registry + t52Editor).matchAll(/__\(\s*'([^']+)',\s*'coin-container'\s*\)/g)].map((m) => m[1]).concat(Object.values(t52Headers).map((h) => h.Title));
+ok('Editor (T-52): inc/editor.php (required by functions.php) filters allowed_block_types_all, sets should_load_remote_block_patterns to false, removes the core-block-patterns support and registers the pattern category coin-container «Coin Container»; inserter categories «Coin: Banners / Lists / Products / Text» and no «COIN» in any inserter string',
+	/require_once get_template_directory\(\) \. '\/inc\/editor\.php';/.test(functionsPhp)
+	&& /add_filter\(\s*'allowed_block_types_all',\s*'ccn_allowed_block_types',\s*10,\s*2\s*\)/.test(t52Editor)
+	&& /add_filter\(\s*'should_load_remote_block_patterns',\s*'__return_false'\s*\)/.test(t52Editor)
+	&& /remove_theme_support\(\s*'core-block-patterns'\s*\)/.test(t52Editor)
+	&& /register_block_pattern_category\(\s*'coin-container',\s*array\(\s*'label'\s*=>\s*__\(\s*'Coin Container'/.test(t52Editor)
+	&& JSON.stringify(t52CatTitles) === JSON.stringify(['Coin: Banners', 'Coin: Lists', 'Coin: Products', 'Coin: Text'])
+	&& !t52Strings.some((s) => /COIN/.test(s)),
+	JSON.stringify({ categories: t52CatTitles, strings: t52Strings.length, coin: t52Strings.filter((s) => /COIN/.test(s)) }));
+// Inserter examples: one entry per block of the registry, 'example' only in the ten that need no query, script or chosen
+// form or media (decision T-52: home-hero, contact-cards, featured-products, news, trust-bar, reviews-widget, logos,
+// form-card, related-links and gallery-rail have none).
+const T52_EXAMPLES = ['cta-banner', 'faq', 'info-cards', 'intro', 'numbered-list', 'price-table', 'services', 'stats', 'text-image', 'text-section'];
+const t52Entries = t52Registry.split(/\n\t\tarray\(\n\t\t\t'name'\s*=>\s*/).slice(1).map((chunk) => {
+	const entry = chunk.split('\n\t\t),')[0];
+	return { name: (entry.match(/^'([^']+)'/) || [])[1], example: /'example'\s*=>/.test(entry) };
+});
+const t52WithExample = t52Entries.filter((e) => e.example).map((e) => e.name).sort();
+ok('Editor (T-52): inserter examples with placeholder data for the 10 blocks that render from their own fields or Site Settings only, none for the 10 that query products or posts, start third-party scripts or need a chosen form or media; the registry passes them to WordPress',
+	t52Entries.length === 20 && JSON.stringify(t52WithExample) === JSON.stringify(T52_EXAMPLES) && /\$args\['example'\]\s*=\s*\$block\['example'\]/.test(t52Registry),
+	JSON.stringify({ blocks: t52Entries.length, withExample: t52WithExample }));
+// Block styles: core's styles of the allowed blocks without theme CSS go in the editor only (inline script on the post
+// editor screen after wp-edit-post); the theme registers none of its own (theme.css has no is-style-* class).
+const t52ThemePhp = readdirSync(themeDir, { recursive: true }).map(String)
+	.filter((f) => f.endsWith('.php') && !/^(vendor|tests|node_modules)[\\/]/.test(f)).map((f) => themeFile(f.replace(/\\/g, '/'))).join('\n');
+ok('Editor (T-52): core block styles of image, quote, separator and table dropped by an editor-only inline script (enqueue_block_editor_assets, wp.blocks.unregisterBlockStyle after wp-edit-post); no block style registered by the theme; nothing of it in the front page or main.js',
+	/add_action\(\s*'enqueue_block_editor_assets',\s*'ccn_editor_block_styles'\s*\)/.test(t52Editor) && /wp\.blocks\.unregisterBlockStyle/.test(t52Editor)
+	&& ['core/image', 'core/quote', 'core/separator', 'core/table'].every((b) => t52Editor.includes(`'${b}'`)) && /'wp-edit-post'/.test(t52Editor)
+	&& !/register_block_style\s*\(/.test(t52ThemePhp) && !/is-style-/.test(themeCss)
+	&& !/unregisterBlockStyle|ccn-editor-block-styles/.test(homeHtml) && !/unregisterBlockStyle/.test(mainJs),
+	JSON.stringify({ phpFiles: t52ThemePhp.length }));
+const t52Route = await fetch(`${BASE}/wp-json/wp/v2/block-patterns/patterns?cb=${Date.now()}`);
+ok('Editor (T-52): /wp-json/wp/v2/block-patterns/patterns closed to anonymous visitors (401)', t52Route.status === 401, String(t52Route.status));
+// Placeholders: a page built from a pattern and published before every «[…]» was replaced would show them; WordPress
+// search (REST) looks through every published page, post and product for each placeholder of inc/editor.php.
+const t52Placeholders = [...t52Editor.matchAll(/__\(\s*'(\[[^\]']+\])',\s*'coin-container'\s*\)/g)].map((m) => m[1]);
+const t52Leaks = {};
+for (const ph of t52Placeholders) {
+	const r = await t56Get(`/wp-json/wp/v2/search?search=${encodeURIComponent(ph)}&per_page=1&_fields=id,url`);
+	const total = Number(r.res.headers.get('x-wp-total') || 0);
+	if (r.res.status !== 200 || total > 0) t52Leaks[ph] = r.res.status === 200 ? { total, first: r.text.slice(0, 160) } : `HTTP ${r.res.status}`;
+}
+ok('Patterns (T-52): no pattern placeholder ([Überschrift], [Text], …) on a published page, post or product (REST search for every placeholder of inc/editor.php)',
+	t52Placeholders.length >= 10 && Object.keys(t52Leaks).length === 0, JSON.stringify({ placeholders: t52Placeholders.length, leaks: t52Leaks }));
+if (process.env.CCN_PATTERN_TEST === '1') {
+	const t52Auth = { Authorization: `Basic ${Buffer.from(process.env.CCN_WP_AUTH || '').toString('base64')}` };
+	const t52All = await (await fetch(`${BASE}/wp-json/wp/v2/block-patterns/patterns?cb=${Date.now()}`, { headers: t52Auth })).json().catch(() => null);
+	const t52Pages = {};
+	for (const name of Object.keys(T52_PATTERNS)) {
+		const pat = Array.isArray(t52All) ? t52All.find((p) => p.name === `coin-container/${name}`) : null;
+		if (!pat) {
+			t52Pages[name] = { error: 'not in the patterns route' };
+			continue;
+		}
+		const made = await (await fetch(`${BASE}/wp-json/wp/v2/pages`, {
+			method: 'POST',
+			headers: { ...t52Auth, 'Content-Type': 'application/json' },
+			body: JSON.stringify({ title: `T-52 pattern test ${name}`, status: 'publish', content: pat.content, template: name === 'article' ? '' : 'template-landing-full.php' }),
+		})).json().catch(() => ({}));
+		// Rendered sections: every ACF block of the pattern but the form card (no form chosen in a pattern prints nothing).
+		const rec = { id: made.id || 0, expect: (pat.content.match(/<!-- wp:acf\/(?!form-card)[a-z-]+/g) || []).length };
+		const url = () => `${made.link}${made.link.includes('?') ? '&' : '?'}cb=${Date.now()}`;
+		if (made.id && made.link) {
+			for (const w of [360, 1440]) {
+				const pg = await browser.newPage({ viewport: { width: w, height: 900 } });
+				const errs = [];
+				pg.on('pageerror', (e) => errs.push(e.message));
+				pg.on('console', (m) => { if (m.type() === 'error') errs.push(m.text()); });
+				const resp = await pg.goto(url(), { waitUntil: 'load' });
+				rec[w] = { status: resp.status(), errors: errs, ...await pg.evaluate(() => ({
+					header: document.querySelectorAll('header').length, main: document.querySelectorAll('main').length,
+					footer: document.querySelectorAll('footer').length, h1: document.querySelectorAll('h1').length,
+					sections: document.querySelectorAll('main section:not(.ccn-page-hero)').length,
+					unnamedNav: [...document.querySelectorAll('nav')].filter((n) => !n.getAttribute('aria-label') && !n.getAttribute('aria-labelledby')).length,
+					scrollX: document.documentElement.scrollWidth - window.innerWidth,
+					php: /<b>(?:Warning|Notice|Deprecated|Fatal error)<\/b>:/.test(document.documentElement.innerHTML),
+				})) };
+				await pg.close();
+			}
+		}
+		const del = made.id ? await fetch(`${BASE}/wp-json/wp/v2/pages/${made.id}?force=true`, { method: 'DELETE', headers: t52Auth }) : null;
+		rec.deleted = del ? (await del.json().catch(() => ({}))).deleted === true : false;
+		rec.after = made.link ? (await fetch(url())).status : 0;
+		t52Pages[name] = rec;
+	}
+	const t52PageOk = (r) => r.id > 0 && r.deleted && r.after === 404 && [360, 1440].every((w) => r[w] && r[w].status === 200 && r[w].header === 1
+		&& r[w].main === 1 && r[w].footer === 1 && r[w].h1 === 1 && r[w].sections === r.expect && r[w].unnamedNav === 0
+		&& r[w].errors.length === 0 && !r[w].php && r[w].scrollX <= 0);
+	ok('Patterns (T-52, CCN_PATTERN_TEST=1): a page built from each of the 4 patterns (REST, published; Landing full width, the article on the default template) renders at 360 and 1440 with one header/main/footer/h1, every block, named navs, no JS error, PHP notice or sideways scroll, and is deleted again (404 afterwards)',
+		Object.keys(t52Pages).length === 4 && Object.values(t52Pages).every(t52PageOk), JSON.stringify(t52Pages));
+} else {
+	t52Notes.push('SKIP Patterns (T-52, CCN_PATTERN_TEST=1): page from each pattern not built — set CCN_PATTERN_TEST=1 and CCN_WP_AUTH=<user>:<application password> (creates, checks and deletes 4 pages)');
+}
+
 await browser.close();
 console.log(results.join('\n'));
+if (t52Notes.length) console.log(t52Notes.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
 console.log(`\n${results.length - fails}/${results.length} PASS`);
 process.exit(fails ? 1 : 0);
