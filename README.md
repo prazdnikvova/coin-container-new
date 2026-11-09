@@ -60,8 +60,9 @@ mobile emulation) and the numbers go into the commit body.
   measured contrast, one type scale, spacing, containers, radius, shadows,
   motion — documented in [`DESIGN.md`](DESIGN.md); `tests/contrast.cjs` is the
   WCAG calculator behind its tables.
-- All strings wrapped in gettext with the `coin-container` text domain
-  (WPML-ready); site content is German, code and docs are English.
+- All strings wrapped in gettext with the `coin-container` text domain;
+  site content is German, code and docs are English. Second language:
+  English through TranslatePress free (see "Languages").
 - ACF field groups sync to `acf-json/` and are committed together with the
   templates that use them.
 - Features of the production theme (`transmax-child`) are ported one file
@@ -95,6 +96,39 @@ mobile emulation) and the numbers go into the commit body.
   Google reviews and the Trustpilot TrustBox, as on production): its widget
   HTML comes from `/wp-json/ccn/v1/reviews` and its third-party scripts start
   only when the block comes near ([`DESIGN.md`](DESIGN.md) "Trust").
+
+## Languages
+
+German is the site language: locale `de_DE_formal`, so WordPress,
+WooCommerce and Contact Form 7 address the reader with «Sie», as the site
+does. English lives at `/en/` through TranslatePress free (one extra
+language), set up like production's K62 pilot: `<html lang="en">`, hreflang
+`de` / `en` plus `x-default` = German from TranslatePress itself, British
+English with German number and price formats.
+
+- `languages/`: the `.pot` of the theme and the German `.po`/`.mo` (with a
+  copy for the formal locale), see `languages/README.md`.
+- `inc/trp-compat.php` (included right after the REST header fallback,
+  before the rest of `inc/`): the current-language helpers, 512M of memory
+  for the English render (TranslatePress parses the whole page in its output
+  buffer), TranslatePress' own front-end assets dequeued, shop e-mails in
+  German, customer data kept out of the dictionary, Contact Form 7 responses
+  translated.
+- `inc/trp-seo-en.php`: Rank Math's title, description, og/twitter texts and
+  canonical of English pages from the meta `_coin_en_title` /
+  `_coin_en_description` of the page, post, product or category (German
+  without it), `og:locale` `en_GB`, and `/sitemap-en.xml` (listed in
+  `sitemap_index.xml`).
+- `inc/trp-dictionary-rest.php`: `GET /wp-json/coin/v1/trp-strings`, the
+  dictionary for the translation pipeline (read only, translation editor
+  capability, Application Password).
+- `template-parts/language-switcher.php`: «DE | EN» in the top bar and in the
+  mobile menu, without TranslatePress markup or assets
+  ([`DESIGN.md`](DESIGN.md) "Languages").
+
+Deploy: upload the `inc/trp-*.php` files before `functions.php`, which
+requires them, then save the permalinks once (TranslatePress' `/en/` and the
+`/sitemap-en.xml` rule).
 
 ## Markup standard
 

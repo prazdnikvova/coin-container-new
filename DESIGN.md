@@ -282,6 +282,8 @@ replaces its "planned" line with the implemented spec.
 - Anchors: `scroll-padding-top: calc(var(--ccn-header-total) + 1rem)`.
   Logged in: `top: var(--wp-admin--admin-bar--height)` keeps the header below
   the admin bar.
+- Language switcher «DE | EN»: last item of the top bar from 64rem, last
+  item of the mobile menu below it (see Languages).
 
 ## Hero
 
@@ -591,6 +593,39 @@ under `/product/<slug>/`, pages and posts at their own paths.
   (`SEO/301-map-2026-11.htaccess`), not theme code. Locally the same rows
   live in Rank Math's Redirections module (`tools/migration/redirects.php`
   of the library), so the smoke test sees the same answers.
+
+## Languages
+
+T-55. German at the root, English at `/en/` (TranslatePress free, the
+settings of production's K62 pilot; README "Languages" has the code side).
+The English pages are the German pages translated by TranslatePress: the
+same templates, blocks and tokens, `<html lang="en">`, prices and numbers in
+the German format («1.800,00 €»).
+
+- **Switcher** (`template-parts/language-switcher.php`): `<p class="ccn-lang">`
+  with «DE | EN» — the current language a `<span aria-current="true">` in
+  bold, the other one a link with `hreflang` and `lang` to the same page in
+  that language (the page's hreflang alternate: pagination kept, actions
+  such as `?add-to-cart=` dropped, a search keeps its query). The separator
+  is `aria-hidden`. No flags, no icon font, no TranslatePress floater,
+  stylesheet or script: 0 requests on German pages.
+- **Where:** the end of the top bar from 64rem (white on
+  `--ccn-color-secondary`, 6.44:1, underline on hover like the other top bar
+  links) and the end of the mobile menu below 64rem (`#202020` on white,
+  44px tall link, 16px gutter like the menu items). One of the two copies is
+  always `display: none`.
+- **SEO of English pages:** Rank Math's title, description and og/twitter
+  texts from `_coin_en_title` / `_coin_en_description` (German when empty),
+  `og:locale` `en_GB`, canonical = the English address, hreflang `de` /
+  `en` / `x-default` (German) from TranslatePress only, `/sitemap-en.xml`
+  in the sitemap index.
+- **Theme strings:** German in `languages/de_DE.po` (formal «Sie»); the
+  site locale is `de_DE_formal`, so WordPress, WooCommerce and Contact Form
+  7 say «Sie» too.
+- **Budget:** the switcher adds two short paragraphs to the document and
+  three rules to theme.css; TranslatePress adds the three hreflang links
+  and a body class. The front page stays in the first TCP window (document
+  and theme.css, smoke "First TCP window").
 
 ## Trust
 
@@ -1214,3 +1249,22 @@ for reviewing content:
   `/container-kaufen/`; the current-item colours are checked on
   `/kontakt-beratung/` (production's menu has no «Home» item). The menu is
   built by `tools/migration/menu.php` of the project library.
+- Smoke test, "TranslatePress (T-55)": four English pages (front page,
+  Container kaufen, contact, a product) 200 with `lang="en"` and a body over
+  10 KB (TranslatePress' empty-200 trap), the German front page `lang="de"`;
+  hreflang de / en / x-default once each on both sides (x-default German);
+  English title, description, og/twitter texts different from the German
+  ones, `og:locale` `en_GB`, canonical and og:url `/en/`; German price format
+  on `/en/`; `/sitemap-en.xml` = every URL of the German child sitemaps under
+  `/en/` with alternates, listed in the index, robots.txt unchanged; the
+  switcher in the top bar at 1280 and in the open menu at 360 (44px), its
+  German link on an English page not rewritten; 0 TranslatePress requests or
+  tags on the front page; `/en/warenkorb/` with jQuery, `/en/` without, no
+  JS errors; `.pot` ≥ 73 msgids, `.po` in sync, `de_DE.mo` =
+  `de_DE_formal.mo`; 0 English theme strings on the 404, search pages and a
+  post; 0 «du/dein» in the theme strings, the cart, the checkout and the
+  Contact Form 7 messages; the dictionary route read only and closed to
+  visitors. Negative run of the project library (`t55-mutations.log`): the
+  English title filter off, the formal `.mo` removed, TranslatePress' assets
+  back and the switcher without `data-no-translation` fail exactly five of
+  these checks.

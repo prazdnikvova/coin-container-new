@@ -24,8 +24,11 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 
 - Production coin-container.de is OFF LIMITS (deploy is a separate, user-driven stage).
 - This repo is PUBLIC: no credentials, keys, dumps, or license keys in any commit.
-- Languages: code/comments/docs — English; site content — German; gettext domain
-  `coin-container` on every string (WPML-ready).
+- Languages: code/comments/docs — English; site content — German (formal
+  «Sie», site locale `de_DE_formal`); gettext domain `coin-container` on every
+  string, German in `languages/`. English at `/en/` through TranslatePress
+  free: gettext everywhere, no hardcoded strings, the SEO layer in
+  `inc/trp-seo-en.php` (README "Languages").
 - Performance budget (Lighthouse mobile, homepage): score ≥ 99, LCP ≤ 1.9 s,
   ≤ 370 KB transfer, ≤ 20 requests. Vanilla JS only, everything deferred,
   fonts self-hosted.
