@@ -1121,3 +1121,18 @@ for reviewing content:
   Lighthouse's mobile emulation (Lighthouse counts 14 with `/favicon.ico` and
   its redirect) and none to `content-cards.css`, which only pages with the
   price table or link cards load, after theme.css.
+- Smoke test, "Migration (T-53b)": the 30 converted Elementor records and the
+  15 pages of production's `[coin_*]` shortcodes answer 200 without Elementor
+  markup, a raw `[coin_` or the donor host; price tables on the 13 pages of
+  `[coin_preise]` and on `/container-kaufen/`, the diesel surcharge 3× on the
+  transport cost post; trust bar and reviews widget where production printed
+  `[coin_hero_trust]` / `[coin_reviews]`; Impressum and Datenschutz with
+  production's e-mail; the inspiration landing under production's slug with
+  production's counters, its old slug not 200; the hub boxes as related-links
+  on the four hubs and Containerzubehör; the gallery rails of
+  `/container-projekte-referenzen/` (named focusable lists, lazy photos,
+  `gallery-rail.css` in `<head>` after theme.css, no carousel library; at 360
+  «Weiter» scrolls the row and the page does not scroll sideways); the front
+  page document sent gzip ≤ 14 600 bytes. The converter, the sync of the
+  hand-made landings and the parity check live in the project library
+  (`tools/migration/elementor2blocks.php`, `reports/2026-11-09-data/t53b_parity.py`).

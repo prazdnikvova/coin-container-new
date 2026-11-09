@@ -10,6 +10,8 @@ const CAT_BASE = '/container-kaufen/';
 const CAT_STANDARD = `${CAT_BASE}standardcontainer/`;
 const CAT_SPECIAL = `${CAT_BASE}spezialcontainer/`;
 const CAT_COOLING = `${CAT_BASE}kuehlcontainer/`;
+// The inspiration landing has production's slug since T-53b (was /container-inspiration-ideen/).
+const INSPIRATION = '/container-ideen-inspiration/';
 
 const results = [];
 const ok = (name, cond, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}${extra ? ' — ' + extra : ''}`);
@@ -238,7 +240,7 @@ const textLandings = [
 	'/sanitaercontainer-alles-was-sie-wissen-muessen/',
 	'/container-services/',
 	'/nachhaltige-containerloesungen-ihr-partner-fuer-umweltfreundliche-container/',
-	'/container-inspiration-ideen/',
+	INSPIRATION,
 	'/ueber-uns/',
 ];
 for (const slug of textLandings) {
@@ -257,7 +259,7 @@ ok('Sanitaer type cards', (await (async () => {
 	return page.locator('.ccn-info-card').count();
 })()) === 4);
 ok('Inspiration stats + idea cards', (await (async () => {
-	await page.goto(BASE + '/container-inspiration-ideen/', { waitUntil: 'domcontentloaded' });
+	await page.goto(BASE + INSPIRATION, { waitUntil: 'domcontentloaded' });
 	return (await page.locator('.ccn-stats').count()) === 1 && (await page.locator('.ccn-info-card').count()) === 7;
 })()));
 
@@ -976,7 +978,7 @@ const sameNeighbours = flow.slice(1).map((s, i) => [flow[i], s]).filter(([a, b])
 ok('Components (e) home: >= 4 different section backgrounds, neighbours differ', new Set(homeBgs.map((s) => s.bg)).size >= 4 && sameNeighbours.length === 0,
 	`${homeBgs.map((s) => `${s.cls}:${s.bg}`).join(', ')}${sameNeighbours.length ? ' | same: ' + sameNeighbours.join(', ') : ''}`);
 const ctaCount = {};
-for (const path of ['/', '/container-kaufen/', '/container-mieten/', '/containerzubehoer/', '/ueber-uns/', '/container-inspiration-ideen/']) {
+for (const path of ['/', '/container-kaufen/', '/container-mieten/', '/containerzubehoer/', '/ueber-uns/', INSPIRATION]) {
 	await secPage.goto(BASE + path, { waitUntil: 'domcontentloaded' });
 	ctaCount[path] = await secPage.locator('.ccn-cta').count();
 }
@@ -1346,7 +1348,7 @@ await t50Bar.close();
 // Schema: no FAQPage node and no aggregateRating anywhere (team decision 22.09.2026); FAQ questions only as on
 // production — as WebPage.mainEntity once Rank Math is there (T-54), none before.
 const t50Ld = [];
-for (const p of ['/', '/container-kaufen/', '/container-mieten/', '/container-inspiration-ideen/', '/ueber-uns/', '/product/20-fuss-container-gebraucht/']) {
+for (const p of ['/', '/container-kaufen/', '/container-mieten/', INSPIRATION, '/ueber-uns/', '/product/20-fuss-container-gebraucht/']) {
 	const html = await (await fetch(`${BASE}${p}?cb=${Date.now()}`)).text();
 	const ld = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g)].map((m) => m[1]).join(' ');
 	t50Ld.push({ p, faqPage: (ld.match(/"FAQPage"/g) || []).length, question: (ld.match(/"Question"/g) || []).length, rating: (html.match(/aggregateRating/g) || []).length,
@@ -1823,6 +1825,105 @@ ok('First TCP window (T-56): front page 12 requests in Lighthouse mobile emulati
 	t56HomeReqs.length === 12 && !t56HomeReqs.some((u) => u.includes('content-cards.css')) && !t56ProductHead.includes(t56CardsTag)
 	&& t56PostHead.indexOf("id='coin-container-css'") > -1 && t56PostHead.indexOf(t56CardsTag) > t56PostHead.indexOf("id='coin-container-css'"),
 	JSON.stringify({ home: t56HomeReqs.length, product: t56ProductHead.includes(t56CardsTag), post: t56PostHead.includes(t56CardsTag) }));
+
+// Content migration (T-53b, DESIGN.md "How to measure"): the 30 Elementor records of production are blocks now
+// (group A: hand-made landings synced unit by unit; group B: converted and replaced or created), production's
+// [coin_*] shortcodes became blocks in 15 more records. No page of that set answers anything but 200 or carries
+// Elementor markup, a raw [coin_ shortcode or the donor host.
+const T53B_PAGES = ['/', '/container-kaufen/', '/container-mieten/', '/containerzubehoer/', '/container-transport-logistik/',
+	'/container-modifikation-umbau-dienstleistungen/', '/container-services/',
+	'/nachhaltige-containerloesungen-ihr-partner-fuer-umweltfreundliche-container/', INSPIRATION, '/container-angebot-anfordern/',
+	'/kontakt-beratung/', '/container-shop/', '/weihnachtsgruesse-coin-container/', '/weihnachten-coin-container/',
+	'/container-projekte-weltweit/', '/intermodaler-containertransport-nachhaltige-logistik/',
+	'/umlackierung-ral-7016-20-hc-open-side-umbau/', '/containerkauf-teure-fehler/', '/groesste-containerhaefen-europas-teu/',
+	'/container-im-sommer-und-im-winter-wie-sie-ueberhitzung-frost-und-kondenswasser-vermeiden/',
+	'/container-mieten-oder-kaufen-ratgeber-2026/', '/double-door-container-beidseitiger-zugang-logistik/',
+	'/cny-2026-containerlieferungen-europa/', '/kondenswasser-im-container-wie-man-es-vermeidet-und-was-wirklich-zaehlt/',
+	'/datenschutzerklaerung/', '/impressum-und-kontakt-coin-container-inspiration-gmbh/', '/allgemeine-geschaeftsbedingungen-agb/',
+	'/cookies-richtlinien-eu/', '/modulare-gewerbeloesungen-hamburg/', '/container-projekte-referenzen/'];
+const T53B_PRICE_PAGES = ['/seecontainer-preise/', '/20-fuss-container-kaufen/', '/40-fuss-container-kaufen/', '/lagercontainer-mieten-hamburg/',
+	'/seecontainer-kaufen-bremen/', '/ueberseecontainer-kaufen/', '/seecontainer-kaufen-duisburg/', '/seecontainer-kaufen-frankfurt/',
+	'/seecontainer-kaufen-muenchen/', '/seecontainer-kaufen-stuttgart/', '/seecontainer-kaufen-berlin/', '/container-ab-rotterdam-antwerpen/',
+	'/seecontainer-kaufen-hamburg/'];
+const T53B_SC_PAGES = [...T53B_PRICE_PAGES, '/container-transport-kosten-lieferzeiten-seecontainer/', '/ueber-uns/bewertungen/'];
+const t53bHtml = {};
+for (const p of [...T53B_PAGES, ...T53B_SC_PAGES]) {
+	const r = await t56Get(p);
+	t53bHtml[p] = { status: r.res.status, html: r.text };
+}
+const t53bBad = Object.entries(t53bHtml).filter(([, v]) => v.status !== 200 || /elementor/i.test(v.html) || v.html.includes('[coin_') || v.html.includes('coin-container.local'))
+	.map(([p, v]) => `${p} ${v.status}${/elementor/i.test(v.html) ? ' elementor' : ''}${v.html.includes('[coin_') ? ' [coin_' : ''}${v.html.includes('coin-container.local') ? ' donor-host' : ''}`);
+ok(`Migration (T-53b): ${T53B_PAGES.length} converted records and ${T53B_SC_PAGES.length} shortcode pages answer 200 without Elementor markup, a raw [coin_ shortcode or the donor host`,
+	t53bBad.length === 0, t53bBad.join(', ') || `${Object.keys(t53bHtml).length} pages`);
+// [coin_preise groesse=…] → the price-table block (13 pages + the hub body of /container-kaufen/), [coin_dieselzuschlag] → the
+// theme's [ccn_dieselzuschlag] with Site Settings → Preise (3× on the transport cost post), [coin_hero_trust] → trust bar,
+// [coin_reviews] → the reviews widget facade.
+const t53bKaufen = (await t56Get('/container-kaufen/')).text;
+const t53bPrice = [...T53B_PRICE_PAGES.map((p) => [p, t53bHtml[p].html]), ['/container-kaufen/', t53bKaufen]]
+	.filter(([, h]) => !(/<section class="ccn-price-table [^"]*"/.test(h) && /<caption id="ccn-price-table-[^"]+" class="screen-reader-text">/.test(h) && /<th scope="row">\d+ Fu/.test(h)))
+	.map(([p]) => p);
+const t53bSurcharge = (t53bHtml['/container-transport-kosten-lieferzeiten-seecontainer/'].html.match(/<span class="ccn-surcharge">\d+(,\d)? %<\/span>/g) || []).length;
+ok('Migration (T-53b): price tables render on the 13 pages of [coin_preise] and on /container-kaufen/ (caption, size rows); the transport cost post shows the diesel surcharge 3× from Site Settings',
+	t53bPrice.length === 0 && t53bSurcharge === 3, JSON.stringify({ withoutTable: t53bPrice, surcharge: t53bSurcharge }));
+ok('Migration (T-53b): [coin_hero_trust] → trust bar on /seecontainer-kaufen-hamburg/, [coin_reviews] → reviews widget facade on /ueber-uns/bewertungen/',
+	/<section class="ccn-trust-bar /.test(t53bHtml['/seecontainer-kaufen-hamburg/'].html) && /class="ccn-reviews-facade/.test(t53bHtml['/ueber-uns/bewertungen/'].html));
+// Legal pages: production's texts (e-mail of production, no Elementor), the inspiration landing under production's slug
+// with production's counters (decision V (a): 10 000 as on production), its old slug not answering 200 (301 map: T-53c).
+const t53bLegalMail = ['/datenschutzerklaerung/', '/impressum-und-kontakt-coin-container-inspiration-gmbh/']
+	.every((p) => /<div class="entry-content">[\s\S]*info@coin-container\.de[\s\S]*<\/div>/.test(t53bHtml[p].html));
+ok('Migration (T-53b): legal pages converted (Impressum and Datenschutz name info@coin-container.de in their content)', t53bLegalMail);
+const t53bInsp = t53bHtml[INSPIRATION].html;
+const t53bOld = await fetch(`${BASE}/container-inspiration-ideen/?cb=${Date.now()}`, { redirect: 'manual' });
+ok(`Migration (T-53b): ${INSPIRATION} 200 with production's counters 20+ / 10.000+ / 50+, the old slug not 200 (301 map: T-53c)`,
+	t53bHtml[INSPIRATION].status === 200 && /data-target="10000" data-suffix="\+">10\.000\+/.test(t53bInsp) && /data-target="20" data-suffix="\+">20\+/.test(t53bInsp)
+	&& /data-target="50" data-suffix="\+">50\+/.test(t53bInsp) && t53bOld.status !== 200, String(t53bOld.status));
+// Hub boxes of production (transmax-child/functions.php: «Verwandte Leistungen», «… im Überblick», «Passende Seiten»):
+// related-links blocks (up to six links) on the four hubs and Containerzubehör.
+const t53bBoxes = {};
+for (const [p, h] of [['/container-kaufen/', t53bKaufen], ...['/container-mieten/', '/container-transport-logistik/', '/container-modifikation-umbau-dienstleistungen/', '/containerzubehoer/'].map((x) => [x, t53bHtml[x].html])]) {
+	t53bBoxes[p] = [...h.matchAll(/<nav aria-labelledby="([^"]+)">\s*<h2 id="\1" class="ccn-related-links-heading">([^<]+)<\/h2>/g)].map((m) => m[2]);
+}
+ok('Migration (T-53b): production hub boxes as related-links — «Verwandte Leistungen» on 4 hubs, «… im Überblick» on transport and modification, «Passende Seiten» on Containerzubehör',
+	['/container-kaufen/', '/container-mieten/', '/container-transport-logistik/', '/container-modifikation-umbau-dienstleistungen/'].every((p) => t53bBoxes[p].includes('Verwandte Leistungen'))
+	&& t53bBoxes['/container-transport-logistik/'].includes('Transport und Lieferung im Überblick') && t53bBoxes['/container-modifikation-umbau-dienstleistungen/'].includes('Umbau-Ratgeber im Überblick')
+	&& t53bBoxes['/containerzubehoer/'].includes('Passende Seiten'), JSON.stringify(t53bBoxes));
+// Gallery rail (blocks/lists/gallery-rail.php): photos in the .ccn-rail row, a focusable list named by the heading (or a label),
+// lazy images, its stylesheet in <head> after theme.css only where it renders, no carousel library, the buttons scroll the row.
+const t53bGrTpl = themeFile('blocks/lists/gallery-rail.php');
+const t53bRef = t53bHtml['/container-projekte-referenzen/'].html;
+const t53bRails = [...t53bRef.matchAll(/<ul id="(ccn-gallery-rail-\d+)" class="ccn-gallery-rail-list ccn-rail" role="list" tabindex="0"\s+aria-(labelledby="([^"]+)"|label="[^"]+")\s*>/g)];
+const t53bNamed = t53bRails.every((m) => !m[3] || t53bRef.includes(`id="${m[3]}"`));
+const t53bImgs = [...t53bRef.matchAll(/<li class="ccn-gallery-rail-item">\s*(?:<figure>\s*)?<img ([^>]+)>/g)].map((m) => m[1]);
+const t53bHeadEnd = t53bRef.indexOf('</head>');
+const t53bGrCss = t53bRef.indexOf("id='ccn-gallery-rail-css'");
+ok('Gallery rail (T-53b): 17 project rails on /container-projekte-referenzen/ — focusable lists named by their headings, every image lazy, gallery-rail.css in <head> after theme.css, no carousel library (Swiper, Slick, Splide, Glide, Owl)',
+	t53bRails.length >= 17 && t53bNamed && t53bImgs.length >= 17 && t53bImgs.every((a) => /loading="lazy"/.test(a)) && t53bGrCss > -1 && t53bGrCss < t53bHeadEnd
+	&& t53bGrCss > t53bRef.indexOf("id='coin-container-css'") && !/swiper|slick|splide|glide|owl\.carousel/i.test(t53bRef) && !/data-autoplay|autoplay\s*[:=]/i.test(t53bGrTpl)
+	&& !t56HomeHead.includes('gallery-rail.css'), JSON.stringify({ rails: t53bRails.length, named: t53bNamed, images: t53bImgs.length, css: t53bGrCss > -1 && t53bGrCss < t53bHeadEnd }));
+const t53bRailPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await t53bRailPage.goto(`${BASE}/container-projekte-referenzen/?cb=${Date.now()}`, { waitUntil: 'load' });
+const t53bScroll = await t53bRailPage.evaluate(async () => {
+	const rail = document.querySelector('.ccn-gallery-rail .ccn-rail');
+	const nav = rail && rail.parentElement.querySelector('.ccn-rail-nav');
+	const next = nav && nav.querySelector('.ccn-rail-btn[data-dir="1"]');
+	if (!next) return { ready: false };
+	rail.style.scrollBehavior = 'auto';
+	next.click();
+	await new Promise((r) => setTimeout(r, 900));
+	return { ready: nav.classList.contains('is-ready'), left: Math.round(rail.scrollLeft), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+});
+await t53bRailPage.close();
+ok('Gallery rail (T-53b): at 360 the «Weiter» button is wired and scrolls the row, the page itself does not scroll sideways',
+	t53bScroll.ready && t53bScroll.left > 0 && t53bScroll.overflow <= 0, JSON.stringify(t53bScroll));
+// Front page after the sync of its texts: the document still fits the first TCP window (sent gzip <= 14 600 bytes).
+const t53bHomeGz = await new Promise((resolve) => {
+	t56HttpGet(`${BASE}/?cb=${Date.now()}`, { headers: { 'Accept-Encoding': 'gzip' } }, (res) => {
+		let bytes = 0;
+		res.on('data', (c) => { bytes += c.length; });
+		res.on('end', () => resolve({ status: res.statusCode, encoding: res.headers['content-encoding'] || '', bytes }));
+	}).on('error', (e) => resolve({ status: 0, bytes: -1, error: e.message }));
+});
+ok('First TCP window (T-53b): the front page document sent gzip in <= 14 600 bytes after the text sync', t53bHomeGz.status === 200 && t53bHomeGz.bytes > 0 && t53bHomeGz.bytes <= 14600, JSON.stringify(t53bHomeGz));
 
 await browser.close();
 console.log(results.join('\n'));
