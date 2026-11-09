@@ -1930,6 +1930,20 @@ const t53bHomeGz = await new Promise((resolve) => {
 });
 ok('First TCP window (T-53b): the front page document sent gzip in <= 14 600 bytes after the text sync', t53bHomeGz.status === 200 && t53bHomeGz.bytes > 0 && t53bHomeGz.bytes <= 14600, JSON.stringify(t53bHomeGz));
 
+// Meta descriptions: Rank Math builds og:/twitter:description from the excerpt in wp_head, outside the main loop, where
+// the theme's read-more link (excerpt_more, functions.php) must not land as escaped markup; the blog index keeps its
+// read-more links inside the loop. The front page has no description tags yet (Rank Math meta of production: T-53c).
+const T53B_META_PAGES = ['/container-masse-groessen/', '/seecontainer-preise/', '/containerkauf-teure-fehler/', '/product/20-fuss-container-gebraucht/', '/nachrichten-trends-aus-der-containerwelt/'];
+const t53bMeta = {};
+for (const p of [...T53B_META_PAGES, '/']) {
+	const { text } = await t56Get(p);
+	const tags = [...text.matchAll(/<meta (?:property="og:description"|name="twitter:description") content="([^"]*)"/g)].map((m) => m[1]);
+	t53bMeta[p] = { tags: tags.length, dirty: tags.filter((v) => /&lt;|<|more-link/.test(v)).length, moreLinks: (text.match(/class="more-link"/g) || []).length };
+}
+ok('Meta descriptions (T-53b): og:description and twitter:description on 5 pages (a page, a hub, a post, a product, the blog index) carry no read-more link or other markup, the front page none either; the blog index keeps its read-more links',
+	T53B_META_PAGES.every((p) => t53bMeta[p].tags === 2) && Object.values(t53bMeta).every((m) => m.dirty === 0) && t53bMeta['/nachrichten-trends-aus-der-containerwelt/'].moreLinks > 0,
+	JSON.stringify(t53bMeta));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

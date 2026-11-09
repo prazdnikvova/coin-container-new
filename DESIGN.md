@@ -1136,3 +1136,9 @@ for reviewing content:
   page document sent gzip ≤ 14 600 bytes. The converter, the sync of the
   hand-made landings and the parity check live in the project library
   (`tools/migration/elementor2blocks.php`, `reports/2026-11-09-data/t53b_parity.py`).
+- Smoke test, "Meta descriptions (T-53b)": og:description and
+  twitter:description of five pages (a page, a hub, a post, a product, the
+  blog index) carry no read-more link or other markup, the front page none
+  either. Rank Math builds them from the excerpt in `wp_head`, outside the
+  main loop, and `ccn_excerpt_read_more_link()` (functions.php) adds its link
+  only inside the loop; the blog index keeps its read-more links.

@@ -294,7 +294,9 @@ function ccn_read_more_link() {
 
 add_filter( 'excerpt_more', 'ccn_excerpt_read_more_link' );
 function ccn_excerpt_read_more_link( $more ) {
-	if ( is_admin() ) {
+	// Outside the main loop the excerpt feeds plain text: Rank Math builds og:/twitter:description from it
+	// in wp_head, where a link would print as escaped markup. The loops of entry-summary.php keep it.
+	if ( is_admin() || ! in_the_loop() ) {
 		return $more;
 	}
 	/* translators: %s: post title, visually hidden */
