@@ -67,7 +67,9 @@ mobile emulation) and the numbers go into the commit body.
   `llms-txt.php` (the curated `/llms.txt`: answered by PHP as text/plain
   with `X-Robots-Tag: noindex`; in production a static copy is rewritten on
   every saved page or post, and the web server must send the noindex header
-  for it, as production's root `.htaccess` does).
+  for it, as production's root `.htaccess` does), `freshness.php` (the
+  «Zuletzt aktualisiert» line of production's cluster and glossary pages,
+  printed by the page templates after the content).
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live

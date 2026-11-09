@@ -1651,6 +1651,31 @@ ok('llms.txt (T-56): 200 text/plain, X-Robots-Tag noindex, «# Coin Container» 
 	&& t56LlmsLinks.length >= 20 && t56LlmsLinks.every((l) => l.includes(`](${BASE}/`)),
 	JSON.stringify({ status: t56Llms.res.status, type: t56Llms.res.headers.get('content-type'), robots: t56Llms.res.headers.get('x-robots-tag'), links: t56LlmsLinks.length }));
 
+// Last updated (inc/freshness.php): production's 38 cluster pages and the children of /glossar/, pages only; the
+// <time datetime> is the modified time in UTC (REST modified_gmt), the name links to /ueber-uns/.
+const t56Fresh = /<p class="ccn-freshness">Zuletzt aktualisiert: <time datetime="([^"]+)">(\d{1,2}\. [A-ZÄÖÜ][a-zäöü]+ \d{4})<\/time> · Redaktion: <a href="([^"]+)">Coin Container Team, Hamburg<\/a><\/p>/;
+const t56Pages = async (query) => {
+	const res = await fetch(`${BASE}/wp-json/wp/v2/pages?${query}&_fields=id,link,modified_gmt&cb=${Date.now()}`);
+	return res.ok ? res.json() : [];
+};
+const [t56Cluster] = await t56Pages('slug=seecontainer-preise');
+const [t56GlossarHub] = await t56Pages('slug=glossar');
+const [t56GlossarTerm] = t56GlossarHub ? await t56Pages(`parent=${t56GlossarHub.id}&per_page=1`) : [];
+const t56FreshOn = {};
+for (const p of [t56Cluster, t56GlossarTerm].filter(Boolean)) {
+	const path = new URL(p.link).pathname;
+	const m = (await t56Get(path)).text.match(t56Fresh);
+	t56FreshOn[path] = m ? { utc: new Date(m[1]).toISOString().slice(0, 19) === p.modified_gmt, date: m[2], about: new URL(m[3]).pathname } : null;
+}
+ok('Last updated (T-56): a cluster page and a glossary page end with «Zuletzt aktualisiert: <date> · Redaktion: Coin Container Team, Hamburg», <time datetime> = modified (UTC), the name to /ueber-uns/',
+	Object.keys(t56FreshOn).length === 2 && Object.values(t56FreshOn).every((v) => v && v.utc && v.about === '/ueber-uns/'), JSON.stringify(t56FreshOn));
+const t56FreshOff = {};
+for (const path of [new URL(postUrl).pathname, '/kontakt-beratung/', '/container-kaufen/', '/glossar/', '/']) {
+	t56FreshOff[path] = ((await t56Get(path)).text.match(/class="ccn-freshness/g) || []).length;
+}
+ok('Last updated (T-56): not on a post, the contact page, a landing outside the list, the glossary hub or the front page',
+	Object.values(t56FreshOff).every((n) => n === 0), JSON.stringify(t56FreshOff));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

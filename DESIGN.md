@@ -699,6 +699,26 @@ JS.
   and its first field are in the first screen. The legal paragraph lives only
   as the consent text of the checkbox.
 
+## Last updated
+
+`ccn_freshness()` (`inc/freshness.php`, T-56), a port of production's
+`geo-freshness.php`: «Zuletzt aktualisiert: 14. Oktober 2026 · Redaktion:
+Coin Container Team, Hamburg», the name linking to `/ueber-uns/`.
+
+- Where: pages only, exactly production's list (38 slugs plus every child page
+  of `/glossar/`); never on posts, products or other pages. Olga asked for no
+  visible dates (OPEN #73): until that is decided the list stays as on
+  production, neither wider nor shorter.
+- The page templates print it after the content (`page.php`, both landing
+  templates), so blocks stay untouched (production used a `the_content`
+  filter).
+- Markup: `<p class="ccn-freshness">` with a `<time datetime>` in UTC
+  (`post_modified_gmt`); the visible date is `post_modified` as «j. F Y».
+  `dateModified` in the JSON-LD comes from Rank Math.
+- Look: 14px `--ccn-color-secondary` (6.44:1) under a 1px
+  `--ccn-color-border` line, 32px after the content; the link underlined
+  with the accent-text hover.
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the

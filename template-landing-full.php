@@ -15,6 +15,7 @@ while ( have_posts() ) :
 	?>
 	<div class="ccn-landing-full">
 		<?php the_content(); ?>
+		<?php ccn_freshness( 'ccn-container' ); ?>
 	</div>
 	<?php
 endwhile;

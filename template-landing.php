@@ -18,6 +18,7 @@ while ( have_posts() ) :
 	<div class="ccn-landing ccn-container">
 		<div class="ccn-landing-main">
 			<?php the_content(); ?>
+			<?php ccn_freshness(); ?>
 		</div>
 		<?php get_template_part( 'template-parts/landing-sidebar' ); ?>
 	</div>
