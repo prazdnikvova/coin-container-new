@@ -219,6 +219,17 @@ function ccn_register_blocks() {
 			'template'    => 'blocks/lists/related-links.php',
 			'assets'      => array( 'ccn-content-cards' ),
 		),
+		array(
+			'name'        => 'gallery-rail',
+			'title'       => __( 'Gallery rail', 'coin-container' ),
+			'description' => __( 'Photos in one horizontal row that scrolls sideways (buttons, swipe, arrow keys; no autoplay), with an optional heading and text above — the image carousels and galleries of the old site.', 'coin-container' ),
+			'category'    => 'ccn-lists',
+			'icon'        => 'images-alt2',
+			'keywords'    => array( 'gallery', 'galerie', 'carousel', 'karussell', 'photos', 'bilder', 'projekte' ),
+			'template'    => 'blocks/lists/gallery-rail.php',
+			// Styles outside theme.css (first TCP window), registered below.
+			'assets'      => array( 'ccn-gallery-rail' ),
+		),
 	);
 
 	foreach ( $blocks as $block ) {
@@ -262,6 +273,21 @@ function ccn_register_blocks() {
 
 		acf_register_block_type( $args );
 	}
+}
+
+/**
+ * Stylesheet of the gallery rail block (T-53b, DESIGN.md "Gallery rail"): a file of its
+ * own, enqueued by the block's 'assets' only where it renders; WordPress 7.1 moves the
+ * late link into <head> for classic themes, after theme.css (its dependency).
+ */
+add_action( 'init', 'ccn_register_gallery_rail_style' );
+function ccn_register_gallery_rail_style() {
+	wp_register_style(
+		'ccn-gallery-rail',
+		get_template_directory_uri() . '/assets/css/gallery-rail.css',
+		array( 'coin-container' ),
+		ccn_asset_version( '/assets/css/gallery-rail.css' )
+	);
 }
 
 /**

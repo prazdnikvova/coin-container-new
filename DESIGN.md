@@ -804,6 +804,38 @@ Link cards (T-56): the block `acf/related-links`
   pages with the block and on posts that show «Ähnliche Beiträge» (see Price
   table); the card base (`.ccn-card`, lift) stays in theme.css.
 
+## Gallery rail
+
+`acf/gallery-rail` (`blocks/lists/gallery-rail.php`, T-53b): the image
+carousels, galleries and portfolio sliders of the old site as one row of
+photos — the `.ccn-rail` of Motion, without autoplay and without a library.
+
+- Fields: optional heading (h2) and text (the description of a project row on
+  `/container-projekte-referenzen/`), images (repeater: image, optional
+  caption under the photo; the alt text comes from the media library),
+  background (as Sections). Without an image the block prints nothing.
+- Markup: `<ul class="ccn-gallery-rail-list ccn-rail" role="list"
+  tabindex="0">` — the scrolling list is focusable (arrow keys) and named by
+  the heading (`aria-labelledby`), without a heading by «Bildergalerie»;
+  each `<li>` holds the photo (`medium_large`, lazy, `sizes` = 85vw below
+  36rem, else 320px), inside a `<figure>` with its caption only when it has
+  one (a project page carries 80+ photos: DOM budget below 800 nodes). The
+  ‹ › buttons of Motion → Rail follow when there are two photos or more.
+- Look: photos 4:3 (`object-fit: cover`) at `--ccn-radius-md` on
+  `--ccn-color-surface`, captions 14px muted; tables inside the text get
+  hairlines. Inside running text (posts) the text column holds the gutter,
+  24px above and below, no list markers.
+- Styles: `assets/css/gallery-rail.css` (scoped, like `content-cards.css`):
+  registered with the block (`blocks/acf-blocks.php`), enqueued by its
+  `'assets'` only where the block renders; WordPress 7.1 moves the late link
+  into `<head>` for classic themes, after theme.css. theme.css carries the
+  rail itself and is not touched.
+- Content (T-53b): 17 project rows on `/container-projekte-referenzen/`, the
+  carousels of posts and of `/container-modifikation-umbau-dienstleistungen/`
+  (photos the page does not show yet), the idea galleries of
+  `/container-ideen-inspiration/` (heading and anchor of the production
+  section).
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the
@@ -911,7 +943,8 @@ JS the row keeps its space but stays invisible — no dead controls, no layout
 shift. Buttons are 44×44px and named by screen-reader text (README "Markup
 standard"). No autoplay. A block decides where the rail turns back into a
 grid: `news` below 64rem (from 64rem a 4-column grid, buttons hidden);
-featured products stay a one-column grid at 360 (T-48, see Cards).
+featured products stay a one-column grid at 360 (T-48, see Cards); the
+gallery rail stays a rail on every width (T-53b, see Gallery rail).
 
 ### Not animated (A5 §4, A6 §6.6)
 

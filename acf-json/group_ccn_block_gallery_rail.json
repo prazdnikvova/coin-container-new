@@ -1,0 +1,78 @@
+{
+    "key": "group_ccn_block_gallery_rail",
+    "title": "Block: Gallery rail",
+    "fields": [
+        {
+            "key": "field_ccn_gr_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional section heading (h2) above the photos; it also names the photo row for screen readers (without it the row is called «Bildergalerie»)."
+        },
+        {
+            "key": "field_ccn_gr_text",
+            "label": "Text",
+            "name": "text",
+            "type": "wysiwyg",
+            "instructions": "Optional text between the heading and the photos, e.g. the description of a project.",
+            "media_upload": 0,
+            "toolbar": "basic"
+        },
+        {
+            "key": "field_ccn_gr_images",
+            "label": "Images",
+            "name": "images",
+            "type": "repeater",
+            "instructions": "Photos in this order. They form one row that scrolls sideways (buttons ‹ ›, swipe, arrow keys); no autoplay.",
+            "layout": "block",
+            "button_label": "Add image",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_gr_image",
+                    "label": "Image",
+                    "name": "image",
+                    "type": "image",
+                    "required": 1,
+                    "return_format": "id",
+                    "preview_size": "medium"
+                },
+                {
+                    "key": "field_ccn_gr_caption",
+                    "label": "Caption",
+                    "name": "caption",
+                    "type": "text",
+                    "instructions": "Optional line under the photo (the alt text comes from the media library)."
+                }
+            ]
+        },
+        {
+            "key": "field_ccn_gr_background",
+            "label": "Background",
+            "name": "background",
+            "type": "select",
+            "instructions": "Section background: alternate with the neighbouring sections; yellow only for short sections, at most one per screen (DESIGN.md, Sections).",
+            "choices": {
+                "default": "Default (white)",
+                "light": "Light grey",
+                "dark": "Dark",
+                "yellow": "Yellow"
+            },
+            "default_value": "default",
+            "return_format": "value",
+            "allow_null": 0,
+            "multiple": 0,
+            "ui": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/gallery-rail"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the gallery rail block (blocks\/lists\/gallery-rail.php)."
+}

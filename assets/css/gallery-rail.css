@@ -1,0 +1,21 @@
+/*
+ * Gallery rail block (T-53b, DESIGN.md "Gallery rail"): photos in the .ccn-rail row of theme.css.
+ * Loaded only where the block renders (its 'assets' handle in blocks/acf-blocks.php), after theme.css,
+ * so theme.css stays inside the first TCP window. Tokens only.
+ */
+.ccn-gallery-rail-heading{margin:0 0 var(--ccn-space-3)}
+.ccn-gallery-rail-text{margin-bottom:var(--ccn-space-6)}
+.ccn-gallery-rail-text table{border-collapse:collapse;margin-bottom:var(--ccn-space-4)}
+.ccn-gallery-rail-text :is(th,td){padding:var(--ccn-space-2) var(--ccn-space-3);border-bottom:1px solid var(--ccn-color-border);text-align:left;vertical-align:top}
+.ccn-gallery-rail-text th{font-weight:700}
+.ccn-gallery-rail-item,.ccn-gallery-rail-item figure{margin:0}
+.ccn-gallery-rail-item img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;border-radius:var(--ccn-radius-md);background:var(--ccn-color-surface)}
+.ccn-gallery-rail-item figcaption{margin-top:var(--ccn-space-2);color:var(--ccn-muted,var(--ccn-color-secondary));font-size:var(--ccn-fs-small)}
+/* The focus ring of the scrolling list stays inside its padding */
+.ccn-gallery-rail-list:focus-visible{outline-offset:-3px}
+/* Inside running text (posts, page.php): the text column holds the gutter, 24px above and below, no list markers */
+.entry-content>.ccn-gallery-rail{padding-block:var(--ccn-space-5)}
+.entry-content>.ccn-gallery-rail>.ccn-container{padding-inline:0}
+.entry-content .ccn-gallery-rail-list{margin:calc(-1*var(--ccn-space-5)) calc(-1*var(--ccn-space-4));list-style:none}
+.entry-content .ccn-gallery-rail-item{margin:0}
+.entry-content .ccn-gallery-rail-item img{margin:0;border-radius:var(--ccn-radius-md)}
