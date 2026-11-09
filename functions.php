@@ -3,6 +3,10 @@
  * Coin Container — setup, asset loading, includes.
  */
 
+// First, before anything asks for the current user: REST credentials sent as
+// X-WP-Authorization on hosts that drop the Authorization header (KAS).
+require_once get_template_directory() . '/inc/rest-auth-header-fallback.php';
+
 add_action( 'after_setup_theme', 'ccn_setup' );
 function ccn_setup() {
 	load_theme_textdomain( 'coin-container', get_template_directory() . '/languages' );

@@ -1769,6 +1769,22 @@ ok('Related posts (T-56): «Ähnliche Beiträge» (h2) with 1-3 cards of other p
 	&& t56PostNav > -1 && t56PostNav < t56PostHtml.indexOf('class="ccn-related-posts"'),
 	JSON.stringify({ post: t56PostPath, category: t56TopCat, cards: t56RelHrefs }));
 
+// REST (inc/rest-auth-header-fallback.php, production K67b): on hosts that drop the Authorization header (KAS) the
+// Application Password comes as X-WP-Authorization. Made-up credentials through that header must reach the Application
+// Password check exactly like Authorization (401 invalid_username), not stay anonymous; no credentials -> anonymous
+// (the users route is closed for anonymous visitors). Needs Application Passwords in use, as on production.
+const t56Basic = `Basic ${Buffer.from('ccn-smoke-nobody:not-a-password').toString('base64')}`;
+const t56Rest = async (headers) => {
+	const r = await t56Get('/wp-json/wp/v2/users/me', { headers });
+	let code = '';
+	try { code = JSON.parse(r.text).code || ''; } catch { code = 'not json'; }
+	return `${r.res.status} ${code}`;
+};
+const t56RestAnswers = { xWp: await t56Rest({ 'X-WP-Authorization': t56Basic }), authorization: await t56Rest({ Authorization: t56Basic }), none: await t56Rest({}) };
+ok('REST (T-56): X-WP-Authorization reaches the Application Password check like Authorization (401 invalid_username); without credentials anonymous (no 200/401)',
+	t56RestAnswers.xWp === '401 invalid_username' && t56RestAnswers.authorization === t56RestAnswers.xWp && !/^(200|401)/.test(t56RestAnswers.none),
+	JSON.stringify(t56RestAnswers));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

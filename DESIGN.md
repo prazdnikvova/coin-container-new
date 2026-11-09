@@ -1054,3 +1054,19 @@ for reviewing content:
   this public repo): `validate.php` there checks product and form IDs,
   categories, donor hosts left in `post_content`, `[coin_*]` shortcodes, menu
   links and options; `dom_metrics.py` runs over the list of migrated URLs.
+- Smoke test, "Production features (T-56)": `/llms.txt` 200 as text/plain
+  with `X-Robots-Tag: noindex` and ≥ 20 links on this host; the
+  last-updated line on a cluster page and a glossary page (`<time
+  datetime>` = REST `modified_gmt`, link to `/ueber-uns/`) and none on a
+  post, the contact page, a landing outside the list, the glossary hub and
+  the front page; exactly one theme shortcode (`ccn_dieselzuschlag`); the
+  price-table and related-links templates (caption, scopes, labelled
+  region, container-query hint; no markup without links, nav named by its
+  h2) at code level until T-53b places them; the size-page links of the 20
+  and 40 Fuß products and «Siehe auch:» on Kühlcontainer and the shop with
+  every target 200; «Ähnliche Beiträge» on a post (1–3 cards, never itself,
+  after the post navigation); `X-WP-Authorization` answered like
+  `Authorization` (401 `invalid_username`). The block renders against Site
+  Settings are WP-CLI checks of the project library
+  (`reports/2026-11-09-data/` there), the probes `t56_probe.cjs` and
+  `t56_shots.cjs`.

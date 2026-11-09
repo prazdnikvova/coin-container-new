@@ -76,7 +76,11 @@ mobile emulation) and the numbers go into the commit body.
   Settings → Preise for the `price-table` block, production's
   `inc/preise.php`), `internal-links.php` (production's link plan: the
   size-page link at the end of a product summary, «Siehe auch:» after the
-  grid of categories and the shop).
+  grid of categories and the shop), `related.php` (link-card excerpts and
+  «Ähnliche Beiträge» under posts), `rest-auth-header-fallback.php`
+  (included first: REST clients send an Application Password as
+  `X-WP-Authorization` where the host drops `Authorization`, as on the KAS
+  hosting of production).
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live
