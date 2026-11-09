@@ -40,7 +40,7 @@ mobile emulation) and the numbers go into the commit body.
   rendered by a plain template (legal pages, posts, shop); there is no
   flexible-content layer any more.
 - Scoped assets: all block CSS lives in `assets/css/theme.css` and all theme
-  JS in `assets/js/main.js` (none of the 17 blocks ships its own file today;
+  JS in `assets/js/main.js` (none of the 18 blocks ships its own file today;
   the request forms' focus script `assets/js/forms.js` follows Contact Form
   7's own assets onto the pages with a form, `inc/assets-cleanup.php`).
   A block that ever needs one registers a script/style handle and lists it
@@ -72,7 +72,9 @@ mobile emulation) and the numbers go into the commit body.
   printed by the page templates after the content), `shortcodes.php` (the
   theme's only shortcode, `[ccn_dieselzuschlag]`: the diesel surcharge of
   Site Settings → Preise inside running text, as production's
-  `[coin_dieselzuschlag]`).
+  `[coin_dieselzuschlag]`), `price-table.php` (the price ranges of Site
+  Settings → Preise for the `price-table` block, production's
+  `inc/preise.php`).
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live

@@ -351,6 +351,96 @@
             "endpoint": 0
         },
         {
+            "key": "field_ccn_price_rows",
+            "label": "Price ranges",
+            "name": "price_rows",
+            "type": "repeater",
+            "instructions": "One row per container size: the single source of every price table (block Price table; production: transmax-child/inc/preise.php). Whole euros, net, depot prices without transport. Fill both bounds of a range or none: an empty range shows «auf Anfrage».",
+            "layout": "table",
+            "button_label": "Add size",
+            "sub_fields": [
+                {
+                    "key": "field_ccn_price_size",
+                    "label": "Size",
+                    "name": "size",
+                    "type": "text",
+                    "instructions": "As shown in the first column, e.g. 20 Fuß High Cube.",
+                    "required": 1
+                },
+                {
+                    "key": "field_ccn_price_used_min",
+                    "label": "Used from",
+                    "name": "used_min",
+                    "type": "number",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "key": "field_ccn_price_used_max",
+                    "label": "Used to",
+                    "name": "used_max",
+                    "type": "number",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "key": "field_ccn_price_oneway_min",
+                    "label": "One Way from",
+                    "name": "oneway_min",
+                    "type": "number",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "key": "field_ccn_price_oneway_max",
+                    "label": "One Way to",
+                    "name": "oneway_max",
+                    "type": "number",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "key": "field_ccn_price_new_min",
+                    "label": "New from",
+                    "name": "new_min",
+                    "type": "number",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "key": "field_ccn_price_new_max",
+                    "label": "New to",
+                    "name": "new_max",
+                    "type": "number",
+                    "min": 0,
+                    "step": 1
+                },
+                {
+                    "key": "field_ccn_price_note",
+                    "label": "Note",
+                    "name": "note",
+                    "type": "text",
+                    "instructions": "Optional, a small line under the size."
+                }
+            ]
+        },
+        {
+            "key": "field_ccn_price_stand",
+            "label": "Prices as of",
+            "name": "price_stand",
+            "type": "text",
+            "instructions": "Shown as «Stand: …» under every price table, as typed (production: «Oktober 2026»). Update it with every price change."
+        },
+        {
+            "key": "field_ccn_price_footnote",
+            "label": "Price note",
+            "name": "price_footnote",
+            "type": "textarea",
+            "instructions": "Printed after «Stand: …» under every price table (production: net, depot prices, without transport, binding prices only in the offer).",
+            "rows": 3,
+            "new_lines": ""
+        },
+        {
             "key": "field_ccn_diesel_surcharge",
             "label": "Diesel surcharge (%)",
             "name": "diesel_surcharge",

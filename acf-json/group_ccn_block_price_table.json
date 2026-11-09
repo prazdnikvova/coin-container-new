@@ -1,0 +1,55 @@
+{
+    "key": "group_ccn_block_price_table",
+    "title": "Block: Price table",
+    "fields": [
+        {
+            "key": "field_ccn_pt_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Optional section heading (h2), as on production. Screen readers also get it as the table caption."
+        },
+        {
+            "key": "field_ccn_pt_intro",
+            "label": "Intro",
+            "name": "intro",
+            "type": "textarea",
+            "instructions": "Optional line above the table.",
+            "rows": 2,
+            "new_lines": ""
+        },
+        {
+            "key": "field_ccn_pt_sizes",
+            "label": "Sizes",
+            "name": "sizes",
+            "type": "checkbox",
+            "instructions": "Rows to show, like the groesse attribute of [coin_preise] on production (e.g. 20 Fuß and 20 Fuß High Cube). None ticked = every row. The sizes and prices come from Site Settings → Preise.",
+            "choices": {},
+            "layout": "vertical",
+            "toggle": 0,
+            "allow_custom": 0,
+            "save_custom": 0,
+            "return_format": "value"
+        },
+        {
+            "key": "field_ccn_pt_show_footnote",
+            "label": "Show note",
+            "name": "show_footnote",
+            "type": "true_false",
+            "instructions": "«Stand: …» and the price note of Site Settings → Preise under the table (production: always).",
+            "default_value": 1,
+            "ui": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/price-table"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the price table block (blocks\/lists\/price-table.php)."
+}

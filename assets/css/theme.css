@@ -321,6 +321,24 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-logos-list a{display:inline-flex;align-items:center;min-height:var(--ccn-tap)}
 .ccn-logo-img{width:auto;height:3rem;filter:grayscale(1)}
 .ccn-logos-list :is(li:hover,a:focus-visible) .ccn-logo-img{filter:none}
+/* Block: price table (DESIGN.md "Price table"): the labelled wrapper scrolls sideways; the swipe hint only while the table overflows its box */
+.ccn-price-table-heading{margin-bottom:var(--ccn-space-3)}
+.ccn-price-table-intro{margin-bottom:var(--ccn-space-4)}
+.ccn-price-table-box{container-type:inline-size}
+.ccn-table-wrap{overflow-x:auto;overscroll-behavior-x:contain}
+.ccn-table{width:100%;min-width:32em;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ccn-table :is(th,td){padding:var(--ccn-space-2) var(--ccn-space-3);border-bottom:1px solid var(--ccn-color-border);text-align:left;vertical-align:top}
+.ccn-table th{font-weight:700}
+.ccn-table td{white-space:nowrap}
+.ccn-table tbody th{min-width:7em}
+.ccn-table thead th{border-bottom:2px solid var(--ccn-color-primary)}
+.ccn-price-row-note{display:block;color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small);font-weight:400}
+.ccn-table-hint{display:none;margin-top:var(--ccn-space-2);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small);text-align:right}
+@container (max-width:31.99em){.ccn-table-hint{display:block}}
+.ccn-price-table-note{margin-top:var(--ccn-space-3);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small)}
+/* Inside running text (page.php): the text column holds the gutter; 24px above and below */
+.entry-content>.ccn-price-table{padding-block:var(--ccn-space-5)}
+.entry-content>.ccn-price-table>.ccn-container{padding-inline:0}
 
 /* Block: contact cards — email / phone / address strip overlapping the hero */
 .ccn-contact-cards{position:relative;z-index:3;margin-top:-3rem}

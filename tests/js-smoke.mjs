@@ -1688,6 +1688,20 @@ ok('Shortcodes (T-56): the theme registers exactly one, [ccn_dieselzuschlag], re
 	&& themeFile('inc/shortcodes.php').includes("ccn_setting( 'diesel_surcharge' )"),
 	JSON.stringify({ shortcodes: t56Shortcodes, phpFiles: t56PhpFiles.length }));
 
+// Price table (blocks/lists/price-table.php): code level until the content migration places it (T-53b; the WP-CLI
+// render check against Site Settings is in the T-56 report): a caption, column and row headers, a focusable region
+// named by the caption, the ranges of Site Settings → Preise (used / One Way / new), the swipe hint behind a
+// container query (shown only while the table overflows its box, no JS).
+const t56PriceTpl = themeFile('blocks/lists/price-table.php');
+const t56PriceRows = (t56SiteSettings.find((f) => f.name === 'price_rows') || {}).sub_fields || [];
+ok('Price table (T-56): registered; <caption>, th scope col/row, tabindex 0 region labelled by the caption; Site Settings rows size + used/oneway/new min/max; hint only while the table overflows',
+	blockTemplates.includes('blocks/lists/price-table.php') && /<caption id=/.test(t56PriceTpl)
+	&& t56PriceTpl.includes('<th scope="col">') && t56PriceTpl.includes('<th scope="row">')
+	&& /class="ccn-table-wrap" tabindex="0" role="region" aria-labelledby=/.test(t56PriceTpl)
+	&& ['size', 'used_min', 'used_max', 'oneway_min', 'oneway_max', 'new_min', 'new_max'].every((n) => t56PriceRows.some((f) => f.name === n))
+	&& themeCss.includes('.ccn-table-hint{display:none') && themeCss.includes('@container (max-width:31.99em){.ccn-table-hint{display:block}}'),
+	JSON.stringify({ rows: t56PriceRows.map((f) => f.name) }));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

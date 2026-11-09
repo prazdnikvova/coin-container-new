@@ -198,6 +198,15 @@ function ccn_register_blocks() {
 			'keywords'    => array( 'form', 'anfrage', 'kontakt', 'contact form 7' ),
 			'template'    => 'blocks/text/form-card.php',
 		),
+		array(
+			'name'        => 'price-table',
+			'title'       => __( 'Price table', 'coin-container' ),
+			'description' => __( 'Price ranges per container size from Site Settings → Preise (used, One Way, new) with «Stand» and the note; optional heading, chosen sizes only.', 'coin-container' ),
+			'category'    => 'ccn-lists',
+			'icon'        => 'editor-table',
+			'keywords'    => array( 'preise', 'prices', 'table', 'tabelle', 'richtwerte' ),
+			'template'    => 'blocks/lists/price-table.php',
+		),
 	);
 
 	foreach ( $blocks as $block ) {

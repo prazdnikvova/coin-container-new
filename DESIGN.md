@@ -719,6 +719,36 @@ Coin Container Team, Hamburg», the name linking to `/ueber-uns/`.
   `--ccn-color-border` line, 32px after the content; the link underlined
   with the accent-text hover.
 
+## Price table
+
+`acf/price-table` (`blocks/lists/price-table.php`, T-56): the price ranges of
+Site Settings → Preise (one source for every table, as production's
+`inc/preise.php`) in the columns of production's `[coin_preise]`: Größe,
+gebraucht, One Way, fabrikneu.
+
+- Fields: optional heading (h2) and intro, «Sizes» (the sizes of Site
+  Settings; production's `groesse` attribute: the ticked rows only, in Site
+  Settings order; none ticked = all), «Show note» (default on).
+- Cells: «ca. 850–1.200 €» (whole euros, German grouping, a non-breaking
+  space before €) when both bounds are set, «auf Anfrage» otherwise.
+- Markup: `<div class="ccn-table-wrap" tabindex="0" role="region"
+  aria-labelledby>` around `<table class="ccn-table">` with a `<caption>` for
+  screen readers (the heading, else «Preis-Richtwerte, Stand: …»), `<th
+  scope="col">` per column and `<th scope="row">` per size; then «Stand:
+  Oktober 2026.» and the note of Site Settings.
+- Narrow screens: the table keeps `min-width: 32em` and the wrapper scrolls
+  sideways (keyboard: focus it, then the arrow keys; no JS); a price range
+  never breaks (`nowrap`), a size takes at least 7em (two lines at most). At
+  360 the wrapper scrolls by 200px; at 1440 nothing scrolls. The swipe hint
+  «↔ Tabelle nach links/rechts wischen» (production's text) shows only while
+  the table is wider than its box: a container query on
+  `.ccn-price-table-box`.
+- Look: header row bold over a 2px `--ccn-color-primary` line (yellow as an
+  accent line only), rows split by 1px `--ccn-color-border`, figures
+  `tabular-nums`; note and hint 14px `--ccn-color-secondary`. Inside
+  `.entry-content` the block keeps the text column's gutter and takes 24px
+  above and below instead of the section rhythm.
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the
