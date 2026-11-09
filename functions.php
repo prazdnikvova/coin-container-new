@@ -43,6 +43,31 @@ function ccn_setup() {
 }
 
 /**
+ * Lean markup for the header menu (T-53c): production's menu has 41 items, and
+ * WordPress gives every <li> an id and up to six classes the theme never reads,
+ * which pushed the front page document past the first TCP window. Only the
+ * classes theme.css and the smoke test use stay; the ids go. The footer menu
+ * keeps WordPress's markup.
+ *
+ * @param string[] $classes Classes of the menu item.
+ * @param WP_Post  $item    Menu item.
+ * @param stdClass $args    wp_nav_menu() arguments.
+ * @return string[]
+ */
+add_filter( 'nav_menu_css_class', 'ccn_primary_menu_classes', 10, 3 );
+function ccn_primary_menu_classes( $classes, $item, $args ) {
+	if ( empty( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+		return $classes;
+	}
+	return array_values( array_intersect( (array) $classes, array( 'menu-item-has-children', 'current-menu-item', 'current-menu-ancestor' ) ) );
+}
+
+add_filter( 'nav_menu_item_id', 'ccn_primary_menu_item_id', 10, 3 );
+function ccn_primary_menu_item_id( $id, $item, $args ) {
+	return ( ! empty( $args->theme_location ) && 'primary' === $args->theme_location ) ? '' : $id;
+}
+
+/**
  * Asset version from the file's mtime — editing a file busts the browser
  * cache automatically, nothing is ever bumped by hand.
  */

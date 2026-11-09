@@ -154,6 +154,7 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 @starting-style{.nav-open .site-nav{opacity:0;transform:translateY(-.5rem)}}
 .site-menu a{display:block;padding:.75rem 1rem;font-family:var(--ccn-font-heading);font-weight:700}
 .site-menu .sub-menu a{padding-left:2rem;font-weight:400}
+.site-menu .sub-menu .sub-menu a{padding-left:3rem}
 
 @media (min-width:64rem){
 	/* .is-stuck folds the top bar, row 80 -> 64px: the one height transition (DESIGN.md "Header") */
@@ -175,7 +176,11 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 	.site-menu>li.menu-item-has-children>a::after{content:'';display:inline-block;margin-left:.4rem;vertical-align:.15em;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor}
 	.site-menu .sub-menu{display:none;position:absolute;top:100%;left:0;min-width:16rem;background:var(--ccn-color-white);border:1px solid var(--ccn-color-light);box-shadow:var(--ccn-shadow-2);z-index:100}
 	.site-menu li:hover>.sub-menu,.site-menu li:focus-within>.sub-menu{display:block}
-	.site-menu .sub-menu a{padding:.5rem 1rem;font-weight:400}
+	.site-menu .sub-menu a,.site-menu .sub-menu .sub-menu a{padding:.5rem 1rem;font-weight:400}
+	/* Third level: beside its item, same box as the second; a right caret marks items with children */
+	.site-menu .sub-menu li{position:relative}
+	.site-menu .sub-menu .sub-menu{top:-1px;left:100%}
+	.site-menu .sub-menu .menu-item-has-children>a::after{content:'';float:right;margin:.45em 0 0 .5rem;border-top:4px solid transparent;border-bottom:4px solid transparent;border-left:5px solid currentColor}
 	.site-menu .sub-menu a:hover{background:var(--ccn-color-light)}
 }
 

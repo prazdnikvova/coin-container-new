@@ -269,6 +269,16 @@ replaces its "planned" line with the implemented spec.
 - Mobile menu: drops below the row and scrolls inside itself
   (`max-height: 100dvh − row`, `overscroll-behavior: contain`), so every item
   is reachable under a fixed header.
+- Main menu (location `primary`): production's menu since T-53c — 41 items in
+  three levels, 7 at the top. In the burger every level is listed, indented
+  1rem / 2rem / 3rem. From 64rem a top item opens its list under it (16rem,
+  white, `--ccn-shadow-2`); a second-level item with children carries a right
+  caret and opens the third level beside it (`left: 100%`, top-aligned, the
+  same box). Both levels open on `:hover` and `:focus-within`, no JS. The
+  items keep only the classes the theme reads (`menu-item-has-children`,
+  `current-menu-item`, `current-menu-ancestor`) and no ids
+  (`ccn_primary_menu_classes()`, functions.php), so the front page document
+  stays inside the first TCP window.
 - Anchors: `scroll-padding-top: calc(var(--ccn-header-total) + 1rem)`.
   Logged in: `top: var(--wp-admin--admin-bar--height)` keeps the header below
   the admin bar.
@@ -1194,3 +1204,13 @@ for reviewing content:
   rows live in the project library (`SEO/301-map-2026-11.csv`,
   `tools/migration/redirect_map.py`, `check_redirects.sh`); the Rank Math
   meta comes from `tools/migration/import.php --seo-meta`.
+- Smoke test, "Main menu (T-53c)": production's 41 items in the header — the
+  7 top items named as on production, Services › Mieten with 5 items of the
+  third level, every link 200 without a redirect; from 64rem the third level
+  opens beside «Mieten», top-aligned and inside the window, on hover at 1440
+  and 1024 and on keyboard focus (Tab from «Services»); at 360 the burger
+  renders all three levels (7 / 24 / 10) indented 16 / 32 / 48px. The menu
+  group «Kaufen» (landing + 8 items) answers 200, all under
+  `/container-kaufen/`; the current-item colours are checked on
+  `/kontakt-beratung/` (production's menu has no «Home» item). The menu is
+  built by `tools/migration/menu.php` of the project library.
