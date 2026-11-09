@@ -2408,6 +2408,130 @@ if (process.env.CCN_PATTERN_TEST === '1') {
 	t52Notes.push('SKIP Patterns (T-52, CCN_PATTERN_TEST=1): page from each pattern not built — set CCN_PATTERN_TEST=1 and CCN_WP_AUTH=<user>:<application password> (creates, checks and deletes 4 pages)');
 }
 
+// B2B shop (T-57a, inc/b2b.php, DESIGN.md "Shop: B2B note"): production's B2B mode (transmax-child/inc/b2b-shop.php)
+// while Site Settings → Shop → b2b_mode is on (the default). Production's texts byte for byte: the note on the product
+// page, the cart with a product and the checkout; «ab» before every shown price (on sale before the <ins>, the
+// screen-reader sentence «Aktueller Preis: ab …»), no price suffix; the required confirmation at the checkout (no
+// order without it and the order meta: checkout-e2e.mjs, which places a real order); inline CSS on those three pages
+// only. Nothing is written but a WooCommerce cart session.
+const T57A_NOTE = '<strong>Verkauf ausschließlich an Unternehmer</strong>, Gewerbetreibende, Behörden und juristische Personen (§ 14 BGB). Alle Preise netto zzgl. MwSt. und Lieferung.<br>Sie bestellen als Privatperson? <a href="{href}">Fordern Sie ein individuelles Angebot an</a>.';
+const T57A_CONFIRM = 'Ich bestelle als Unternehmer, Gewerbetreibender, Behörde oder juristische Person zu gewerblichen Zwecken (§ 14 BGB). *';
+const t57aNotes = (html) => [...String(html).matchAll(/<div class="ccn-b2b-note" role="note"[^>]*>([\s\S]*?)<\/div>/g)].map((m) => m[1]);
+const t57aCss = (html) => [...String(html).matchAll(/<style id="ccn-b2b-css">([\s\S]*?)<\/style>/g)].map((m) => m[0]);
+const t57aCtx = await browser.newContext();
+const t57aPage = await t57aCtx.newPage();
+const t57aProd = await t57aPage.goto(`${BASE}${T49_PRODUCT}?cb=${Date.now()}`, { waitUntil: 'load' });
+const t57aProdHtml = t57aProd ? await t57aProd.text() : '';
+const t57aSeen = { product: await t57aPage.locator('.ccn-b2b-note').first().isVisible().catch(() => false) };
+const t57aProdPrices = await t57aPage.evaluate(() => [...document.querySelectorAll('.ccn-product-price .price')].map((e) => e.innerHTML));
+const t57aPid = await t57aPage.evaluate(() => (document.querySelector('button[name="add-to-cart"]') || {}).value || '');
+const t57aCart = await t57aPage.goto(`${BASE}/warenkorb/?add-to-cart=${t57aPid}&cb=${Date.now()}`, { waitUntil: 'load' });
+const t57aCartHtml = t57aCart ? await t57aCart.text() : '';
+const t57aCartItems = await t57aPage.locator('.woocommerce-cart-form .cart_item').count();
+t57aSeen.cart = await t57aPage.locator('.ccn-b2b-note').first().isVisible().catch(() => false);
+const t57aCheckout = await t57aPage.goto(`${BASE}/kasse/?cb=${Date.now()}`, { waitUntil: 'load' });
+const t57aCheckoutHtml = t57aCheckout ? await t57aCheckout.text() : '';
+t57aSeen.checkout = await t57aPage.locator('.ccn-b2b-note').first().isVisible().catch(() => false);
+const t57aBox = await t57aPage.evaluate(() => {
+	const box = document.querySelector('input[name="coin_b2b_confirm"]');
+	if (!box) return null;
+	const row = box.closest('.form-row');
+	const label = box.closest('label');
+	const notes = document.querySelector('#order_comments_field');
+	return {
+		type: box.type, checked: box.checked, aria: box.getAttribute('aria-required'), row: row ? row.className : '',
+		afterNotes: !!(notes && notes.compareDocumentPosition(box) & Node.DOCUMENT_POSITION_FOLLOWING),
+		inForm: !!box.closest('form.checkout'), label: label ? label.textContent.replace(/\s+/g, ' ').trim() : '',
+		width: Math.round(box.getBoundingClientRect().width), weight: label ? getComputedStyle(label).fontWeight : '',
+	};
+});
+await t57aCtx.close();
+const t57aStatus = { product: t57aProd ? t57aProd.status() : 0, cart: t57aCart ? t57aCart.status() : 0, checkout: t57aCheckout ? t57aCheckout.status() : 0 };
+const t57aNoteOn = { product: t57aNotes(t57aProdHtml), cart: t57aNotes(t57aCartHtml), checkout: t57aNotes(t57aCheckoutHtml) };
+const t57aHrefs = [...new Set(Object.values(t57aNoteOn).flat().map((n) => (n.match(/<a href="([^"]+)">/) || [])[1] || ''))];
+const t57aOffer = t57aHrefs.length === 1 && t57aHrefs[0] ? await fetch(`${new URL(t57aHrefs[0], BASE).href}?cb=${Date.now()}`) : null;
+ok('B2B (T-57a): the note of production, exactly once with role="note" and visible, on the product page, the cart with a product and the checkout (all 200), its link to the request page /container-angebot-anfordern/ (200)',
+	Object.values(t57aStatus).every((s) => s === 200) && t57aCartItems >= 1
+	&& Object.values(t57aSeen).every(Boolean) && Object.values(t57aNoteOn).every((l) => l.length === 1 && l[0] === T57A_NOTE.replace('{href}', () => t57aHrefs[0]))
+	&& new URL(t57aHrefs[0] || '/x/', BASE).pathname === '/container-angebot-anfordern/' && !!t57aOffer && t57aOffer.status === 200,
+	JSON.stringify({ status: t57aStatus, items: t57aCartItems, visible: t57aSeen, notes: Object.fromEntries(Object.entries(t57aNoteOn).map(([k, l]) => [k, l.length])), href: t57aHrefs, offer: t57aOffer ? t57aOffer.status : 0 }));
+// «ab»: the cards of a product category (Standardcontainer: prices on sale, a regular price, no price) and the product
+// page. Regular price: «ab» then the amount; on sale: the struck-out price as it is, «ab» (aria-hidden like the <ins>)
+// before the current amount and WooCommerce's screen-reader sentence as «Aktueller Preis: ab …»; no price: nothing. No
+// suffix anywhere.
+const t57aShop = await browser.newPage();
+await t57aShop.goto(`${BASE}${CAT_STANDARD}?cb=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+const t57aCardPrices = await t57aShop.evaluate(() => [...document.querySelectorAll('ul.products li.product')].map((li) => {
+	const p = li.querySelector('.price');
+	return p ? p.innerHTML : '';
+}));
+await t57aShop.close();
+const t57aPriceKind = (h) => {
+	if (!/woocommerce-Price-amount/.test(h)) return /ccn-price-from|\bab\b/.test(h) ? 'bad-empty' : 'none';
+	if (/woocommerce-price-suffix|zzgl\.?\s*MwSt/i.test(h)) return 'bad-suffix';
+	if (/Aktueller Preis ist:/.test(h)) return 'bad-screen-reader';
+	if (/<ins\b/.test(h)) {
+		return /<\/del> <span class="screen-reader-text">[^<]*<\/span><span class="ccn-price-from" aria-hidden="true">ab<\/span> <ins\b/.test(h)
+			&& /<span class="screen-reader-text">Aktueller Preis: ab [^<]+<\/span>$/.test(h) && (h.match(/ccn-price-from/g) || []).length === 1 ? 'sale' : 'bad-sale';
+	}
+	return h.startsWith('<span class="ccn-price-from">ab</span> <span class="woocommerce-Price-amount') && (h.match(/ccn-price-from/g) || []).length === 1 ? 'regular' : 'bad-regular';
+};
+const t57aKinds = {};
+for (const h of [...t57aCardPrices, ...t57aProdPrices]) t57aKinds[t57aPriceKind(h)] = (t57aKinds[t57aPriceKind(h)] || 0) + 1;
+ok('B2B (T-57a): «ab » before every shown price — category cards and the product page (regular: «ab» + amount; on sale: «ab» before <ins>, screen reader «Aktueller Preis: ab …»), none without a price, no price suffix or «zzgl. MwSt.» in a price',
+	t57aCardPrices.length >= 8 && t57aProdPrices.length === 1 && (t57aKinds.sale || 0) >= 2 && (t57aKinds.regular || 0) >= 1 && (t57aKinds.none || 0) >= 1
+	&& !Object.keys(t57aKinds).some((k) => k.startsWith('bad')) && t57aPriceKind(t57aProdPrices[0] || '') !== 'none',
+	JSON.stringify({ cards: t57aCardPrices.length, kinds: t57aKinds, product: t57aPriceKind(t57aProdPrices[0] || '') }));
+ok('B2B (T-57a): checkout — the confirmation coin_b2b_confirm (checkbox, unticked) after the order notes, required the WooCommerce way (row validate-required, aria-required="true", asterisk), production\'s label, a box of its own size (not the full row) with the sentence in regular weight',
+	!!t57aBox && t57aBox.type === 'checkbox' && !t57aBox.checked && t57aBox.aria === 'true' && /\bvalidate-required\b/.test(t57aBox.row)
+	&& /\bccn-b2b-confirm\b/.test(t57aBox.row) && t57aBox.afterNotes && t57aBox.inForm && t57aBox.label === T57A_CONFIRM
+	&& t57aBox.width > 0 && t57aBox.width <= 24 && t57aBox.weight === '400', JSON.stringify(t57aBox));
+// Inline CSS: once on the three WooCommerce pages, at most 300 bytes, tokens only (every var() a :root token of
+// theme.css, no colour literal); never on the front page, a landing or a post (their documents stay as they were).
+const t57aCssOn = { product: t57aCss(t57aProdHtml), cart: t57aCss(t57aCartHtml), checkout: t57aCss(t57aCheckoutHtml) };
+const t57aCssText = (t57aCssOn.product[0] || '');
+const t57aVars = [...t57aCssText.matchAll(/var\(--([a-z0-9-]+)\)/g)].map((m) => m[1]);
+const t57aElsewhere = { home: homeHtml, landing: t53bKaufen, post: t56PostHtml };
+const t57aLeaks = Object.fromEntries(Object.entries(t57aElsewhere).map(([k, h]) => [k, (String(h).match(/ccn-b2b-css|ccn-b2b-note/g) || []).length]));
+ok('B2B (T-57a): inline <style id="ccn-b2b-css"> exactly once on the product page, the cart and the checkout, <= 300 bytes, only theme tokens (no colour literal); no note or B2B style on the front page, a landing or a post',
+	Object.values(t57aCssOn).every((l) => l.length === 1 && l[0] === t57aCssText) && Buffer.byteLength(t57aCssText) <= 300
+	&& t57aVars.length >= 4 && t57aVars.every((v) => !!tokenValue(v)) && !/#[0-9a-fA-F]{3,8}(?![\w-])|rgba?\(|hsla?\(/.test(t57aCssText)
+	&& !!t56PostHtml && Object.values(t57aLeaks).every((n) => n === 0),
+	JSON.stringify({ bytes: Buffer.byteLength(t57aCssText), on: Object.fromEntries(Object.entries(t57aCssOn).map(([k, l]) => [k, l.length])), vars: t57aVars, elsewhere: t57aLeaks }));
+// Visible text only: Rank Math's Offer price stays the raw number.
+const t57aLd = [...t57aProdHtml.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].flatMap((m) => {
+	try { return [JSON.parse(m[1])]; } catch { return []; }
+});
+const t57aLdPrices = [];
+const t57aWalk = (o) => {
+	if (Array.isArray(o)) o.forEach(t57aWalk);
+	else if (o && typeof o === 'object') {
+		if ('price' in o) t57aLdPrices.push(String(o.price));
+		Object.values(o).forEach(t57aWalk);
+	}
+};
+t57aWalk(t57aLd);
+ok('B2B (T-57a): the product\'s JSON-LD Offer price is the raw number (no «ab», no suffix)',
+	t57aLdPrices.length >= 1 && t57aLdPrices.every((p) => /^\d+(\.\d+)?$/.test(p)), JSON.stringify(t57aLdPrices));
+// /en/ (TranslatePress): the same «ab» and note — German until the dictionary has them (decision T-57a 10).
+const t57aEn = t55Doc[`/en${T55_PRODUCT}`] || { status: 0, html: '' };
+const t57aEnNote = t57aNotes(t57aEn.html);
+ok('B2B (T-57a): the English product page answers 200 with «ab» before its price and the note (German until the TranslatePress dictionary has it)',
+	t57aEn.status === 200 && /<span class="ccn-price-from"[^>]*>[^<]+<\/span> <ins\b/.test(t57aEn.html) && t57aEnNote.length === 1 && t57aCss(t57aEn.html).length === 1,
+	JSON.stringify({ status: t57aEn.status, notes: t57aEnNote.length, german: t57aEnNote.length === 1 && t57aEnNote[0].includes('Verkauf ausschließlich an Unternehmer') }));
+// Code: inc/b2b.php only with WooCommerce, the switch in Site Settings → Shop (true/false, on by default), production's
+// order meta key and value.
+const t57aSettings = JSON.parse(themeFile('acf-json/group_ccn_site_settings.json') || '{}').fields || [];
+const t57aShopTab = t57aSettings.findIndex((f) => f.type === 'tab' && f.label === 'Shop');
+const t57aMode = t57aSettings.find((f) => f.name === 'b2b_mode');
+const t57aCode = themeFile('inc/b2b.php');
+ok('B2B (T-57a): functions.php requires inc/b2b.php only with WooCommerce; Site Settings tab «Shop» with b2b_mode (true/false, default on); the order keeps production\'s _coin_b2b_confirm = ja',
+	/if \( class_exists\( 'WooCommerce' \) \) \{[^}]*require_once get_template_directory\(\) \. '\/inc\/b2b\.php';[^}]*\}/.test(functionsPhp)
+	&& t57aShopTab >= 0 && !!t57aMode && t57aMode.type === 'true_false' && Number(t57aMode.default_value) === 1 && t57aSettings.indexOf(t57aMode) > t57aShopTab
+	&& t57aSettings.slice(t57aShopTab + 1, t57aSettings.indexOf(t57aMode)).every((f) => f.type !== 'tab')
+	&& /update_meta_data\(\s*'_coin_b2b_confirm',\s*'ja'\s*\)/.test(t57aCode) && /add_action\(\s*'woocommerce_checkout_create_order',\s*'ccn_b2b_confirm_meta'\s*\)/.test(t57aCode),
+	JSON.stringify({ tab: t57aShopTab, mode: t57aMode ? { type: t57aMode.type, default: t57aMode.default_value } : null }));
+
 await browser.close();
 console.log(results.join('\n'));
 if (t52Notes.length) console.log(t52Notes.join('\n'));
