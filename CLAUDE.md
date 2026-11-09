@@ -50,6 +50,12 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
   `inc/editor.php` — README "Patterns" and "Editor", smoke "Editor patterns
   and guardrails (T-52)". Editor strings stay English, the brand is «Coin»,
   never «COIN».
+- Shop: production's B2B mode lives in `inc/b2b.php` (Site Settings → Shop →
+  `b2b_mode`, on by default): its texts are production's (copy changes go
+  through the editorial process), the order meta `_coin_b2b_confirm` = `ja`
+  is production's key, and its CSS stays inline on product, cart and
+  checkout — README "Shop", smoke "B2B shop (T-57a)", `tests/checkout-e2e.mjs`
+  (places a real order).
 
 ## Tests
 

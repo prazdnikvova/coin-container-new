@@ -87,7 +87,9 @@ mobile emulation) and the numbers go into the commit body.
   the product category base, e.g. `/container-kaufen/buerocontainer-kaufen/`,
   answer as pages although WooCommerce owns that base: one rewrite rule per
   child, as production's `seo-migration-kaufen-hierarchie.php`; flush the
-  rules once after adding or moving such a page). Redirects of old addresses
+  rules once after adding or moving such a page), `b2b.php` (the B2B mode of
+  the shop: «ab» before prices, the B2B note, the required confirmation at
+  the checkout; see "Shop"). Redirects of old addresses
   are not theme code: the project's 301 map goes to the web server
   ([`DESIGN.md`](DESIGN.md) "URLs and redirects").
 - Admin-editable globals live on the Site Settings page and are read through a
@@ -129,6 +131,46 @@ English with German number and price formats.
 Deploy: upload the `inc/trp-*.php` files before `functions.php`, which
 requires them, then save the permalinks once (TranslatePress' `/en/` and the
 `/sitemap-en.xml` rule).
+
+## Shop
+
+### B2B mode
+
+The web shop sells to businesses, tradespeople, public bodies and legal
+persons only (§ 14 BGB); private customers get an individual offer. Ported
+from production (`transmax-child/inc/b2b-shop.php`) to `inc/b2b.php` (T-57a,
+required only with WooCommerce) and switched in Site Settings → Shop → «B2B
+mode» (true/false, on by default; until the field is saved the theme reads
+it as on). Off, prices, cart and checkout are WooCommerce's own.
+
+- **Prices:** no price suffix, whatever WooCommerce's tax settings hold (the
+  option and the suffix HTML are both emptied: the net-price statement lives
+  in the note, production decision 20.09.2026), and «ab» before every price
+  WooCommerce prints through `get_price_html()` — cards, the product page,
+  related products, the featured-products block, the admin product list.
+  On sale the word stands before the current amount and WooCommerce's
+  screen-reader sentence reads «Aktueller Preis: ab …». Line prices of cart
+  and checkout and Rank Math's JSON-LD Offer price stay without it.
+- **Note** «Verkauf ausschließlich an Unternehmer …» with the way for
+  private customers: on the product page (`woocommerce_single_product_summary`
+  25), the cart (`woocommerce_before_cart`, so not on an empty cart) and the
+  checkout (`woocommerce_checkout_before_customer_details`). Its link is Site
+  Settings `anfrage_url` while that points at `/container-angebot-anfordern/`
+  (production's target), else that page's permalink. Styles inline on those
+  pages only (`<style id="ccn-b2b-css">`, at most 300 bytes, tokens;
+  DESIGN.md "Shop: B2B note").
+- **Checkout:** the required box `coin_b2b_confirm` «Ich bestelle als
+  Unternehmer …» after the order notes; without it WooCommerce refuses the
+  order with production's notice. The order keeps `_coin_b2b_confirm` = `ja`
+  (production's meta key and value: one key for the orders and exports of
+  both sites), shown after the billing address in the order screen, also
+  when the mode is off later.
+- **Texts:** production's, byte for byte, as German gettext source strings
+  (`de_DE.po`: msgstr = msgid); English comes from the TranslatePress
+  dictionary. Copy changes go through the editorial process for both sites,
+  not into this file.
+- **Tests:** smoke section "B2B shop (T-57a)" and `tests/checkout-e2e.mjs`
+  (see Tests).
 
 ## Patterns
 
@@ -271,6 +313,14 @@ node js-smoke.mjs
 
 The check count grows with the theme — every new interactive block adds its checks
 here. Any FAIL blocks the commit.
+
+Checkout end to end (`node checkout-e2e.mjs`): product → cart → checkout with
+cash on delivery. In B2B mode the order is refused without the confirmation
+(production's notice) and goes through with it; its `_coin_b2b_confirm` meta
+is read through WP-CLI (`CCN_PHP`, `CCN_PHP_INI`, `CCN_WP_CLI` for the
+`wp-cli.phar`, `CCN_WP_PATH`; without them the PHP, php.ini and folder of the
+Local by Flywheel site whose domain is the host of `CCN_BASE_URL`). Every run
+places one real order in the site's database.
 
 CI (GitHub Actions) runs `php -l` on PHP 8.2/8.3 and PHPCS (security + i18n
 ruleset) on every push.

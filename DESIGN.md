@@ -560,6 +560,43 @@ pages (`inc/assets-cleanup.php`), so every rule is the theme's.
 - Related products: product cards (see Cards), always the same four (menu
   order, then title).
 
+## Shop: B2B note
+
+T-57a, production's B2B shop (`inc/b2b.php`, README "Shop"; Site Settings →
+Shop → «B2B mode», on by default): the shop sells to businesses only, so a
+shown price is a lower bound and the product page, the cart and the checkout
+say who may order. Texts are production's (Content & brand rules: design
+never rewrites copy, the dash of the checkout notice included).
+
+- **«ab» before a price** (`<span class="ccn-price-from">`): no style of its
+  own, it takes the type of the price it stands in (24px bold on the product
+  page, 16px bold on cards). On sale it stands between the struck-out price
+  and the current one and is hidden from screen readers like WooCommerce's
+  `<ins>`; the screen-reader sentence says «Aktueller Preis: ab …». Measured:
+  every card price stays on one line at 360 and 1440.
+- **Note** (`<div class="ccn-b2b-note" role="note">`): `--ccn-color-light` box
+  with a 4px `--ccn-color-secondary` bar on the left (the look of
+  WooCommerce's info notices), padding `--ccn-space-4`, `--ccn-space-4` after
+  it, text `--ccn-fs-small` in `#202020` (15.20:1 on `#f7f7f7`), the link
+  underlined. The first words are bold: «Verkauf ausschließlich an
+  Unternehmer». Product page: after the short description and before the
+  add-to-cart form (production's place) from 48rem; below 48rem it joins the
+  rest of the summary (`order: 6`: after «Jetzt anfragen» with the trust row
+  and after the short description), so the first screen keeps h1, price,
+  gallery and add to cart (see Product page). Cart: above the table;
+  checkout: above the customer details.
+- **Confirmation** at the checkout: WooCommerce's checkbox look, the box in
+  its own size before the sentence in regular weight. theme.css gives every
+  input of a WooCommerce form row the full width and every label bold type;
+  the inline style takes both back for this one field (by id, because it
+  comes before theme.css). Required the WooCommerce way: the asterisk, the
+  row class `validate-required` and `aria-required`; the server refuses the
+  order without it.
+- **Styles:** inline `<style id="ccn-b2b-css">` (294 bytes, tokens only) on
+  the product, cart and checkout pages, never in theme.css (first TCP window)
+  and never on other pages: the front page and the landings keep their CSS;
+  their product cards gain only the «ab».
+
 ## Breadcrumbs
 
 `ccn_breadcrumbs()` in `inc/seo.php` (T-49; Rank Math since T-54). The trail
@@ -1313,3 +1350,21 @@ for reviewing content:
   pattern) is checked by the library probe
   `reports/2026-11-09-t52-shots/t52_editor.cjs` under a temporary
   administrator.
+- Smoke test, "B2B shop (T-57a)": production's note, exactly once and byte
+  for byte, on the product page, the cart with a product and the checkout,
+  its link to the request page answering 200; «ab» before every card price
+  of a product category (Standardcontainer: prices on sale, a regular price
+  and products without one) and the product price (on sale before `<ins>`
+  with «Aktueller Preis: ab …» for screen readers), none without a price, no
+  suffix; the
+  checkout box after the order notes, required the WooCommerce way, in its
+  own size with the sentence in regular weight; the inline style once on
+  those three pages (≤ 300 bytes, tokens only) and the note and style on no
+  other page; the JSON-LD Offer price a plain number; `/en/` with «ab» and
+  the note; the code switch (`b2b_mode`, default on) and production's order
+  meta. `tests/checkout-e2e.mjs`: no order without the box (production's
+  notice), the order with it carries `_coin_b2b_confirm` = `ja`. Negative
+  run (`b2b_mode` off) and screenshots: the T-57a report of the project
+  library (`reports/2026-11-09-t57a-report.md`; probes
+  `reports/2026-11-09-data/t57a-scripts/t57a_shots.cjs` (note, box and their
+  geometry at 360/1440) and `t57a_cards.cjs` (card prices)).
