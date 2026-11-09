@@ -517,27 +517,31 @@ pages (`inc/assets-cleanup.php`), so every rule is the theme's.
 
 ## Breadcrumbs
 
-`ccn_breadcrumbs()` in `inc/seo.php` (T-49). The trail and its BreadcrumbList
-schema come from the SEO plugin: Rank Math (`rank_math_the_breadcrumbs()`)
-once it is installed (T-54), Yoast (`yoast_breadcrumb()`, theme support
-`yoast-seo-breadcrumbs`) until then. The theme prints the trail only, no
-schema of its own.
+`ccn_breadcrumbs()` in `inc/seo.php` (T-49; Rank Math since T-54). The trail
+and its BreadcrumbList schema come from the same Rank Math crumbs
+(`rank_math_the_breadcrumbs()`); the theme prints them as a list and adds no
+schema of its own. Without Rank Math nothing is printed.
 
 - Markup: `<nav class="ccn-breadcrumbs" aria-label="Brotkrumen">` with an
-  `<ol>` (Yoast filters for the list and item tags, no text separator); the
+  `<ol>`, one `<li>` per crumb (Rank Math's `<p>` with separator spans is
+  replaced through `rank_math/frontend/breadcrumb/html` for that call); the
   current page last, not linked, `aria-current="page"`.
+- Trail as on production (`transmax-child/inc/breadcrumbs.php`): «Startseite»
+  (`rank_math/frontend/breadcrumb/strings`), the shop page after it on
+  products and product categories (`…/is_using_shop_base`), parent
+  categories (`…/settings`, `show_ancestors`), a product's primary category
+  with its parents (Rank Math's primary-term meta, else the deepest
+  category) and decoded HTML entities (`…/items`); the schema gets the same
+  crumbs. Names come from the shop page and the categories of the site.
 - Where: products, the shop and product categories (above the h1,
-  `woocommerce.php`), landings (under the hero band, on white,
+  `woocommerce.php`), landings and contact pages (under the hero band, on
+  white, in the 1200px container like the hero text,
   `template-parts/page-hero.php`), posts (`single.php`) and pages
-  (`page.php`); never on the front page.
+  (`page.php`), both in the 820px text column; never on the front page.
 - Look: 14px `--ccn-color-secondary` (6.44:1), links underlined with the
   accent-text hover, 44px tall targets, separator `›` as `::before` (not
-  read out: `content: "›" / ""`); one line, the current page cut off with
-  an ellipsis.
-- Texts and levels follow the plugin's settings. Yoast gives «Home › Shop ›
-  20 Fuß Container …» today; production shows «Startseite › Container
-  kaufen › Standardcontainer › …» — settled with Rank Math in T-54, which
-  also checks the look of its own markup (a `<p>` with separator spans).
+  read out: `content: "›" / ""`). A trail that does not fit its line wraps;
+  the current page keeps at least 6em and is cut off with an ellipsis.
 
 ## Trust
 
@@ -620,8 +624,9 @@ pairs (answers keep `p`, `a`, `ul`/`ol`, `strong`, `br` only).
 - Schema (`inc/schema.php`): the pairs of every `acf/faq` block of a page
   (nested blocks too), Site Settings → Schema → `faq_schema_mode`:
   `webpage-mainentity` (default, production: the questions as `mainEntity`
-  of Rank Math's WebPage node through `rank_math/json_ld`, no FAQPage node;
-  nothing before Rank Math, T-54), `faqpage` (own FAQPage node), `none`.
+  of Rank Math's WebPage node through `rank_math/json_ld`, or of an own
+  WebPage node when its graph has none; no FAQPage node, and Rank Math's
+  own FAQ nodes are dropped, T-54), `faqpage` (own FAQPage node), `none`.
 
 ## Logos
 
@@ -928,3 +933,14 @@ for reviewing content:
   after an empty submit, `aria-*` in the DOM),
   `reports/2026-11-08-t51-shots/t51_shots.cjs` (360/1440 and the error
   state).
+- Smoke test, "SEO plugin (T-54)": Rank Math only (its JSON-LD valid on six
+  pages, no Yoast marks), one non-empty `<title>` and at most one meta
+  description; one BreadcrumbList naming the visible crumbs, «Startseite»
+  first, the product path with its category; one company node on the front
+  page (Organization + Store, `/#organization`); the sitemap index with the
+  page, post, product and product_cat sitemaps and the robots.txt line; the
+  trail at the container edge at 1440 on landings and contact pages and a
+  long product trail fitting 360. Library probes:
+  `reports/2026-11-09-data/t54_seo_probe.py` (head bytes, meta tags and
+  JSON-LD nodes per page), `reports/2026-11-09-t54-shots/t54_shots.cjs`
+  (trail geometry and screenshots at 1440/360).
