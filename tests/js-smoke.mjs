@@ -2711,6 +2711,144 @@ ok('Catalog filters (T-57b): at 360 the closed «Filter» is a >= 44px target wi
 	&& !!t57bChosen && t57bChosen.color === 'rgb(32, 32, 32)' && t57bChosen.bg === 'rgb(247, 198, 0)' && t57bChosen.h >= 44 && /✓"\s*\/\s*""/.test(t57bChosen.mark) && t57bChosen.reset >= 44,
 	JSON.stringify({ closed: t57bClosed, focus: t57bFocus, opened: t57bOpened, chosen: t57bChosen }));
 
+// Glossary (T-57c, DESIGN.md "Glossary", inc/glossary.php): production's glossary is plain pages — the hub /glossar/
+// and one child page per term, no post type of its own. The theme adds production's A–Z index under the hub text and
+// the DefinedTermSet / DefinedTerm JSON-LD, both read from the pages (title, Rank Math meta description, permalink).
+// The child pages come from REST, so the index checks and the schema checks fail apart. Read-only: nothing is written.
+const T57C_HUB = '/glossar/';
+const T57C_H1 = 'Container-Glossar: Fachbegriffe rund um Container';
+const t57cText = (s) => String(s).replace(/<[^>]+>/g, '').replace(/&#0?39;|&#x27;/g, "'").replace(/&quot;|&#0?34;/g, '"')
+	.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#8211;|&ndash;/g, '–').replace(/&amp;|&#0?38;/g, '&').trim();
+const t57cTypes = (n) => [].concat(n['@type'] || []);
+// strnatcasecmp as production sorts: whitespace skipped, ASCII letters compared upper-case (PHP's toupper), digit runs
+// as numbers, everything else by code point (= UTF-8 byte order) — so «Open-Top-Container» before «Open Side Container».
+const t57cNat = (a, b) => {
+	const norm = (s) => s.replace(/\s+/g, '').replace(/[a-z]/g, (c) => c.toUpperCase());
+	const x = norm(a).match(/\d+|\D+/g) || [];
+	const y = norm(b).match(/\d+|\D+/g) || [];
+	for (let i = 0; i < Math.min(x.length, y.length); i++) {
+		if (x[i] === y[i]) continue;
+		if (/^\d/.test(x[i]) && /^\d/.test(y[i])) return Number(x[i]) - Number(y[i]);
+		return x[i] < y[i] ? -1 : 1;
+	}
+	return x.length - y.length;
+};
+const t57cRead = (html) => {
+	const h = String(html);
+	const idx = [...h.matchAll(/<div class="ccn-glossary-index"[^>]*>([\s\S]*?)<\/div>/g)];
+	const groups = idx[0] ? [...idx[0][1].matchAll(/<h2>([^<]*)<\/h2><ul>([\s\S]*?)<\/ul>/g)].map((g) => ({
+		letter: t57cText(g[1]),
+		items: [...g[2].matchAll(/<li><a href="([^"]+)">([^<]*)<\/a>(?: – ([^<]*))?<\/li>/g)]
+			.map((i) => ({ href: t57cText(i[1]), name: t57cText(i[2]), desc: t57cText(i[3] || '') })),
+		lis: (g[2].match(/<li>/g) || []).length,
+	})) : [];
+	const nodes = [...h.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g)]
+		.flatMap((m) => { try { const d = JSON.parse(m[1]); return d['@graph'] || [d]; } catch { return [{ '@type': 'INVALID' }]; } });
+	return {
+		idx: idx.length, raw: idx[0] ? idx[0][0] : '', groups, items: groups.flatMap((g) => g.items), lis: groups.reduce((s, g) => s + g.lis, 0),
+		h1: [...h.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/g)].map((m) => t57cText(m[1])),
+		headers: (h.match(/<header[\s>]/g) || []).length, lang: (h.match(/<html[^>]* lang="([^"]+)"/) || [])[1] || '',
+		meta: t57cText((h.match(/<meta name="description" content="([^"]*)"/) || [])[1] || ''),
+		sets: nodes.filter((n) => t57cTypes(n).includes('DefinedTermSet')), terms: nodes.filter((n) => t57cTypes(n).includes('DefinedTerm')),
+		org: nodes.filter((n) => t57cTypes(n).includes('Organization')).map((n) => n['@id']),
+		invalid: nodes.filter((n) => t57cTypes(n).includes('INVALID')).length,
+		fresh: /<p class="ccn-freshness">Zuletzt aktualisiert: <time datetime="[^"]+">/.test(h),
+		at: (needle) => h.indexOf(needle),
+	};
+};
+const t57cHubRes = await t56Get(T57C_HUB);
+const t57cHub = t57cRead(t57cHubRes.text);
+const t57cEnRes = await t56Get(`/en${T57C_HUB}`);
+const t57cEn = t57cRead(t57cEnRes.text);
+const [t57cHubPage] = await (await fetch(`${BASE}/wp-json/wp/v2/pages?slug=glossar&parent=0&_fields=id,link&cb=${Date.now()}`)).json().catch(() => []);
+const t57cKids = t57cHubPage
+	? await (await fetch(`${BASE}/wp-json/wp/v2/pages?parent=${t57cHubPage.id}&per_page=100&_fields=id,link&cb=${Date.now()}`)).json().catch(() => [])
+	: [];
+const t57cKidLinks = t57cKids.map((k) => k.link).sort();
+// Every published child page of the hub, one after the other.
+const t57cChildren = [];
+for (const k of t57cKids) {
+	const path = new URL(k.link).pathname;
+	const r = await t56Get(path);
+	t57cChildren.push({ link: k.link, path, status: r.res.status, v: t57cRead(r.text) });
+}
+const t57cChild = Object.fromEntries(t57cChildren.map((c) => [c.link, c]));
+const t57cHrefs = t57cHub.items.map((i) => i.href);
+const t57cThemeCss = themeFile('assets/css/theme.css');
+const t57cLeak = { home: homeHtml.includes('ccn-glossary-index'), kaufen: t53bKaufen.includes('ccn-glossary-index'), child: t57cChildren.filter((c) => c.v.idx > 0).length };
+ok('Glossary (T-57c): the hub /glossar/ answers 200 with production\'s h1 and text, then the A–Z index exactly once (div.ccn-glossary-index after «Fehlt ein Begriff?», no inline style, no rule of its own in theme.css); no index on the front page, a landing or a child page',
+	t57cHubRes.res.status === 200 && t57cHub.h1.length === 1 && t57cHub.h1[0] === T57C_H1 && t57cHub.idx === 1
+	&& t57cHub.at('<p>Das <strong>Container-Glossar</strong>') > -1 && t57cHub.at('<p>Fehlt ein Begriff?') > -1 && t57cHub.at('<div class="ccn-glossary-index">') > t57cHub.at('<p>Fehlt ein Begriff?')
+	&& !/style=/.test(t57cHub.raw) && !t57cThemeCss.includes('ccn-glossary') && !t57cLeak.home && !t57cLeak.kaufen && t57cLeak.child === 0,
+	JSON.stringify({ status: t57cHubRes.res.status, h1: t57cHub.h1, index: t57cHub.idx, bytes: Buffer.byteLength(t57cHub.raw), leak: t57cLeak }));
+const t57cLetters = t57cHub.groups.map((g) => g.letter);
+const t57cLetterOf = (name) => { const l = name.charAt(0).toUpperCase(); return /[A-ZÄÖÜ]/.test(l) ? l : '#'; };
+ok('Glossary (T-57c): the index lists every published child page of the hub (REST) once — 23/23, «Name – definition» per item — in >= 10 letter groups in A→Z order, each name under its first letter, natural order inside a letter (production\'s strnatcasecmp)',
+	t57cKids.length >= 23 && t57cHub.items.length === t57cKids.length && t57cHub.lis === t57cHub.items.length
+	&& JSON.stringify([...t57cHrefs].sort()) === JSON.stringify(t57cKidLinks) && new Set(t57cHrefs).size === t57cHrefs.length
+	&& t57cHub.items.every((i) => i.name && i.desc && new RegExp(`^${BASE}/glossar/[^/]+/$`).test(i.href))
+	&& t57cLetters.length >= 10 && new Set(t57cLetters).size === t57cLetters.length && t57cLetters.join() === [...t57cLetters].sort().join()
+	&& t57cHub.groups.every((g) => g.items.every((i) => t57cLetterOf(i.name) === g.letter)
+		&& g.items.every((i, n) => n === 0 || t57cNat(g.items[n - 1].name, i.name) <= 0)),
+	JSON.stringify({ children: t57cKids.length, items: t57cHub.items.length, lis: t57cHub.lis, letters: t57cLetters.join(' ') }));
+// The definition in the index is the page's meta description (Rank Math: production's 'short').
+const t57cLinkBad = t57cHub.items.map((i) => ({ i, c: t57cChild[i.href] }))
+	.filter(({ i, c }) => !(c && c.status === 200 && c.v.h1.length === 1 && c.v.h1[0] === i.name && c.v.meta !== '' && c.v.meta === i.desc))
+	.map(({ i, c }) => ({ href: i.href, status: c ? c.status : 0, h1: c ? c.v.h1 : [], meta: c ? c.v.meta.slice(0, 40) : '', desc: i.desc.slice(0, 40) }));
+ok('Glossary (T-57c): each index link answers 200 on its child page, whose h1 is the link text and whose meta description is the definition in the index (23/23)',
+	t57cHub.items.length === t57cKids.length && t57cHub.items.length >= 23 && t57cLinkBad.length === 0,
+	JSON.stringify({ links: t57cHub.items.length, bad: t57cLinkBad.slice(0, 3) }));
+const T57C_SET_ID = `${BASE}${T57C_HUB}#definedtermset`;
+const t57cSet = t57cHub.sets[0] || {};
+const t57cHas = Array.isArray(t57cSet.hasDefinedTerm) ? t57cSet.hasDefinedTerm : [];
+const t57cEnSet = t57cEn.sets[0] || {};
+const t57cHome = t57cRead(homeHtml);
+ok('Glossary (T-57c): the hub\'s JSON-LD has one DefinedTermSet (@id /glossar/#definedtermset, name «Container-Glossar», url the hub, publisher the Organization @id of the front page) with one DefinedTerm per published child page (@id = url + #definedterm, name = its h1, url, inDefinedTermSet = the set @id), production\'s keys in production\'s order; the same set on /en/glossar/ (/en/ addresses); none on the front page',
+	t57cHub.invalid === 0 && t57cHub.sets.length === 1 && t57cHub.terms.length === 0
+	&& JSON.stringify(Object.keys(t57cSet)) === JSON.stringify(['@type', '@id', 'name', 'url', 'publisher', 'hasDefinedTerm'])
+	&& t57cSet['@id'] === T57C_SET_ID && t57cSet.name === 'Container-Glossar' && t57cSet.url === `${BASE}${T57C_HUB}`
+	&& !!t57cSet.publisher && t57cSet.publisher['@id'] === `${BASE}/#organization` && t57cHome.org.includes(t57cSet.publisher['@id'])
+	&& t57cHas.length === t57cKids.length && t57cHas.length >= 23
+	&& t57cHas.every((t) => JSON.stringify(Object.keys(t)) === JSON.stringify(['@type', '@id', 'name', 'url', 'inDefinedTermSet'])
+		&& t['@type'] === 'DefinedTerm' && t['@id'] === `${t.url}#definedterm` && t.inDefinedTermSet === T57C_SET_ID
+		&& !!t57cChild[t.url] && t57cChild[t.url].v.h1[0] === t.name)
+	&& JSON.stringify(t57cHas.map((t) => t.url).sort()) === JSON.stringify(t57cKidLinks)
+	&& t57cEn.sets.length === 1 && t57cEnSet['@id'] === `${BASE}/en${T57C_HUB}#definedtermset` && (t57cEnSet.hasDefinedTerm || []).length === t57cHas.length
+	&& t57cHome.sets.length === 0 && t57cHome.terms.length === 0,
+	JSON.stringify({ sets: t57cHub.sets.length, id: t57cSet['@id'], name: t57cSet.name, publisher: t57cSet.publisher, terms: t57cHas.length, homeOrg: t57cHome.org, en: { sets: t57cEn.sets.length, id: t57cEnSet['@id'], terms: (t57cEnSet.hasDefinedTerm || []).length } }));
+const t57cTermBad = t57cChildren.filter((c) => {
+	const t = c.v.terms[0] || {};
+	const set = t.inDefinedTermSet || {};
+	return !(c.status === 200 && c.v.invalid === 0 && c.v.terms.length === 1 && c.v.sets.length === 0
+		&& JSON.stringify(Object.keys(t)) === JSON.stringify(['@type', '@id', 'name', 'description', 'url', 'inDefinedTermSet'])
+		&& t['@id'] === `${c.link}#definedterm` && t.url === c.link && t.name === c.v.h1[0] && t.description === c.v.meta && c.v.meta !== ''
+		&& JSON.stringify(set) === JSON.stringify({ '@type': 'DefinedTermSet', '@id': T57C_SET_ID, name: 'Container-Glossar', url: `${BASE}${T57C_HUB}` })
+		&& c.v.h1.length === 1 && c.v.headers === 1 && c.v.fresh);
+}).map((c) => ({ path: c.path, status: c.status, terms: c.v.terms.length, desc: (c.v.terms[0] || {}).description === c.v.meta, headers: c.v.headers, fresh: c.v.fresh }));
+ok('Glossary (T-57c): every child page carries one DefinedTerm (@id = its url + #definedterm, name = h1, description = meta description, url, inDefinedTermSet = {DefinedTermSet, the hub\'s set @id, name, url}) in production\'s keys, one <header>, one h1 and «Zuletzt aktualisiert» (T-56) — 23/23',
+	t57cChildren.length === t57cKids.length && t57cChildren.length >= 23 && t57cTermBad.length === 0,
+	JSON.stringify({ pages: t57cChildren.length, bad: t57cTermBad.slice(0, 3) }));
+const t57cPages = await t53aLocs('/page-sitemap.xml');
+const t57cGlossarLocs = t57cPages.locs.filter((u) => u.startsWith(`${BASE}${T57C_HUB}`)).sort();
+ok('Glossary (T-57c): page-sitemap.xml lists the hub and every child page — 24 /glossar/ URLs',
+	t57cPages.status === 200 && t57cGlossarLocs.length === 1 + t57cKids.length && t57cGlossarLocs.length >= 24
+	&& JSON.stringify(t57cGlossarLocs) === JSON.stringify([`${BASE}${T57C_HUB}`, ...t57cKidLinks].sort()),
+	JSON.stringify({ status: t57cPages.status, glossar: t57cGlossarLocs.length }));
+// English: the index through TranslatePress (German words until the dictionary is filled, roadmap 196).
+ok('Glossary (T-57c): /en/glossar/ answers 200 (lang en) with the index once — as many links as the German hub, all to /en/glossar/<slug>/',
+	t57cEnRes.res.status === 200 && t57cEn.lang.startsWith('en') && t57cEn.idx === 1 && t57cEn.items.length === t57cKids.length && t57cEn.items.length >= 23
+	&& t57cEn.items.every((i) => new RegExp(`^${BASE}/en/glossar/[^/]+/$`).test(i.href)),
+	JSON.stringify({ status: t57cEnRes.res.status, lang: t57cEn.lang, index: t57cEn.idx, items: t57cEn.items.length }));
+// Pages, not a post type: inc/glossary.php is required for every site (not only with WooCommerce), the theme
+// registers no post type and REST knows none called glossar.
+const t57cTypesRest = await (await fetch(`${BASE}/wp-json/wp/v2/types?cb=${Date.now()}`)).json().catch(() => ({}));
+const t57cCpt = readdirSync(themeDir, { recursive: true }).map(String)
+	.filter((f) => f.endsWith('.php') && !/^(vendor|tests|node_modules)[\\/]/.test(f) && /register_post_type\s*\(/.test(themeFile(f)));
+ok('Glossary (T-57c): plain pages, as on production — inc/glossary.php required outside the WooCommerce block of functions.php, no register_post_type() in the theme, no post type «glossar» in REST',
+	/\nrequire_once get_template_directory\(\) \. '\/inc\/glossary\.php';/.test(functionsPhp.split("if ( class_exists( 'WooCommerce' ) ) {")[0])
+	&& t57cCpt.length === 0 && typeof t57cTypesRest === 'object' && !!t57cTypesRest.page && !t57cTypesRest.glossar,
+	JSON.stringify({ cpt: t57cCpt, types: Object.keys(t57cTypesRest || {}).length, glossar: !!(t57cTypesRest || {}).glossar }));
+
 await browser.close();
 console.log(results.join('\n'));
 if (t52Notes.length) console.log(t52Notes.join('\n'));

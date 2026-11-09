@@ -348,6 +348,8 @@ require_once get_template_directory() . '/inc/freshness.php';
 require_once get_template_directory() . '/inc/shortcodes.php';
 require_once get_template_directory() . '/inc/price-table.php';
 require_once get_template_directory() . '/inc/related.php';
+// Glossary (T-57c): production's A–Z index on /glossar/ and its DefinedTerm schema, read from the pages.
+require_once get_template_directory() . '/inc/glossary.php';
 if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
 	require_once get_template_directory() . '/inc/internal-links.php';
