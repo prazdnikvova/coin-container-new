@@ -5,6 +5,11 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 const BASE = process.env.CCN_BASE_URL || 'http://coin-container-new.local';
+// Product categories live under the production base since T-53a (woocommerce_permalinks.category_base).
+const CAT_BASE = '/container-kaufen/';
+const CAT_STANDARD = `${CAT_BASE}standardcontainer/`;
+const CAT_SPECIAL = `${CAT_BASE}spezialcontainer/`;
+const CAT_COOLING = `${CAT_BASE}kuehlcontainer/`;
 
 const results = [];
 const ok = (name, cond, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}${extra ? ' — ' + extra : ''}`);
@@ -175,7 +180,7 @@ ok('Shop lists products', await page.locator('ul.products li.product').count() >
 ok('jQuery on shop (WooCommerce page, T-49)', await page.evaluate(() => typeof window.jQuery === 'function'));
 
 // Category archive renders products
-const respCat = await page.goto(BASE + '/product-category/cointainer/standardcontainer/', { waitUntil: 'domcontentloaded' });
+const respCat = await page.goto(BASE + CAT_STANDARD, { waitUntil: 'domcontentloaded' });
 ok('Category responds 200', respCat.status() === 200, String(respCat.status()));
 ok('Category lists products', await page.locator('ul.products li.product').count() >= 3);
 
@@ -337,8 +342,11 @@ ok('wp_head without json+oembed link', !postHtml.includes('json+oembed'));
 // render exactly one <header>, <main>, <footer> and <h1>; no <header> inside
 // <main>; every <nav> named by aria-label/aria-labelledby, never "...navigation"
 // (screen readers add the role); heading levels of theme markup never skip —
-// editor content (.entry-content, .rich-text, WooCommerce tab panels) is content,
-// not theme, and is left out; main#content takes focus from the skip link;
+// editor content (.entry-content, .rich-text, WooCommerce tab panels, category
+// descriptions .term-description — production texts since T-53a with h3 that
+// production prints below the product grid, WooCommerce here above it; place
+// and levels are a roadmap item) is content, not theme, and is left out;
+// main#content takes focus from the skip link;
 // anchor targets clear the sticky header. A new page template adds its page here.
 const structurePages = [
 	['/', 200], // front page (blocks)
@@ -349,7 +357,7 @@ const structurePages = [
 	['/gebrauchte-seecontainer-in-cuxhaven/', 200], // single post
 	['/nachrichten-trends-aus-der-containerwelt/', 200], // blog index (home.php)
 	['/container-shop/', 200], // shop
-	['/product-category/cointainer/kuehlcontainer/', 200], // product category
+	[CAT_COOLING, 200], // product category
 	['/product/20-fuss-container-gebraucht/', 200], // single product
 	['/?s=container', 200], // search results
 	['/kein-solcher-pfad/', 404], // 404.php
@@ -367,7 +375,7 @@ for (const [path, status] of structurePages) {
 		const jumps = [];
 		let prev = 0;
 		for (const h of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
-			if (h.closest('.entry-content, .rich-text, .woocommerce-Tabs-panel')) continue;
+			if (h.closest('.entry-content, .rich-text, .woocommerce-Tabs-panel, .term-description')) continue;
 			const level = Number(h.tagName[1]);
 			if (level > prev + 1) jumps.push(`h${prev}->h${level} "${h.textContent.trim().slice(0, 40)}"`);
 			prev = level;
@@ -1055,7 +1063,7 @@ await secPage.close();
 // shop, categories, products and the cart keep it for WooCommerce's own scripts, deferred on shop pages; the front
 // page, landings, posts and legal pages ship none.
 const T49_PRODUCT = '/product/20-fuss-container-gebraucht/';
-const wooPages = ['/container-shop/', '/product-category/cointainer/standardcontainer/', T49_PRODUCT, '/warenkorb/'];
+const wooPages = ['/container-shop/', CAT_STANDARD, T49_PRODUCT, '/warenkorb/'];
 const jqPage = await browser.newPage();
 const jq = {};
 const wcCss = {};
@@ -1069,7 +1077,7 @@ ok('Product & catalog: jQuery on the WooCommerce pages only (shop, category, pro
 // WooCommerce's three stylesheets only where theme.css does not cover its markup yet (shop, category, cart); the product
 // page and the product cards of the front page and landings run on theme.css alone (same computed card styles, T-49 probe).
 ok('Product & catalog: WooCommerce stylesheets on shop, category and cart only (product page, front page, landings: 0)',
-	Object.entries(wcCss).every(([p, n]) => (['/container-shop/', '/product-category/cointainer/standardcontainer/', '/warenkorb/'].includes(p) ? n === 3 : n === 0)), JSON.stringify(wcCss));
+	Object.entries(wcCss).every(([p, n]) => (['/container-shop/', CAT_STANDARD, '/warenkorb/'].includes(p) ? n === 3 : n === 0)), JSON.stringify(wcCss));
 // Product card title links without underline on every page with cards, with or without WooCommerce's stylesheets.
 const cardLinks = {};
 for (const path of ['/', '/container-kaufen/', '/container-shop/', T49_PRODUCT]) {
@@ -1211,7 +1219,7 @@ await fsProduct.close();
 // the shop, landings, posts and pages; the current page last and not linked; 14px --ccn-color-secondary; none on the front page.
 const bcPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
 const crumbs = {};
-for (const path of [T49_PRODUCT, '/product-category/cointainer/standardcontainer/', '/container-shop/', '/container-kaufen/', '/containerzubehoer/',
+for (const path of [T49_PRODUCT, CAT_STANDARD, '/container-shop/', '/container-kaufen/', '/containerzubehoer/',
 	'/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/', '/']) {
 	await bcPage.goto(BASE + path, { waitUntil: 'load' });
 	crumbs[path] = await bcPage.evaluate(() => {
@@ -1228,7 +1236,7 @@ ok('Breadcrumbs: one nav "Brotkrumen" on product, category, shop, landings, post
 // Catalogue order (production): discounted products first on the shop and the categories in the default order, so the
 // first product is on sale whenever one is; a sort order the visitor picks (?orderby=) is left alone.
 const saleOrder = {};
-for (const path of ['/container-shop/', '/product-category/cointainer/standardcontainer/', '/product-category/cointainer/spezialcontainer/', '/container-shop/?orderby=menu_order']) {
+for (const path of ['/container-shop/', CAT_STANDARD, CAT_SPECIAL, '/container-shop/?orderby=menu_order']) {
 	await bcPage.goto(BASE + path, { waitUntil: 'domcontentloaded' });
 	saleOrder[path] = await bcPage.evaluate(() => [...document.querySelectorAll('ul.products > li.product')].map((li) => (li.querySelector('.onsale') ? 'S' : '-')).join(''));
 }
@@ -1578,6 +1586,54 @@ const t54Fit = await t54Geo.evaluate(() => {
 ok('Breadcrumbs 360: the product trail (>= 4 crumbs) fits its line box, the current page keeps >= 80px, no page overflow',
 	!!t54Fit && t54Fit.items >= 4 && t54Fit.scroll <= t54Fit.client && t54Fit.last >= 80 && t54Fit.page <= 360, JSON.stringify(t54Fit));
 await t54Geo.close();
+
+// Migration (T-53a, DESIGN.md "How to measure"): pages, posts, products, forms and media of production (through the
+// donor dump). No page names the donor host any more (the knowledge graph logo in the JSON-LD was the last one); the
+// product and category sitemaps list the production catalogue under the production category base; the menu group of
+// the product categories answers 200 from every link; a product trail runs «Startseite › shop page › its category ›
+// product» without the rebuild's old parent category.
+const T53A_PAGES = ['/', '/container-kaufen/', '/container-mieten/', '/container-shop/', CAT_STANDARD, T49_PRODUCT,
+	'/gebrauchte-seecontainer-in-cuxhaven/', '/kontakt-beratung/', '/projekt-asphaltmischwerk/'];
+const t53aDonor = {};
+for (const p of T53A_PAGES) {
+	const res = await fetch(`${BASE}${p}?cb=${Date.now()}`);
+	const html = await res.text();
+	t53aDonor[p] = res.status === 200 ? (html.match(/coin-container\.local/g) || []).length : `status ${res.status}`;
+}
+ok('Migration: 0 links to the donor host coin-container.local in the HTML of nine pages, the JSON-LD logo included',
+	Object.values(t53aDonor).every((n) => n === 0), JSON.stringify(t53aDonor));
+const t53aLocs = async (path) => {
+	const res = await fetch(`${BASE}${path}?cb=${Date.now()}`);
+	return { status: res.status, locs: [...(await res.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]) };
+};
+const t53aProd = await t53aLocs('/product-sitemap.xml');
+const t53aCat = await t53aLocs('/product_cat-sitemap.xml');
+const t53aProducts = t53aProd.locs.filter((u) => u.startsWith(`${BASE}/product/`));
+ok('Migration: product-sitemap.xml lists the 42 production products, product_cat-sitemap.xml only categories under /container-kaufen/',
+	t53aProd.status === 200 && t53aProducts.length === 42 && t53aCat.status === 200 && t53aCat.locs.length >= 3
+	&& t53aCat.locs.every((u) => u.startsWith(`${BASE}${CAT_BASE}`)),
+	JSON.stringify({ products: t53aProducts.length, other: t53aProd.locs.length - t53aProducts.length, cats: t53aCat.locs.map((u) => u.replace(BASE, '')) }));
+const t53aNav = await browser.newPage();
+await t53aNav.goto(`${BASE}/?cb=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+const t53aGroup = await t53aNav.evaluate((cat) => {
+	const li = [...document.querySelectorAll('#site-nav .site-menu > li')]
+		.find((l) => [...l.querySelectorAll('.sub-menu a')].some((a) => new URL(a.href).pathname.startsWith(cat)));
+	return li ? [li.querySelector(':scope > a').href, ...[...li.querySelectorAll('.sub-menu a')].map((a) => a.href)] : [];
+}, CAT_BASE);
+await t53aNav.close();
+const t53aLinks = {};
+for (const u of t53aGroup) {
+	t53aLinks[u.replace(BASE, '')] = (await fetch(`${u}${u.includes('?') ? '&' : '?'}cb=${Date.now()}`, { redirect: 'manual' })).status;
+}
+ok('Migration: the menu group of the product categories (parent and sub-menu, >= 7 links) answers 200 from every link, the categories under /container-kaufen/',
+	t53aGroup.length >= 7 && Object.values(t53aLinks).every((s) => s === 200) && Object.keys(t53aLinks).filter((p) => p.startsWith(CAT_BASE)).length >= 3,
+	JSON.stringify(t53aLinks));
+const t53aPosted = (await (await fetch(`${BASE}${T49_PRODUCT}?cb=${Date.now()}`)).text()).match(/<span class="posted_in">([\s\S]*?)<\/span>/);
+const t53aCats = t53aPosted ? [...t53aPosted[1].matchAll(/<a [^>]*>([^<]+)<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim()) : [];
+const t53aTrail = t54[T49_PRODUCT].crumbs;
+ok('Migration: the product trail is «Startseite › shop page › one of its categories › product», no old parent category',
+	t53aTrail.length === 4 && t53aTrail[0] === 'Startseite' && t53aCats.includes(t53aTrail[2]) && !t53aTrail.some((c) => /COIN/.test(c)),
+	JSON.stringify({ trail: t53aTrail, categories: t53aCats }));
 
 await browser.close();
 console.log(results.join('\n'));
