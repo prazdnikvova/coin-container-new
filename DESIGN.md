@@ -529,14 +529,22 @@ schema of its own. Without Rank Math nothing is printed.
   replaced through `rank_math/frontend/breadcrumb/html` for that call); the
   current page last, not linked, `aria-current="page"`.
 - Trail as on production (`transmax-child/inc/breadcrumbs.php`): «Startseite»
-  (`rank_math/frontend/breadcrumb/strings`), the shop page after it on
+  (`rank_math/frontend/breadcrumb/strings`), the shop level after it on
   products and product categories (`…/is_using_shop_base`), parent
   categories (`…/settings`, `show_ancestors`), a product's primary category
   with its parents (Rank Math's primary-term meta, else the deepest
   category) and decoded HTML entities (`…/items`); the schema gets the same
-  crumbs. Names come from the shop page and the categories of the site
-  (since T-53a the production categories, top level, without a parent
-  category of their own).
+  crumbs. Names come from the categories of the site (since T-53a the
+  production categories, top level, without a parent category of their own).
+- The shop level names the landing at the product category base
+  («Container kaufen», `/container-kaufen/`, T-53c): on production that page
+  is the shop. Here the shop archive keeps its own page (`/container-shop/`,
+  «Shop», which its own trail still shows), so `…/items` swaps the shop crumb
+  for that landing on products and categories only, e.g. «Startseite ›
+  Container kaufen › Standardcontainer › 20 Fuß Container gebraucht, …».
+  The primary category is production's `rank_math_primary_product_cat`
+  (migrated by T-53c); where production points at a deleted category, the
+  fallback picks the same category production shows.
 - Where: products, the shop and product categories (above the h1,
   `woocommerce.php`), landings and contact pages (under the hero band, on
   white, in the 1200px container like the hero text,
@@ -546,6 +554,33 @@ schema of its own. Without Rank Math nothing is printed.
   accent-text hover, 44px tall targets, separator `›` as `::before` (not
   read out: `content: "›" / ""`). A trail that does not fit its line wraps;
   the current page keeps at least 6em and is cut off with an ellipsis.
+
+## URLs and redirects
+
+The address scheme is production's: product categories under
+`/container-kaufen/<category>/` (the WooCommerce category base), products
+under `/product/<slug>/`, pages and posts at their own paths.
+
+- `/container-kaufen/` is a landing page, and its child pages share the
+  category base: `/container-kaufen/buerocontainer-kaufen/`,
+  `…/sanitaercontainer-kaufen/`, `…/containerzubehoer/`. WooCommerce's rule
+  for the base would read them as categories, so `inc/rewrites.php` adds one
+  rule per published descendant of the page at the category base (found by
+  path, no IDs), on `init` before the WooCommerce rules, as production's
+  `seo-migration-kaufen-hierarchie.php` does. WordPress stores the rules:
+  after adding, renaming or moving such a child page, save the permalinks
+  once (Settings › Permalinks, or `wp rewrite flush`).
+- The shop archive is `/container-shop/` («Shop»); production's shop is
+  `/container-kaufen/` (decision T-53c 1, variant B+). Trails of products and
+  categories name the landing (see Breadcrumbs).
+- Old addresses are answered by one 301 map of the project library
+  (`SEO/301-map-2026-11.csv`: production's `.htaccess` rules and PHP
+  redirects, WordPress's old slugs, the release decisions of 29.09.2026, the
+  shop pagination `/container-kaufen/page/N/` → `/container-shop/page/N/`).
+  On production it is a block of `RewriteRule`s in the root `.htaccess`
+  (`SEO/301-map-2026-11.htaccess`), not theme code. Locally the same rows
+  live in Rank Math's Redirections module (`tools/migration/redirects.php`
+  of the library), so the smoke test sees the same answers.
 
 ## Trust
 
@@ -1094,8 +1129,9 @@ for reviewing content:
   product sitemap lists the 42 production products and the category sitemap
   only categories under `/container-kaufen/` (the production category base);
   every link of the product categories menu group answers 200; the product
-  trail is «Startseite › shop page › one of its categories › product» without
-  the rebuild's old parent category. Category paths of the smoke test are
+  trail is «Startseite › Container kaufen › one of its categories › product»
+  (the shop level as on production since T-53c) without the rebuild's old
+  parent category. Category paths of the smoke test are
   constants at the top of the file (`CAT_BASE`, `CAT_STANDARD`, …). The
   migration scripts live in the project library (`tools/migration/`, outside
   this public repo): `validate.php` there checks product and form IDs,
@@ -1142,3 +1178,19 @@ for reviewing content:
   either. Rank Math builds them from the excerpt in `wp_head`, outside the
   main loop, and `ccn_excerpt_read_more_link()` (functions.php) adds its link
   only inside the loop; the blog index keeps its read-more links.
+- Smoke test, "Kaufen hierarchy, breadcrumbs, SEO meta and the 301 map
+  (T-53c)": the three child pages of `/container-kaufen/` answer 200 as pages
+  (`page-id-*`) and two categories under the same base stay categories; the
+  trail of a category and of a product names «Container kaufen» linking
+  `/container-kaufen/`, the product shows production's primary category
+  (Standardcontainer of its two) and the shop archive keeps «Startseite ›
+  Shop»; production's Rank Math meta gives all six pages of the SEO check a
+  description and the front page its own title (not «Home - …»); six old
+  addresses answer 301 with the targets of the map, a theme demo path 410 and
+  an unknown path 404. Containerzubehör's address is the constant `ZUBEHOER`
+  at the top of the file; it also replaces the Sanitär landing of T-30c in
+  the text landing checks (that address answers production's 301 now, its
+  four type cards are checked on `/container-services/`). The map, its generator and the HTTP check of all
+  rows live in the project library (`SEO/301-map-2026-11.csv`,
+  `tools/migration/redirect_map.py`, `check_redirects.sh`); the Rank Math
+  meta comes from `tools/migration/import.php --seo-meta`.
