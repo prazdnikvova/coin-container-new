@@ -1,0 +1,11 @@
+/* Shop: filters (DESIGN.md), only where they print */
+.ccn-filter{clear:both;margin:var(--ccn-space-4) 0 var(--ccn-space-5);border:1px solid var(--ccn-color-border);border-radius:var(--ccn-radius-md)}
+.ccn-filter summary{padding:var(--ccn-space-3) var(--ccn-space-4);font-weight:700;cursor:pointer}
+.ccn-filter-body{display:grid;gap:var(--ccn-space-4);padding:0 var(--ccn-space-4) var(--ccn-space-4)}
+.ccn-filter fieldset{display:flex;flex-wrap:wrap;gap:var(--ccn-space-2);min-width:0}
+.ccn-filter legend{margin-bottom:var(--ccn-space-2);font-size:var(--ccn-fs-small);font-weight:700;color:var(--ccn-color-secondary)}
+.ccn-filter fieldset a{display:inline-flex;align-items:center;min-height:var(--ccn-tap);padding:0 var(--ccn-space-4);border:1px solid var(--ccn-color-secondary);border-radius:calc(var(--ccn-tap)/2);font-size:var(--ccn-fs-small);text-decoration:none}
+.ccn-filter fieldset a:hover{background:var(--ccn-color-light)}
+.ccn-filter fieldset a[aria-current]{border-color:var(--ccn-color-text);background:var(--ccn-color-primary);color:var(--ccn-color-text);font-weight:700}
+.ccn-filter fieldset a[aria-current]::before{content:"\2713"/"";margin-right:var(--ccn-space-1)}
+.ccn-filter-reset{justify-self:start;display:inline-flex;align-items:center;min-height:var(--ccn-tap);text-decoration:underline}

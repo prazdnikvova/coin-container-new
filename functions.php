@@ -354,4 +354,6 @@ if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/rewrites.php';
 	// B2B shop (T-57a): production's B2B mode, switched in Site Settings → Shop.
 	require_once get_template_directory() . '/inc/b2b.php';
+	// Catalog filters (T-57b): production's attribute filters as server-side links, the category text under the grid.
+	require_once get_template_directory() . '/inc/catalog-filter.php';
 }

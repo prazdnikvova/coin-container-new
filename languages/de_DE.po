@@ -311,6 +311,7 @@ msgid "fabrikneu"
 msgstr "fabrikneu"
 
 #: blocks/lists/price-table.php:60
+#: inc/catalog-filter.php:44
 msgid "Größe"
 msgstr "Größe"
 
@@ -909,3 +910,25 @@ msgstr "B2B bestätigt:"
 #: inc/b2b.php:221
 msgid "Kunde hat gewerbliche Bestellung nach § 14 BGB bestätigt."
 msgstr "Kunde hat gewerbliche Bestellung nach § 14 BGB bestätigt."
+
+#: inc/catalog-filter.php:42
+msgid "Zustand"
+msgstr "Zustand"
+
+#: inc/catalog-filter.php:43
+msgid "Containertyp"
+msgstr "Containertyp"
+
+#: inc/catalog-filter.php:259
+msgid "Filter"
+msgstr "Filter"
+
+#. translators: %d: number of chosen filter values
+#: inc/catalog-filter.php:262
+#, php-format
+msgid "Filter (%d aktiv)"
+msgstr "Filter (%d aktiv)"
+
+#: inc/catalog-filter.php:280
+msgid "Zurücksetzen"
+msgstr "Zurücksetzen"

@@ -130,6 +130,30 @@ function ccn_enqueue_content_cards() {
 }
 
 /**
+ * Attribute filters of the product categories (assets/css/catalog-filter.css,
+ * T-57b): a file of their own like content-cards.css, so theme.css keeps its
+ * first TCP window; after theme.css, in <head>, only on a product category
+ * that prints the filter (inc/catalog-filter.php). The front page and the
+ * landings request nothing new.
+ */
+add_action( 'init', 'ccn_register_catalog_filter_style' );
+function ccn_register_catalog_filter_style() {
+	wp_register_style(
+		'ccn-catalog-filter',
+		get_template_directory_uri() . '/assets/css/catalog-filter.css',
+		array( 'coin-container' ),
+		ccn_asset_version( '/assets/css/catalog-filter.css' )
+	);
+}
+
+add_action( 'wp_enqueue_scripts', 'ccn_enqueue_catalog_filter' );
+function ccn_enqueue_catalog_filter() {
+	if ( function_exists( 'ccn_catalog_filter_view' ) && is_product_taxonomy() && ccn_catalog_filter_view() ) {
+		wp_enqueue_style( 'ccn-catalog-filter' );
+	}
+}
+
+/**
  * Late dequeues. Cart fragments are disabled everywhere (the header cart count
  * renders server-side); outside the WooCommerce pages the whole jQuery/Woo
  * stack goes away.
