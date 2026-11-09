@@ -19,7 +19,7 @@ msgstr ""
 
 #. Theme Name of the theme
 #: style.css
-#: inc/editor.php:37
+#: inc/editor.php:38
 msgid "Coin Container"
 msgstr "Coin Container"
 
@@ -51,163 +51,163 @@ msgstr "Seite nicht gefunden"
 msgid "Nothing found for the requested page. Try a search instead?"
 msgstr "Für die angeforderte Seite wurde nichts gefunden. Bitte versuchen Sie stattdessen eine Suche."
 
-#: blocks/acf-blocks.php:52
+#: blocks/acf-blocks.php:56
 msgid "Home hero"
 msgstr ""
 
-#: blocks/acf-blocks.php:53
+#: blocks/acf-blocks.php:57
 msgid "First-screen hero: background photo, big left-aligned heading, call-to-action buttons, phone line and trust row."
 msgstr ""
 
-#: blocks/acf-blocks.php:61
+#: blocks/acf-blocks.php:65
 msgid "Contact cards"
 msgstr ""
 
-#: blocks/acf-blocks.php:62
+#: blocks/acf-blocks.php:66
 msgid "Email / phone / address cards fed by Site Settings (no own fields)."
 msgstr ""
 
-#: blocks/acf-blocks.php:70
+#: blocks/acf-blocks.php:74
 msgid "Intro"
 msgstr ""
 
-#: blocks/acf-blocks.php:71
+#: blocks/acf-blocks.php:75
 msgid "Heading with a yellow accent line, bold subheading, text and a CTA button."
 msgstr ""
 
-#: blocks/acf-blocks.php:79
+#: blocks/acf-blocks.php:90
 msgid "Text section"
 msgstr ""
 
-#: blocks/acf-blocks.php:80
+#: blocks/acf-blocks.php:91
 msgid "Optional photo, heading with an inline yellow accent, rich text — landing content section."
 msgstr ""
 
-#: blocks/acf-blocks.php:88
+#: blocks/acf-blocks.php:106
 msgid "Featured products"
 msgstr ""
 
-#: blocks/acf-blocks.php:89
+#: blocks/acf-blocks.php:107
 msgid "WooCommerce product grid: featured products or a chosen category."
 msgstr ""
 
-#: blocks/acf-blocks.php:97
+#: blocks/acf-blocks.php:115
 msgid "Text + image"
 msgstr ""
 
-#: blocks/acf-blocks.php:98
+#: blocks/acf-blocks.php:116
 msgid "Heading, text, bold highlight and CTA on the left; photo collage on the right."
 msgstr ""
 
-#: blocks/acf-blocks.php:106
+#: blocks/acf-blocks.php:131
 msgid "Services strip"
 msgstr ""
 
-#: blocks/acf-blocks.php:107
+#: blocks/acf-blocks.php:132
 msgid "Accent heading and a full-width photo strip with numbered service columns."
 msgstr ""
 
-#: blocks/acf-blocks.php:115
+#: blocks/acf-blocks.php:159
 msgid "Stats"
 msgstr ""
 
-#: blocks/acf-blocks.php:116
+#: blocks/acf-blocks.php:160
 msgid "Centered accent heading with animated counters."
 msgstr ""
 
-#: blocks/acf-blocks.php:124
+#: blocks/acf-blocks.php:176
 msgid "CTA banner"
 msgstr ""
 
-#: blocks/acf-blocks.php:125
+#: blocks/acf-blocks.php:177
 msgid "Full-width photo banner with logo, heading and a yellow button."
 msgstr ""
 
-#: blocks/acf-blocks.php:133
+#: blocks/acf-blocks.php:192
 msgid "Info cards"
 msgstr ""
 
-#: blocks/acf-blocks.php:134
+#: blocks/acf-blocks.php:193
 msgid "White cards in a grid: photo, title, text (accessory trio of the original)."
 msgstr ""
 
-#: blocks/acf-blocks.php:142
+#: blocks/acf-blocks.php:215
 msgid "Numbered list"
 msgstr ""
 
-#: blocks/acf-blocks.php:143
+#: blocks/acf-blocks.php:216
 msgid "Accent heading with numbered items (01, 02, …)."
 msgstr ""
 
-#: blocks/acf-blocks.php:151
+#: blocks/acf-blocks.php:241
 msgid "News"
 msgstr ""
 
-#: blocks/acf-blocks.php:152
+#: blocks/acf-blocks.php:242
 msgid "Latest posts as cards with category badges and dates."
 msgstr ""
 
-#: blocks/acf-blocks.php:160
+#: blocks/acf-blocks.php:250
 msgid "Trust bar"
 msgstr ""
 
-#: blocks/acf-blocks.php:161
+#: blocks/acf-blocks.php:251
 msgid "Trustpilot and Google ratings and the badge from Site Settings (Vertrauen), the same chips as in the home hero, plus up to three key facts with a source. No own fields."
 msgstr ""
 
-#: blocks/acf-blocks.php:169
+#: blocks/acf-blocks.php:259
 msgid "Reviews widget"
 msgstr ""
 
-#: blocks/acf-blocks.php:170
+#: blocks/acf-blocks.php:260
 msgid "Live Google reviews (Trustindex, as on production) and the Trustpilot TrustBox, loaded only when the section comes near."
 msgstr ""
 
-#: blocks/acf-blocks.php:178
+#: blocks/acf-blocks.php:268
 msgid "FAQ"
 msgstr ""
 
-#: blocks/acf-blocks.php:179
+#: blocks/acf-blocks.php:269
 msgid "Frequently asked questions as expandable items (details/summary); JSON-LD per Site Settings → Schema."
 msgstr ""
 
-#: blocks/acf-blocks.php:187
+#: blocks/acf-blocks.php:291
 msgid "Logos"
 msgstr ""
 
-#: blocks/acf-blocks.php:188
+#: blocks/acf-blocks.php:292
 msgid "Partner and certificate logos in a row (lazy, grey until hover)."
 msgstr ""
 
-#: blocks/acf-blocks.php:196
+#: blocks/acf-blocks.php:300
 msgid "Form card"
 msgstr ""
 
-#: blocks/acf-blocks.php:197
+#: blocks/acf-blocks.php:301
 msgid "Request form: heading, intro and a Contact Form 7 form on a light card, optionally with e-mail, phone and address from Site Settings beside it."
 msgstr ""
 
-#: blocks/acf-blocks.php:205
+#: blocks/acf-blocks.php:309
 msgid "Price table"
 msgstr ""
 
-#: blocks/acf-blocks.php:206
+#: blocks/acf-blocks.php:310
 msgid "Price ranges per container size from Site Settings → Preise (used, One Way, new) with «Stand» and the note; optional heading, chosen sizes only."
 msgstr ""
 
-#: blocks/acf-blocks.php:216
+#: blocks/acf-blocks.php:327
 msgid "Related links"
 msgstr ""
 
-#: blocks/acf-blocks.php:217
+#: blocks/acf-blocks.php:328
 msgid "Up to six hand-picked pages, posts or products as link cards under a heading (default «Verwandte Leistungen»), optionally with a short excerpt."
 msgstr ""
 
-#: blocks/acf-blocks.php:226
+#: blocks/acf-blocks.php:337
 msgid "Gallery rail"
 msgstr ""
 
-#: blocks/acf-blocks.php:227
+#: blocks/acf-blocks.php:338
 msgid "Photos in one horizontal row that scrolls sideways (buttons, swipe, arrow keys; no autoplay), with an optional heading and text above — the image carousels and galleries of the old site."
 msgstr ""
 
@@ -761,72 +761,68 @@ msgctxt "Font size name"
 msgid "Heading 1"
 msgstr ""
 
-#: blocks/acf-blocks.php:25
+#: blocks/acf-blocks.php:29
 msgid "Coin: Banners"
 msgstr ""
 
-#: blocks/acf-blocks.php:29
+#: blocks/acf-blocks.php:33
 msgid "Coin: Lists"
 msgstr ""
 
-#: blocks/acf-blocks.php:33
+#: blocks/acf-blocks.php:37
 msgid "Coin: Products"
 msgstr ""
 
-#: blocks/acf-blocks.php:37
+#: blocks/acf-blocks.php:41
 msgid "Coin: Text"
 msgstr ""
 
-#: inc/editor.php:38
+#: inc/editor.php:39
 msgid "Page layouts of the theme: replace every [placeholder], then pick the images and the form in the block sidebar."
 msgstr ""
 
-#: inc/editor.php:54
+#: inc/editor.php:61
 msgid "[Überschrift]"
 msgstr ""
 
-#: inc/editor.php:55
+#: inc/editor.php:62
 msgid "[Akzent]"
 msgstr ""
 
-#: inc/editor.php:56
+#: inc/editor.php:63
 msgid "[Kurzer Einleitungstext]"
 msgstr ""
 
-#: inc/editor.php:57
+#: inc/editor.php:64
 msgid "[Text]"
 msgstr ""
 
-#: inc/editor.php:58
+#: inc/editor.php:65
 msgid "[Titel]"
 msgstr ""
 
-#: inc/editor.php:59
+#: inc/editor.php:66
 msgid "[Kurzer Text]"
 msgstr ""
 
-#: inc/editor.php:60
+#: inc/editor.php:67
 msgid "[Frage]"
 msgstr ""
 
-#: inc/editor.php:61
+#: inc/editor.php:68
 msgid "[Antwort]"
 msgstr ""
 
-#: inc/editor.php:62
+#: inc/editor.php:69
 msgid "[Hervorhebung]"
 msgstr ""
 
-#: inc/editor.php:63
+#: inc/editor.php:70
 msgid "[Zwischenüberschrift]"
 msgstr ""
 
-#: inc/editor.php:64
+#: inc/editor.php:71
 msgid "[Listenpunkt]"
-msgstr ""
-
-#: inc/editor.php:65
-msgid "[Bezeichnung]"
 msgstr ""
 
 #: patterns/article.php

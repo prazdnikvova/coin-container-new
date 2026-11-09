@@ -6,6 +6,10 @@
  * Field groups come from acf-json/ (one group per block, location: block).
  * Per-block assets: list registered handles in 'assets' — they are enqueued
  * only on pages where the block is actually present.
+ * Inserter preview: 'example' with placeholder data (ccn_block_example(),
+ * inc/editor.php) only for blocks that render from their own fields or Site
+ * Settings; none for blocks that query products or posts, start third-party
+ * scripts or need a chosen form or image (README "Editor").
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -73,6 +77,13 @@ function ccn_register_blocks() {
 			'icon'        => 'text-page',
 			'keywords'    => array( 'intro', 'text', 'heading' ),
 			'template'    => 'blocks/text/intro.php',
+			'example'     => ccn_block_example(
+				array(
+					'heading'        => array( 'field_ccn_in_heading', ccn_placeholder( 'heading' ) ),
+					'heading_accent' => array( 'field_ccn_in_heading_accent', ccn_placeholder( 'accent' ) ),
+					'text'           => array( 'field_ccn_in_text', ccn_placeholder_html( 'intro' ) ),
+				)
+			),
 		),
 		array(
 			'name'        => 'text-section',
@@ -82,6 +93,13 @@ function ccn_register_blocks() {
 			'icon'        => 'editor-alignleft',
 			'keywords'    => array( 'text', 'section', 'landing' ),
 			'template'    => 'blocks/text/text-section.php',
+			'example'     => ccn_block_example(
+				array(
+					'heading'        => array( 'field_ccn_ts_heading', ccn_placeholder( 'heading' ) ),
+					'heading_accent' => array( 'field_ccn_ts_heading_accent', ccn_placeholder( 'accent' ) ),
+					'text'           => array( 'field_ccn_ts_text', ccn_placeholder_html( 'text' ) ),
+				)
+			),
 		),
 		array(
 			'name'        => 'featured-products',
@@ -100,6 +118,13 @@ function ccn_register_blocks() {
 			'icon'        => 'align-pull-right',
 			'keywords'    => array( 'text', 'image', 'collage' ),
 			'template'    => 'blocks/text/text-image.php',
+			'example'     => ccn_block_example(
+				array(
+					'heading'   => array( 'field_ccn_ti_heading', ccn_placeholder( 'heading' ) ),
+					'text'      => array( 'field_ccn_ti_text', ccn_placeholder_html( 'text' ) ),
+					'highlight' => array( 'field_ccn_ti_highlight', ccn_placeholder( 'highlight' ) ),
+				)
+			),
 		),
 		array(
 			'name'        => 'services',
@@ -109,6 +134,25 @@ function ccn_register_blocks() {
 			'icon'        => 'columns',
 			'keywords'    => array( 'services', 'strip', 'numbers' ),
 			'template'    => 'blocks/banners/services.php',
+			'example'     => ccn_block_example(
+				array(
+					'heading'        => array( 'field_ccn_sv_heading', ccn_placeholder( 'heading' ) ),
+					'heading_accent' => array( 'field_ccn_sv_heading_accent', ccn_placeholder( 'accent' ) ),
+				) + ccn_block_rows(
+					'items',
+					'field_ccn_sv_items',
+					array_map(
+						function ( $icon ) {
+							return array(
+								'icon'  => array( 'field_ccn_sv_item_icon', $icon ),
+								'title' => array( 'field_ccn_sv_item_title', ccn_placeholder( 'title' ) ),
+								'text'  => array( 'field_ccn_sv_item_text', ccn_placeholder( 'teaser' ) ),
+							);
+						},
+						array( 'buy', 'rent', 'transport' )
+					)
+				)
+			),
 		),
 		array(
 			'name'        => 'stats',
@@ -118,6 +162,14 @@ function ccn_register_blocks() {
 			'icon'        => 'chart-bar',
 			'keywords'    => array( 'stats', 'numbers', 'counters' ),
 			'template'    => 'blocks/lists/stats.php',
+			// Heading and subtitle only: a counter needs a real figure (a placeholder prints as 0).
+			'example'     => ccn_block_example(
+				array(
+					'heading'        => array( 'field_ccn_st_heading', ccn_placeholder( 'heading' ) ),
+					'heading_accent' => array( 'field_ccn_st_heading_accent', ccn_placeholder( 'accent' ) ),
+					'subtitle'       => array( 'field_ccn_st_subtitle', ccn_placeholder( 'intro' ) ),
+				)
+			),
 		),
 		array(
 			'name'        => 'cta-banner',
@@ -127,6 +179,13 @@ function ccn_register_blocks() {
 			'icon'        => 'megaphone',
 			'keywords'    => array( 'cta', 'banner' ),
 			'template'    => 'blocks/banners/cta-banner.php',
+			// Without own button fields the band takes the button and the phone from Site Settings.
+			'example'     => ccn_block_example(
+				array(
+					'heading' => array( 'field_ccn_cb_heading', ccn_placeholder( 'heading' ) ),
+					'text'    => array( 'field_ccn_cb_text', ccn_placeholder( 'teaser' ) ),
+				)
+			),
 		),
 		array(
 			'name'        => 'info-cards',
@@ -136,6 +195,20 @@ function ccn_register_blocks() {
 			'icon'        => 'grid-view',
 			'keywords'    => array( 'cards', 'grid', 'info' ),
 			'template'    => 'blocks/lists/info-cards.php',
+			'example'     => ccn_block_example(
+				array( 'heading' => array( 'field_ccn_ic_heading', ccn_placeholder( 'heading' ) ) ) + ccn_block_rows(
+					'cards',
+					'field_ccn_ic_cards',
+					array_fill(
+						0,
+						3,
+						array(
+							'title' => array( 'field_ccn_ic_title', ccn_placeholder( 'title' ) ),
+							'text'  => array( 'field_ccn_ic_text', ccn_placeholder_html( 'teaser' ) ),
+						)
+					)
+				)
+			),
 		),
 		array(
 			'name'        => 'numbered-list',
@@ -145,6 +218,23 @@ function ccn_register_blocks() {
 			'icon'        => 'editor-ol',
 			'keywords'    => array( 'numbered', 'list', 'steps' ),
 			'template'    => 'blocks/lists/numbered-list.php',
+			'example'     => ccn_block_example(
+				array(
+					'heading'        => array( 'field_ccn_nl_heading', ccn_placeholder( 'heading' ) ),
+					'heading_accent' => array( 'field_ccn_nl_heading_accent', ccn_placeholder( 'accent' ) ),
+				) + ccn_block_rows(
+					'items',
+					'field_ccn_nl_items',
+					array_fill(
+						0,
+						3,
+						array(
+							'title' => array( 'field_ccn_nl_item_title', ccn_placeholder( 'title' ) ),
+							'text'  => array( 'field_ccn_nl_item_text', ccn_placeholder( 'teaser' ) ),
+						)
+					)
+				)
+			),
 		),
 		array(
 			'name'        => 'news',
@@ -181,6 +271,20 @@ function ccn_register_blocks() {
 			'icon'        => 'editor-help',
 			'keywords'    => array( 'faq', 'questions', 'fragen', 'accordion' ),
 			'template'    => 'blocks/text/faq.php',
+			'example'     => ccn_block_example(
+				array( 'heading' => array( 'field_ccn_fq_heading', ccn_placeholder( 'heading' ) ) ) + ccn_block_rows(
+					'items',
+					'field_ccn_fq_items',
+					array_fill(
+						0,
+						2,
+						array(
+							'question' => array( 'field_ccn_fq_question', ccn_placeholder( 'question' ) ),
+							'answer'   => array( 'field_ccn_fq_answer', ccn_placeholder_html( 'answer' ) ),
+						)
+					)
+				)
+			),
 		),
 		array(
 			'name'        => 'logos',
@@ -210,6 +314,13 @@ function ccn_register_blocks() {
 			'template'    => 'blocks/lists/price-table.php',
 			// Styles outside theme.css (first TCP window): inc/assets-cleanup.php.
 			'assets'      => array( 'ccn-content-cards' ),
+			// The rows come from Site Settings → Preise, as on every page.
+			'example'     => ccn_block_example(
+				array(
+					'heading'       => array( 'field_ccn_pt_heading', ccn_placeholder( 'heading' ) ),
+					'show_footnote' => array( 'field_ccn_pt_show_footnote', 1 ),
+				)
+			),
 		),
 		array(
 			'name'        => 'related-links',
@@ -258,6 +369,10 @@ function ccn_register_blocks() {
 			),
 			'render_template'   => $block['template'],
 		);
+
+		if ( ! empty( $block['example'] ) ) {
+			$args['example'] = $block['example'];
+		}
 
 		if ( ! empty( $block['assets'] ) ) {
 			$handles                = $block['assets'];
