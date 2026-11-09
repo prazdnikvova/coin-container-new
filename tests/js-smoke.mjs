@@ -446,6 +446,8 @@ const [h2Narrow, h2Wide] = [await sectionH2(narrow), await sectionH2(wide)];
 ok('Type scale: section h2 one formula (26px at 360, 40px at 1440)', h2Narrow.join() === '26px' && h2Wide.join() === '40px', `${h2Narrow} / ${h2Wide}`);
 const [bodyNarrow, bodyWide] = [await narrow.evaluate(() => getComputedStyle(document.body).fontSize), await wide.evaluate(() => getComputedStyle(document.body).fontSize)];
 ok('Type scale: body 16px at 360, 18px at 1440', bodyNarrow === '16px' && bodyWide === '18px', `${bodyNarrow} / ${bodyWide}`);
+// Production's menu (T-53c) has no «Home» item, so the current item is checked on a page of the menu.
+await wide.goto(BASE + '/kontakt-beratung/', { waitUntil: 'load' });
 const currentItem = await wide.evaluate(() => {
 	const a = document.querySelector('.site-menu > li.current-menu-item > a');
 	if (!a) return null;
@@ -1633,8 +1635,9 @@ const t53aLinks = {};
 for (const u of t53aGroup) {
 	t53aLinks[u.replace(BASE, '')] = (await fetch(`${u}${u.includes('?') ? '&' : '?'}cb=${Date.now()}`, { redirect: 'manual' })).status;
 }
-ok('Migration: the menu group of the product categories (parent and sub-menu, >= 7 links) answers 200 from every link, the categories under /container-kaufen/',
-	t53aGroup.length >= 7 && Object.values(t53aLinks).every((s) => s === 200) && Object.keys(t53aLinks).filter((p) => p.startsWith(CAT_BASE)).length >= 3,
+// Since T-53c the header shows production's menu: its group «Kaufen» is the landing plus 8 items, all under the base.
+ok('Migration: the menu group «Kaufen» (the landing and its 8 sub-items: 5 categories, 3 child pages) answers 200 from every link, all under /container-kaufen/',
+	t53aGroup.length === 9 && Object.values(t53aLinks).every((s) => s === 200) && Object.keys(t53aLinks).every((p) => p.startsWith(CAT_BASE)),
 	JSON.stringify(t53aLinks));
 const t53aPosted = (await (await fetch(`${BASE}${T49_PRODUCT}?cb=${Date.now()}`)).text()).match(/<span class="posted_in">([\s\S]*?)<\/span>/);
 const t53aCats = t53aPosted ? [...t53aPosted[1].matchAll(/<a [^>]*>([^<]+)<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim()) : [];
@@ -2004,6 +2007,94 @@ const t53cMissing = (await t56Get('/t53c-no-such-address/', { redirect: 'manual'
 ok('301 map (T-53c): six old addresses (top-level kaufen page, gebraucht page, inspiration slug, old category base, shop pagination, old product slug) answer 301 with their targets, a theme demo path 410, an unknown path 404',
 	T53C_REDIRECTS.every(([from, to]) => t53cRedirects[from] === `301 ${to}`) && t53cGone === 410 && t53cMissing === 404,
 	JSON.stringify({ ...t53cRedirects, gone: t53cGone, missing: t53cMissing }));
+
+// Production's main menu in the header (T-53c, DESIGN.md "Header"): 41 items in three levels — the 7 top items named
+// as on production, Services › Mieten with 5 items of the third level, every link 200 without a redirect. From 64rem the
+// third level opens beside its item, inside the window, by hover and by keyboard focus (CSS only); in the burger every
+// level shows, the indent growing per level.
+const T53C_TOP = ['Kaufen', 'Services', 'Inspiration', 'FAQ', 'Über uns', 'Blog', 'Kontakt'];
+const t53cMenuPage = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await t53cMenuPage.goto(`${BASE}/?cb=${Date.now()}`, { waitUntil: 'load' });
+const t53cMenu = await t53cMenuPage.evaluate(() => {
+	const name = (li) => li.querySelector(':scope > a').textContent.trim();
+	const top = [...document.querySelectorAll('#site-nav .site-menu > li')];
+	const services = top.find((li) => name(li) === 'Services');
+	const mieten = services ? [...services.querySelectorAll(':scope > .sub-menu > li')].find((li) => name(li) === 'Mieten') : null;
+	return {
+		top: top.map(name),
+		all: [...document.querySelectorAll('#site-nav .site-menu a')].map((a) => a.href),
+		third: mieten ? [...mieten.querySelectorAll(':scope > .sub-menu > li')].map(name) : [],
+	};
+});
+await t53cMenuPage.close();
+const t53cMenuStatus = {};
+for (const u of [...new Set(t53cMenu.all)]) {
+	t53cMenuStatus[u.replace(BASE, '')] = (await fetch(`${u}${u.includes('?') ? '&' : '?'}cb=${Date.now()}`, { redirect: 'manual' })).status;
+}
+ok('Main menu (T-53c): production\'s 41 items — the 7 top items named as on production, Services › Mieten with 5 items of the third level, every link 200',
+	JSON.stringify(t53cMenu.top) === JSON.stringify(T53C_TOP) && t53cMenu.all.length === 41 && t53cMenu.third.length === 5
+	&& Object.values(t53cMenuStatus).every((s) => s === 200),
+	JSON.stringify({ top: t53cMenu.top, items: t53cMenu.all.length, third: t53cMenu.third, not200: Object.entries(t53cMenuStatus).filter(([, s]) => s !== 200) }));
+// Opens «Services › Mieten» by hover (pointer over both) or by keyboard (Tab from «Services» lands on «Mieten») and
+// returns the boxes of the second-level list, the «Mieten» item and its third-level list.
+const t53cThird = async (width, mode) => {
+	const p = await browser.newPage({ viewport: { width, height: 900 } });
+	await p.goto(`${BASE}/?cb=${Date.now()}`, { waitUntil: 'load' });
+	const found = await p.evaluate(() => {
+		const name = (li) => li.querySelector(':scope > a').textContent.trim();
+		const services = [...document.querySelectorAll('#site-nav .site-menu > li')].find((li) => name(li) === 'Services');
+		const mieten = services && [...services.querySelectorAll(':scope > .sub-menu > li')].find((li) => name(li) === 'Mieten');
+		if (!mieten) return false;
+		services.querySelector(':scope > a').id = 't53c-services';
+		mieten.querySelector(':scope > a').id = 't53c-mieten';
+		return true;
+	});
+	if (found && 'hover' === mode) {
+		await p.hover('#t53c-services');
+		await p.hover('#t53c-mieten');
+	} else if (found) {
+		await p.focus('#t53c-services');
+		await p.keyboard.press('Tab');
+	}
+	await p.waitForTimeout(200);
+	const box = found ? await p.evaluate(() => {
+		const a = document.getElementById('t53c-mieten');
+		const li = a.parentElement;
+		const third = li.querySelector(':scope > .sub-menu');
+		const r = (el) => { const b = el.getBoundingClientRect(); return { l: Math.round(b.left), r: Math.round(b.right), t: Math.round(b.top) }; };
+		return { focus: document.activeElement === a, visible: getComputedStyle(third).display !== 'none', second: r(li.parentElement), item: r(li), third: r(third), width: innerWidth };
+	}) : { found };
+	await p.close();
+	return box;
+};
+const t53cOpen = {};
+for (const [key, width, mode] of [['hover1440', 1440, 'hover'], ['hover1024', 1024, 'hover'], ['focus1440', 1440, 'focus']]) {
+	t53cOpen[key] = await t53cThird(width, mode);
+}
+const t53cBeside = (g) => !!g.visible && g.third.l >= g.second.r - 2 && g.third.r <= g.width && Math.abs(g.third.t - g.item.t) <= 2;
+ok('Main menu (T-53c): from 64rem the third level opens beside «Mieten», top-aligned and inside the window — hover at 1440 and 1024, keyboard focus at 1440',
+	t53cBeside(t53cOpen.hover1440) && t53cBeside(t53cOpen.hover1024) && t53cBeside(t53cOpen.focus1440) && t53cOpen.focus1440.focus, JSON.stringify(t53cOpen));
+const t53cMob = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await t53cMob.goto(`${BASE}/?cb=${Date.now()}`, { waitUntil: 'load' });
+await t53cMob.click('.nav-toggle');
+await t53cMob.waitForTimeout(400);
+const t53cLevels = await t53cMob.evaluate(() => {
+	const depth = (a) => { let d = 0; let ul = a.closest('ul'); while (ul && ul.classList.contains('sub-menu')) { d++; ul = ul.parentElement.closest('ul'); } return d; };
+	const out = {};
+	for (const a of document.querySelectorAll('#site-nav .site-menu a')) {
+		const d = depth(a);
+		out[d] = out[d] || { n: 0, shown: 0, pads: [] };
+		out[d].n++;
+		if (a.getBoundingClientRect().height > 0) out[d].shown++;
+		const pad = getComputedStyle(a).paddingLeft;
+		if (!out[d].pads.includes(pad)) out[d].pads.push(pad);
+	}
+	return out;
+});
+await t53cMob.close();
+ok('Main menu (T-53c) 360: the burger shows all three levels (7 / 24 / 10 items, every one rendered), indent growing per level (16 / 32 / 48px)',
+	[0, 1, 2].every((d) => !!t53cLevels[d] && t53cLevels[d].shown === t53cLevels[d].n) && t53cLevels[0].n === 7 && t53cLevels[1].n === 24 && t53cLevels[2].n === 10
+	&& JSON.stringify([0, 1, 2].map((d) => t53cLevels[d].pads)) === JSON.stringify([['16px'], ['32px'], ['48px']]), JSON.stringify(t53cLevels));
 
 await browser.close();
 console.log(results.join('\n'));
