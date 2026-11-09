@@ -1,0 +1,777 @@
+# German translation of the Coin Container theme (formal address, «Sie»).
+# Copyright (C) 2026 Volodymyr Prazdnikov
+# This file is distributed under the GNU General Public License v3 or Later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Coin Container 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/theme/coin-container\n"
+"Last-Translator: Coin Container Team\n"
+"Language-Team: German (formal)\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-11-09T16:29:37+00:00\n"
+"PO-Revision-Date: 2026-11-09 18:00+0100\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: coin-container\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+
+#. Theme Name of the theme
+#: style.css
+msgid "Coin Container"
+msgstr "Coin Container"
+
+#. Theme URI of the theme
+#: style.css
+msgid "https://github.com/prazdnikvova/coin-container-new"
+msgstr ""
+
+#. Description of the theme
+#: style.css
+msgid "Custom WooCommerce theme for coin-container.de — performance-first rebuild. Built on the pra-theme starter (deferred assets, security hardening, i18n-ready, PHPCS + CI + Playwright smoke tests)."
+msgstr ""
+
+#. Author of the theme
+#: style.css
+msgid "Volodymyr Prazdnikov"
+msgstr ""
+
+#. Author URI of the theme
+#: style.css
+msgid "https://www.linkedin.com/in/volodymyr-prazdnikov-2516451ab/"
+msgstr ""
+
+#: 404.php:5
+msgid "Page Not Found"
+msgstr "Seite nicht gefunden"
+
+#: 404.php:8
+msgid "Nothing found for the requested page. Try a search instead?"
+msgstr "Für die angeforderte Seite wurde nichts gefunden. Bitte versuchen Sie stattdessen eine Suche."
+
+#: blocks/acf-blocks.php:23
+msgid "COIN Banners"
+msgstr ""
+
+#: blocks/acf-blocks.php:27
+msgid "COIN Lists"
+msgstr ""
+
+#: blocks/acf-blocks.php:31
+msgid "COIN Products"
+msgstr ""
+
+#: blocks/acf-blocks.php:35
+msgid "COIN Text"
+msgstr ""
+
+#: blocks/acf-blocks.php:50
+msgid "Home hero"
+msgstr ""
+
+#: blocks/acf-blocks.php:51
+msgid "First-screen hero: background photo, big left-aligned heading, call-to-action buttons, phone line and trust row."
+msgstr ""
+
+#: blocks/acf-blocks.php:59
+msgid "Contact cards"
+msgstr ""
+
+#: blocks/acf-blocks.php:60
+msgid "Email / phone / address cards fed by Site Settings (no own fields)."
+msgstr ""
+
+#: blocks/acf-blocks.php:68
+msgid "Intro"
+msgstr ""
+
+#: blocks/acf-blocks.php:69
+msgid "Heading with a yellow accent line, bold subheading, text and a CTA button."
+msgstr ""
+
+#: blocks/acf-blocks.php:77
+msgid "Text section"
+msgstr ""
+
+#: blocks/acf-blocks.php:78
+msgid "Optional photo, heading with an inline yellow accent, rich text — landing content section."
+msgstr ""
+
+#: blocks/acf-blocks.php:86
+msgid "Featured products"
+msgstr ""
+
+#: blocks/acf-blocks.php:87
+msgid "WooCommerce product grid: featured products or a chosen category."
+msgstr ""
+
+#: blocks/acf-blocks.php:95
+msgid "Text + image"
+msgstr ""
+
+#: blocks/acf-blocks.php:96
+msgid "Heading, text, bold highlight and CTA on the left; photo collage on the right."
+msgstr ""
+
+#: blocks/acf-blocks.php:104
+msgid "Services strip"
+msgstr ""
+
+#: blocks/acf-blocks.php:105
+msgid "Accent heading and a full-width photo strip with numbered service columns."
+msgstr ""
+
+#: blocks/acf-blocks.php:113
+msgid "Stats"
+msgstr ""
+
+#: blocks/acf-blocks.php:114
+msgid "Centered accent heading with animated counters."
+msgstr ""
+
+#: blocks/acf-blocks.php:122
+msgid "CTA banner"
+msgstr ""
+
+#: blocks/acf-blocks.php:123
+msgid "Full-width photo banner with logo, heading and a yellow button."
+msgstr ""
+
+#: blocks/acf-blocks.php:131
+msgid "Info cards"
+msgstr ""
+
+#: blocks/acf-blocks.php:132
+msgid "White cards in a grid: photo, title, text (accessory trio of the original)."
+msgstr ""
+
+#: blocks/acf-blocks.php:140
+msgid "Numbered list"
+msgstr ""
+
+#: blocks/acf-blocks.php:141
+msgid "Accent heading with numbered items (01, 02, …)."
+msgstr ""
+
+#: blocks/acf-blocks.php:149
+msgid "News"
+msgstr ""
+
+#: blocks/acf-blocks.php:150
+msgid "Latest posts as cards with category badges and dates."
+msgstr ""
+
+#: blocks/acf-blocks.php:158
+msgid "Trust bar"
+msgstr ""
+
+#: blocks/acf-blocks.php:159
+msgid "Trustpilot and Google ratings and the badge from Site Settings (Vertrauen), the same chips as in the home hero, plus up to three key facts with a source. No own fields."
+msgstr ""
+
+#: blocks/acf-blocks.php:167
+msgid "Reviews widget"
+msgstr ""
+
+#: blocks/acf-blocks.php:168
+msgid "Live Google reviews (Trustindex, as on production) and the Trustpilot TrustBox, loaded only when the section comes near."
+msgstr ""
+
+#: blocks/acf-blocks.php:176
+msgid "FAQ"
+msgstr ""
+
+#: blocks/acf-blocks.php:177
+msgid "Frequently asked questions as expandable items (details/summary); JSON-LD per Site Settings → Schema."
+msgstr ""
+
+#: blocks/acf-blocks.php:185
+msgid "Logos"
+msgstr ""
+
+#: blocks/acf-blocks.php:186
+msgid "Partner and certificate logos in a row (lazy, grey until hover)."
+msgstr ""
+
+#: blocks/acf-blocks.php:194
+msgid "Form card"
+msgstr ""
+
+#: blocks/acf-blocks.php:195
+msgid "Request form: heading, intro and a Contact Form 7 form on a light card, optionally with e-mail, phone and address from Site Settings beside it."
+msgstr ""
+
+#: blocks/acf-blocks.php:203
+msgid "Price table"
+msgstr ""
+
+#: blocks/acf-blocks.php:204
+msgid "Price ranges per container size from Site Settings → Preise (used, One Way, new) with «Stand» and the note; optional heading, chosen sizes only."
+msgstr ""
+
+#: blocks/acf-blocks.php:214
+msgid "Related links"
+msgstr ""
+
+#: blocks/acf-blocks.php:215
+msgid "Up to six hand-picked pages, posts or products as link cards under a heading (default «Verwandte Leistungen»), optionally with a short excerpt."
+msgstr ""
+
+#: blocks/acf-blocks.php:224
+msgid "Gallery rail"
+msgstr ""
+
+#: blocks/acf-blocks.php:225
+msgid "Photos in one horizontal row that scrolls sideways (buttons, swipe, arrow keys; no autoplay), with an optional heading and text above — the image carousels and galleries of the old site."
+msgstr ""
+
+#: blocks/banners/contact-cards.php:14
+msgid "Contact cards: fill email, phone and address in Site Settings."
+msgstr ""
+
+#: blocks/banners/contact-cards.php:24
+#: blocks/text/form-card.php:46
+msgid "E-Mail"
+msgstr "E-Mail"
+
+#: blocks/banners/contact-cards.php:31
+#: blocks/text/form-card.php:49
+msgid "Telefon"
+msgstr "Telefon"
+
+#: blocks/banners/contact-cards.php:38
+#: blocks/text/form-card.php:52
+msgid "Adresse"
+msgstr "Adresse"
+
+#: blocks/banners/cta-banner.php:22
+msgid "CTA banner: add a heading in the block sidebar."
+msgstr ""
+
+#: blocks/banners/home-hero.php:22
+msgid "Home hero: pick a background image and a title in the block sidebar."
+msgstr ""
+
+#: blocks/banners/services.php:16
+msgid "Services: add a heading and items in the block sidebar."
+msgstr ""
+
+#: blocks/banners/trust-bar.php:27
+msgid "Trust bar: fill in Site Settings → Vertrauen."
+msgstr ""
+
+#: blocks/lists/gallery-rail.php:26
+msgid "Gallery rail: add images in the block sidebar."
+msgstr ""
+
+#: blocks/lists/gallery-rail.php:47
+msgid "Bildergalerie"
+msgstr "Bildergalerie"
+
+#: blocks/lists/gallery-rail.php:74
+#: blocks/lists/news.php:60
+msgid "Zurück"
+msgstr "Zurück"
+
+#: blocks/lists/gallery-rail.php:75
+#: blocks/lists/news.php:61
+msgid "Weiter"
+msgstr "Weiter"
+
+#: blocks/lists/info-cards.php:14
+msgid "Info cards: add cards in the block sidebar."
+msgstr ""
+
+#: blocks/lists/logos.php:20
+msgid "Logos: add logos with alt text in the block sidebar."
+msgstr ""
+
+#: blocks/lists/news.php:24
+msgid "News: no posts published yet."
+msgstr ""
+
+#: blocks/lists/news.php:53
+msgid "Weiterlesen"
+msgstr "Weiterlesen"
+
+#: blocks/lists/numbered-list.php:15
+msgid "Numbered list: add items in the block sidebar."
+msgstr ""
+
+#: blocks/lists/price-table.php:26
+msgid "Price table: no rows in Site Settings → Preise (or none of the ticked sizes)."
+msgstr ""
+
+#: blocks/lists/price-table.php:35
+msgid "Preis-Richtwerte"
+msgstr "Preis-Richtwerte"
+
+#. translators: %s: «Stand» of the prices, e.g. Oktober 2026.
+#: blocks/lists/price-table.php:38
+#, php-format
+msgid "Preis-Richtwerte, Stand: %s"
+msgstr "Preis-Richtwerte, Stand: %s"
+
+#: blocks/lists/price-table.php:41
+msgid "gebraucht"
+msgstr "gebraucht"
+
+#: blocks/lists/price-table.php:42
+msgid "One Way"
+msgstr "One Way"
+
+#: blocks/lists/price-table.php:43
+msgid "fabrikneu"
+msgstr "fabrikneu"
+
+#: blocks/lists/price-table.php:60
+msgid "Größe"
+msgstr "Größe"
+
+#: blocks/lists/price-table.php:78
+msgid "Tabelle nach links/rechts wischen"
+msgstr "Tabelle nach links/rechts wischen"
+
+#. translators: %s: «Stand» of the prices, e.g. Oktober 2026.
+#: blocks/lists/price-table.php:83
+#, php-format
+msgid "Stand: %s."
+msgstr "Stand: %s."
+
+#: blocks/lists/related-links.php:20
+msgid "Related links: pick up to six pages, posts or products in the block sidebar."
+msgstr ""
+
+#: blocks/lists/related-links.php:26
+msgid "Verwandte Leistungen"
+msgstr "Verwandte Leistungen"
+
+#: blocks/lists/reviews-widget.php:21
+msgid "Reviews widget: activate the Google reviews plugin or fill in the Trustpilot business unit ID (Site Settings → Vertrauen)."
+msgstr ""
+
+#: blocks/lists/stats.php:14
+msgid "Stats: add a heading and counters in the block sidebar."
+msgstr ""
+
+#: blocks/products/featured-products.php:10
+msgid "Featured products: WooCommerce is not active."
+msgstr ""
+
+#: blocks/products/featured-products.php:53
+msgid "Featured products: no products matched (mark products as featured or set a category)."
+msgstr ""
+
+#: blocks/text/faq.php:35
+msgid "FAQ: add questions and answers in the block sidebar."
+msgstr ""
+
+#: blocks/text/form-card.php:19
+msgid "Form card: choose a Contact Form 7 form in the block sidebar."
+msgstr ""
+
+#: blocks/text/form-card.php:52
+msgid "Adresse auf Google Maps öffnen"
+msgstr "Adresse auf Google Maps öffnen"
+
+#. translators: %d: number of reviews
+#. translators: %s: rating with one decimal, e.g. 4,5
+#. translators: %d: number of Google reviews
+#: blocks/text/form-card.php:52
+#: footer.php:68
+#: header.php:57
+#: template-parts/trust-row.php:39
+#: template-parts/trust-row.php:42
+#: template-parts/trust-row.php:73
+#: template-parts/trust-row.php:80
+msgid "(öffnet in neuem Tab)"
+msgstr "(öffnet in neuem Tab)"
+
+#: blocks/text/intro.php:16
+msgid "Intro: add a heading in the block sidebar."
+msgstr ""
+
+#: blocks/text/text-image.php:17
+msgid "Text + image: add a heading in the block sidebar."
+msgstr ""
+
+#: blocks/text/text-section.php:17
+msgid "Text section: add a heading or text in the block sidebar."
+msgstr ""
+
+#. translators: %s: number of comments
+#: comments.php:12
+#, php-format
+msgid "%s comment"
+msgid_plural "%s comments"
+msgstr[0] "%s Kommentar"
+msgstr[1] "%s Kommentare"
+
+#: comments.php:23
+msgid "Comments are closed."
+msgstr "Die Kommentare sind geschlossen."
+
+#: entry-footer.php:3
+msgid "Categories: "
+msgstr "Kategorien: "
+
+#: footer.php:14
+msgid "Kontakt"
+msgstr "Kontakt"
+
+#: footer.php:34
+#: footer.php:40
+msgid "Rechtliches"
+msgstr "Rechtliches"
+
+#: footer.php:49
+msgid "Folgen Sie uns"
+msgstr "Folgen Sie uns"
+
+#: footer.php:84
+msgid "Schnellkontakt"
+msgstr "Schnellkontakt"
+
+#: footer.php:86
+msgid "Anrufen"
+msgstr "Anrufen"
+
+#: footer.php:89
+msgid "Anfrage"
+msgstr "Anfrage"
+
+#: functions.php:39
+msgid "Primary Menu"
+msgstr ""
+
+#: functions.php:40
+msgid "Footer Menu"
+msgstr ""
+
+#: functions.php:305
+msgid "Skip to the content"
+msgstr "Zum Inhalt springen"
+
+#. translators: %s: post title, visually hidden
+#: functions.php:317
+#: functions.php:328
+#, php-format
+msgid "&hellip;%s"
+msgstr "&hellip;%s"
+
+#: header.php:70
+msgid "Hauptmenü"
+msgstr "Hauptmenü"
+
+#. translators: %s: phone number
+#: header.php:89
+#, php-format
+msgid "Anrufen: %s"
+msgstr "Anrufen: %s"
+
+#. translators: %d: items in cart
+#: header.php:98
+#, php-format
+msgid "Warenkorb, %d Artikel"
+msgstr "Warenkorb, %d Artikel"
+
+#: header.php:105
+#: header.php:108
+msgid "Suche"
+msgstr "Suche"
+
+#: header.php:109
+msgid "Suchen …"
+msgstr "Suchen …"
+
+#: header.php:110
+msgid "Suchen"
+msgstr "Suchen"
+
+#: header.php:116
+msgid "Menü"
+msgstr "Menü"
+
+#: home.php:13
+msgid "Blog"
+msgstr "Blog"
+
+#: inc/freshness.php:74
+msgid "Zuletzt aktualisiert:"
+msgstr "Zuletzt aktualisiert:"
+
+#: inc/freshness.php:77
+msgid "Redaktion:"
+msgstr "Redaktion:"
+
+#: inc/freshness.php:79
+msgid "Coin Container Team, Hamburg"
+msgstr "Coin Container Team, Hamburg"
+
+#: inc/internal-links.php:42
+msgid "Passende Alternativen"
+msgstr "Passende Alternativen"
+
+#: inc/internal-links.php:44
+msgid "Alle 20 Fuß Container"
+msgstr "Alle 20 Fuß Container"
+
+#: inc/internal-links.php:45
+msgid "Alle 40 Fuß Container"
+msgstr "Alle 40 Fuß Container"
+
+#: inc/internal-links.php:46
+msgid "Siehe auch:"
+msgstr "Siehe auch:"
+
+#: inc/price-table.php:40
+msgid "auf Anfrage"
+msgstr "auf Anfrage"
+
+#. translators: price range of one container size, 1: lower bound, 2: upper bound (formatted numbers).
+#: inc/price-table.php:44
+#, php-format
+msgid "ca. %1$s–%2$s"
+msgstr "ca. %1$s–%2$s"
+
+#: inc/seo.php:19
+msgid "Startseite"
+msgstr "Startseite"
+
+#: inc/seo.php:142
+msgid "Brotkrumen"
+msgstr "Brotkrumen"
+
+#: inc/woocommerce.php:77
+msgid "Vorheriges Bild"
+msgstr "Vorheriges Bild"
+
+#: inc/woocommerce.php:78
+msgid "Nächstes Bild"
+msgstr "Nächstes Bild"
+
+#: inc/woocommerce.php:130
+msgid "Jetzt anfragen"
+msgstr "Jetzt anfragen"
+
+#: inc/woocommerce.php:168
+msgid "Angebot!"
+msgstr "Angebot!"
+
+#: inc/woocommerce.php:198
+msgid "Kategorien"
+msgstr "Kategorien"
+
+#: inc/woocommerce.php:203
+msgid "Alle"
+msgstr "Alle"
+
+#. translators: %s: arrow
+#: nav-below.php:5
+#, php-format
+msgid "%s older"
+msgstr "%s älter"
+
+#. translators: %s: arrow
+#: nav-below.php:7
+#, php-format
+msgid "newer %s"
+msgstr "neuer %s"
+
+#. translators: %s: search query
+#: search.php:8
+#, php-format
+msgid "Search Results for: %s"
+msgstr "Suchergebnisse für: %s"
+
+#: search.php:22
+msgid "Nothing Found"
+msgstr "Nichts gefunden"
+
+#: search.php:25
+msgid "Sorry, nothing matched your search. Please try again."
+msgstr "Ihre Suche ergab leider keine Treffer. Bitte versuchen Sie es erneut."
+
+#. Template Name of the theme
+msgid "Landing (full width)"
+msgstr ""
+
+#. Template Name of the theme
+msgid "Landing (sidebar)"
+msgstr ""
+
+#: template-parts/landing-sidebar.php:31
+msgid "Unsere Dienstleistungen"
+msgstr "Unsere Dienstleistungen"
+
+#: template-parts/related-posts.php:16
+msgid "Ähnliche Beiträge"
+msgstr "Ähnliche Beiträge"
+
+#. translators: %d: number of reviews
+#: template-parts/trust-row.php:39
+#, php-format
+msgid " von 5 Sternen, %d Bewertung"
+msgid_plural " von 5 Sternen, %d Bewertungen"
+msgstr[0] " von 5 Sternen, %d Bewertung"
+msgstr[1] " von 5 Sternen, %d Bewertungen"
+
+#: template-parts/trust-row.php:42
+msgid "Google-Bewertungen"
+msgstr "Google-Bewertungen"
+
+#: template-parts/trust-row.php:53
+msgid "Hervorragend"
+msgstr "Hervorragend"
+
+#: template-parts/trust-row.php:53
+msgid "Sehr gut"
+msgstr "Sehr gut"
+
+#. translators: %d: number of reviews
+#: template-parts/trust-row.php:72
+#, php-format
+msgid "%d Bewertung auf"
+msgid_plural "%d Bewertungen auf"
+msgstr[0] "%d Bewertung auf"
+msgstr[1] "%d Bewertungen auf"
+
+#. translators: %s: rating with one decimal, e.g. 4,5
+#: template-parts/trust-row.php:73
+#, php-format
+msgid ", %s von 5 Sternen"
+msgstr ", %s von 5 Sternen"
+
+#. translators: %d: number of Google reviews
+#: template-parts/trust-row.php:80
+#, php-format
+msgid "%d Google-Bewertung"
+msgid_plural "%d Google-Bewertungen"
+msgstr[0] "%d Google-Bewertung"
+msgstr[1] "%d Google-Bewertungen"
+
+#: theme.json
+msgctxt "Color name"
+msgid "Yellow (fills only)"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Yellow text"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Gray"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Text"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Orange (fills only)"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Dark"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "Light"
+msgstr ""
+
+#: theme.json
+msgctxt "Color name"
+msgid "White"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "1 (4px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "2 (8px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "3 (12px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "4 (16px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "5 (24px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "6 (32px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "7 (48px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "8 (64px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Space size name"
+msgid "9 (96px)"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "DM Sans (headings)"
+msgstr ""
+
+#: theme.json
+msgctxt "Font family name"
+msgid "Nunito Sans (text)"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Small"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Body"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Lead"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Heading 3"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Heading 2"
+msgstr ""
+
+#: theme.json
+msgctxt "Font size name"
+msgid "Heading 1"
+msgstr ""
