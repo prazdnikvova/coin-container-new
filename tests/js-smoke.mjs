@@ -12,6 +12,8 @@ const CAT_SPECIAL = `${CAT_BASE}spezialcontainer/`;
 const CAT_COOLING = `${CAT_BASE}kuehlcontainer/`;
 // The inspiration landing has production's slug since T-53b (was /container-inspiration-ideen/).
 const INSPIRATION = '/container-ideen-inspiration/';
+// Containerzubehör is a child of the kaufen landing since T-53c, as on production (was /containerzubehoer/).
+const ZUBEHOER = '/container-kaufen/containerzubehoer/';
 
 const results = [];
 const ok = (name, cond, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}${extra ? ' — ' + extra : ''}`);
@@ -205,7 +207,7 @@ ok('No PNG/JPEG images in content', await page.evaluate(() =>
 	![...document.images].some((i) => /\.(png|jpe?g)(\?|$)/i.test(i.currentSrc || i.src))));
 
 // Landing on blocks, full width (T-30b): zubehoer — info cards, numbered list, CTA
-const respZub = await page.goto(BASE + '/containerzubehoer/', { waitUntil: 'domcontentloaded' });
+const respZub = await page.goto(BASE + ZUBEHOER, { waitUntil: 'domcontentloaded' });
 ok('Zubehoer landing 200', respZub.status() === 200, String(respZub.status()));
 ok('Zubehoer is full width (no sidebar)', await page.locator('.ccn-landing-full').count() === 1
 	&& await page.locator('.ccn-landing-sidebar').count() === 0);
@@ -236,8 +238,10 @@ ok('Mieten no raw shortcode leak', await page.evaluate(() => !document.body.text
 // Text landings migrated to blocks (T-30c): full width, hero band, CTA,
 // zero flexible-content markup anywhere. After this batch NO page uses
 // template-sections.php — the .section-hero guard below proves it per page.
+// T-53c: the Sanitär landing of T-30c answers production's 301 now (to
+// /container-kaufen/sanitaercontainer-kaufen/), Containerzubehör (same template) takes its place.
 const textLandings = [
-	'/sanitaercontainer-alles-was-sie-wissen-muessen/',
+	ZUBEHOER,
 	'/container-services/',
 	'/nachhaltige-containerloesungen-ihr-partner-fuer-umweltfreundliche-container/',
 	INSPIRATION,
@@ -254,8 +258,10 @@ for (const slug of textLandings) {
 	ok(`Landing ${slug} no flexible sections`, await page.locator('.section-hero, .section-text, .section-cta').count() === 0);
 	ok(`Landing ${slug} no raw markup leak`, await page.evaluate(() => !document.body.textContent.includes('u003c') && !document.body.textContent.includes('<p>')));
 }
-ok('Sanitaer type cards', (await (async () => {
-	await page.goto(BASE + '/sanitaercontainer-alles-was-sie-wissen-muessen/', { waitUntil: 'domcontentloaded' });
+// The four type cards of the retired Sanitär landing (T-30c, see above): the same info-cards block with four cards
+// on /container-services/.
+ok('Info cards: four service cards on /container-services/ (was the Sanitär landing, 301 since T-53c)', (await (async () => {
+	await page.goto(BASE + '/container-services/', { waitUntil: 'domcontentloaded' });
 	return page.locator('.ccn-info-card').count();
 })()) === 4);
 ok('Inspiration stats + idea cards', (await (async () => {
@@ -354,7 +360,7 @@ const structurePages = [
 	['/', 200], // front page (blocks)
 	['/container-kaufen/', 200], // landing with sidebar + product grid
 	['/container-mieten/', 200], // landing with sidebar
-	['/containerzubehoer/', 200], // landing full width
+	[ZUBEHOER, 200], // landing full width
 	['/datenschutzerklaerung/', 200], // default page.php
 	['/gebrauchte-seecontainer-in-cuxhaven/', 200], // single post
 	['/nachrichten-trends-aus-der-containerwelt/', 200], // blog index (home.php)
@@ -847,7 +853,7 @@ await cartPage.close();
 // Components (T-48, DESIGN.md "Components"). (a) No horizontal scroll at 360/768/1280/1440 on the six
 // key pages, the blog index, the search results and the full-width landing with a product grid.
 const t48Pages = ['/', '/container-kaufen/', '/container-mieten/', '/container-shop/', '/kontakt-beratung/',
-	'/product/20-fuss-container-gebraucht/', '/nachrichten-trends-aus-der-containerwelt/', '/?s=container', '/containerzubehoer/'];
+	'/product/20-fuss-container-gebraucht/', '/nachrichten-trends-aus-der-containerwelt/', '/?s=container', ZUBEHOER];
 const ovPage = await browser.newPage();
 const overflowed = {};
 for (const [w, h] of [[360, 800], [768, 1024], [1280, 800], [1440, 900]]) {
@@ -866,7 +872,7 @@ await ovPage.close();
 // a landing with sidebar, a full-width and a text landing; the product card on the landing is as wide as on the front page.
 const gutterPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
 const gutters = {};
-for (const path of ['/', '/container-kaufen/', '/containerzubehoer/', '/ueber-uns/']) {
+for (const path of ['/', '/container-kaufen/', ZUBEHOER, '/ueber-uns/']) {
 	await gutterPage.goto(BASE + path, { waitUntil: 'load' });
 	gutters[path] = await gutterPage.evaluate(() => {
 		const vis = (e) => { const s = getComputedStyle(e); const b = e.getBoundingClientRect(); return s.display !== 'none' && s.visibility !== 'hidden' && b.width > 0 && b.height > 0; };
@@ -978,7 +984,7 @@ const sameNeighbours = flow.slice(1).map((s, i) => [flow[i], s]).filter(([a, b])
 ok('Components (e) home: >= 4 different section backgrounds, neighbours differ', new Set(homeBgs.map((s) => s.bg)).size >= 4 && sameNeighbours.length === 0,
 	`${homeBgs.map((s) => `${s.cls}:${s.bg}`).join(', ')}${sameNeighbours.length ? ' | same: ' + sameNeighbours.join(', ') : ''}`);
 const ctaCount = {};
-for (const path of ['/', '/container-kaufen/', '/container-mieten/', '/containerzubehoer/', '/ueber-uns/', INSPIRATION]) {
+for (const path of ['/', '/container-kaufen/', '/container-mieten/', ZUBEHOER, '/ueber-uns/', INSPIRATION]) {
 	await secPage.goto(BASE + path, { waitUntil: 'domcontentloaded' });
 	ctaCount[path] = await secPage.locator('.ccn-cta').count();
 }
@@ -1069,7 +1075,7 @@ const wooPages = ['/container-shop/', CAT_STANDARD, T49_PRODUCT, '/warenkorb/'];
 const jqPage = await browser.newPage();
 const jq = {};
 const wcCss = {};
-for (const path of [...wooPages, '/', '/container-kaufen/', '/containerzubehoer/', '/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/']) {
+for (const path of [...wooPages, '/', '/container-kaufen/', ZUBEHOER, '/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/']) {
 	await jqPage.goto(BASE + path, { waitUntil: 'load' });
 	jq[path] = await jqPage.evaluate(() => `${typeof window.jQuery}|${(document.getElementById('jquery-core-js') || {}).defer === true ? 'defer' : 'blocking'}`);
 	wcCss[path] = await jqPage.locator('link[rel="stylesheet"][href*="/plugins/woocommerce/assets/css/woocommerce"]').count();
@@ -1221,7 +1227,7 @@ await fsProduct.close();
 // the shop, landings, posts and pages; the current page last and not linked; 14px --ccn-color-secondary; none on the front page.
 const bcPage = await browser.newPage({ viewport: { width: 360, height: 800 } });
 const crumbs = {};
-for (const path of [T49_PRODUCT, CAT_STANDARD, '/container-shop/', '/container-kaufen/', '/containerzubehoer/',
+for (const path of [T49_PRODUCT, CAT_STANDARD, '/container-shop/', '/container-kaufen/', ZUBEHOER,
 	'/gebrauchte-seecontainer-in-cuxhaven/', '/datenschutzerklaerung/', '/']) {
 	await bcPage.goto(BASE + path, { waitUntil: 'load' });
 	crumbs[path] = await bcPage.evaluate(() => {
@@ -1371,7 +1377,7 @@ const t51 = await browser.newPage({ viewport: { width: 360, height: 800 } });
 const t51Req = [];
 t51.on('request', (r) => t51Req.push(r.url()));
 const t51Pages = {};
-for (const path of [...T51_LANDINGS, ...T51_CONTACT, '/', '/containerzubehoer/']) {
+for (const path of [...T51_LANDINGS, ...T51_CONTACT, '/', ZUBEHOER]) {
 	t51Req.length = 0;
 	await t51.goto(`${BASE}${path}?cb=${Date.now()}`, { waitUntil: 'load' });
 	t51Pages[path] = await t51.evaluate(() => ({
@@ -1385,15 +1391,15 @@ for (const path of [...T51_LANDINGS, ...T51_CONTACT, '/', '/containerzubehoer/']
 const t51CardPages = [...T51_LANDINGS, ...T51_CONTACT];
 ok('Request form: the form card block on the 4 landings and the 2 contact pages, no hand-built ccn-form-card group left',
 	t51CardPages.every((p) => t51Pages[p].card === 1 && t51Pages[p].group === 0), JSON.stringify(t51CardPages.map((p) => [p, t51Pages[p].card, t51Pages[p].group])));
-ok('Request form: CF7 CSS/JS on every page with a form, no CF7 request on / and /containerzubehoer/',
-	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].cf7 >= 2) && ['/', '/containerzubehoer/'].every((p) => t51Pages[p].cf7 === 0),
+ok(`Request form: CF7 CSS/JS on every page with a form, no CF7 request on / and ${ZUBEHOER}`,
+	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].cf7 >= 2) && ['/', ZUBEHOER].every((p) => t51Pages[p].cf7 === 0),
 	JSON.stringify(Object.entries(t51Pages).map(([p, s]) => [p, s.cf7])));
 // The fields (T-51): visible labels, <= 4 required, consent after the fields, «Anfrage senden» >= 48px and enabled
 // from the start (consent as validation: CF7 would otherwise disable the button), hidden produkt/quelle, German form
 // language; forms.js (defer, <= 1 KB) only where the form is.
 const t51FormsJs = themeFile('assets/js/forms.js');
-ok('Request form: forms.js (defer) wherever the form is, not on / and /containerzubehoer/; <= 1 KB, no form code in main.js',
-	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].forms === 1 && t51Pages[p].formsDefer) && ['/', '/containerzubehoer/'].every((p) => t51Pages[p].forms === 0)
+ok(`Request form: forms.js (defer) wherever the form is, not on / and ${ZUBEHOER}; <= 1 KB, no form code in main.js`,
+	[...T51_LANDINGS, ...T51_CONTACT].every((p) => t51Pages[p].forms === 1 && t51Pages[p].formsDefer) && ['/', ZUBEHOER].every((p) => t51Pages[p].forms === 0)
 	&& t51FormsJs.length > 0 && t51FormsJs.length <= 1024 && !/wpcf7/.test(themeFile('assets/js/main.js')),
 	`${JSON.stringify(Object.entries(t51Pages).map(([p, s]) => [p, s.forms, s.formsDefer]))} forms.js ${t51FormsJs.length} B`);
 for (const path of T51_CONTACT) {
@@ -1633,8 +1639,8 @@ ok('Migration: the menu group of the product categories (parent and sub-menu, >=
 const t53aPosted = (await (await fetch(`${BASE}${T49_PRODUCT}?cb=${Date.now()}`)).text()).match(/<span class="posted_in">([\s\S]*?)<\/span>/);
 const t53aCats = t53aPosted ? [...t53aPosted[1].matchAll(/<a [^>]*>([^<]+)<\/a>/g)].map((m) => m[1].replace(/&amp;/g, '&').trim()) : [];
 const t53aTrail = t54[T49_PRODUCT].crumbs;
-ok('Migration: the product trail is «Startseite › shop page › one of its categories › product», no old parent category',
-	t53aTrail.length === 4 && t53aTrail[0] === 'Startseite' && t53aCats.includes(t53aTrail[2]) && !t53aTrail.some((c) => /COIN/.test(c)),
+ok('Migration: the product trail is «Startseite › Container kaufen › one of its categories › product» (T-53c: the shop level as on production), no old parent category',
+	t53aTrail.length === 4 && t53aTrail[0] === 'Startseite' && t53aTrail[1] === 'Container kaufen' && t53aCats.includes(t53aTrail[2]) && !t53aTrail.some((c) => /COIN/.test(c)),
 	JSON.stringify({ trail: t53aTrail, categories: t53aCats }));
 
 // Production features (T-56, DESIGN.md "How to measure"): ports of transmax-child modules and two blocks for the
@@ -1830,7 +1836,7 @@ ok('First TCP window (T-56): front page 12 requests in Lighthouse mobile emulati
 // (group A: hand-made landings synced unit by unit; group B: converted and replaced or created), production's
 // [coin_*] shortcodes became blocks in 15 more records. No page of that set answers anything but 200 or carries
 // Elementor markup, a raw [coin_ shortcode or the donor host.
-const T53B_PAGES = ['/', '/container-kaufen/', '/container-mieten/', '/containerzubehoer/', '/container-transport-logistik/',
+const T53B_PAGES = ['/', '/container-kaufen/', '/container-mieten/', ZUBEHOER, '/container-transport-logistik/',
 	'/container-modifikation-umbau-dienstleistungen/', '/container-services/',
 	'/nachhaltige-containerloesungen-ihr-partner-fuer-umweltfreundliche-container/', INSPIRATION, '/container-angebot-anfordern/',
 	'/kontakt-beratung/', '/container-shop/', '/weihnachtsgruesse-coin-container/', '/weihnachten-coin-container/',
@@ -1885,13 +1891,13 @@ ok(`Migration (T-53b): ${INSPIRATION} 200 with production's counters 20+ / 10.00
 // Hub boxes of production (transmax-child/functions.php: «Verwandte Leistungen», «… im Überblick», «Passende Seiten»):
 // related-links blocks (up to six links) on the four hubs and Containerzubehör.
 const t53bBoxes = {};
-for (const [p, h] of [['/container-kaufen/', t53bKaufen], ...['/container-mieten/', '/container-transport-logistik/', '/container-modifikation-umbau-dienstleistungen/', '/containerzubehoer/'].map((x) => [x, t53bHtml[x].html])]) {
+for (const [p, h] of [['/container-kaufen/', t53bKaufen], ...['/container-mieten/', '/container-transport-logistik/', '/container-modifikation-umbau-dienstleistungen/', ZUBEHOER].map((x) => [x, t53bHtml[x].html])]) {
 	t53bBoxes[p] = [...h.matchAll(/<nav aria-labelledby="([^"]+)">\s*<h2 id="\1" class="ccn-related-links-heading">([^<]+)<\/h2>/g)].map((m) => m[2]);
 }
 ok('Migration (T-53b): production hub boxes as related-links — «Verwandte Leistungen» on 4 hubs, «… im Überblick» on transport and modification, «Passende Seiten» on Containerzubehör',
 	['/container-kaufen/', '/container-mieten/', '/container-transport-logistik/', '/container-modifikation-umbau-dienstleistungen/'].every((p) => t53bBoxes[p].includes('Verwandte Leistungen'))
 	&& t53bBoxes['/container-transport-logistik/'].includes('Transport und Lieferung im Überblick') && t53bBoxes['/container-modifikation-umbau-dienstleistungen/'].includes('Umbau-Ratgeber im Überblick')
-	&& t53bBoxes['/containerzubehoer/'].includes('Passende Seiten'), JSON.stringify(t53bBoxes));
+	&& t53bBoxes[ZUBEHOER].includes('Passende Seiten'), JSON.stringify(t53bBoxes));
 // Gallery rail (blocks/lists/gallery-rail.php): photos in the .ccn-rail row, a focusable list named by the heading (or a label),
 // lazy images, its stylesheet in <head> after theme.css only where it renders, no carousel library, the buttons scroll the row.
 const t53bGrTpl = themeFile('blocks/lists/gallery-rail.php');
@@ -1932,7 +1938,7 @@ ok('First TCP window (T-53b): the front page document sent gzip in <= 14 600 byt
 
 // Meta descriptions: Rank Math builds og:/twitter:description from the excerpt in wp_head, outside the main loop, where
 // the theme's read-more link (excerpt_more, functions.php) must not land as escaped markup; the blog index keeps its
-// read-more links inside the loop. The front page has no description tags yet (Rank Math meta of production: T-53c).
+// read-more links inside the loop. The front page carries production's own description since T-53c (Rank Math meta).
 const T53B_META_PAGES = ['/container-masse-groessen/', '/seecontainer-preise/', '/containerkauf-teure-fehler/', '/product/20-fuss-container-gebraucht/', '/nachrichten-trends-aus-der-containerwelt/'];
 const t53bMeta = {};
 for (const p of [...T53B_META_PAGES, '/']) {
@@ -1943,6 +1949,61 @@ for (const p of [...T53B_META_PAGES, '/']) {
 ok('Meta descriptions (T-53b): og:description and twitter:description on 5 pages (a page, a hub, a post, a product, the blog index) carry no read-more link or other markup, the front page none either; the blog index keeps its read-more links',
 	T53B_META_PAGES.every((p) => t53bMeta[p].tags === 2) && Object.values(t53bMeta).every((m) => m.dirty === 0) && t53bMeta['/nachrichten-trends-aus-der-containerwelt/'].moreLinks > 0,
 	JSON.stringify(t53bMeta));
+
+// Kaufen hierarchy, breadcrumbs, production's SEO meta and the 301 map (T-53c, DESIGN.md "URLs and redirects",
+// "Breadcrumbs"). Child pages of the landing at the category base answer as pages (inc/rewrites.php: WooCommerce's
+// category rule would read them as categories and answer 404); the categories under the same base stay categories.
+// The shop level of product and category trails is that landing («Container kaufen»), as on production, where it is
+// the shop; the shop archive keeps «Shop». Production's Rank Math meta is on the pages. Old addresses answer the 301 map
+// (here from Rank Math Redirections, on production from .htaccess); an unknown path stays 404.
+const T53C_CHILDREN = ['/container-kaufen/buerocontainer-kaufen/', '/container-kaufen/sanitaercontainer-kaufen/', ZUBEHOER];
+const T53C_CATS = [CAT_STANDARD, `${CAT_BASE}gebrauchte-seecontainer-kaufen/`];
+const t53cBody = {};
+for (const p of [...T53C_CHILDREN, ...T53C_CATS]) {
+	const { res, text } = await t56Get(p, { redirect: 'manual' });
+	const cls = (text.match(/<body class="([^"]*)"/) || ['', ''])[1];
+	t53cBody[p] = `${res.status} ${/\bpage-id-\d+\b/.test(cls) ? 'page' : /\btax-product_cat\b/.test(cls) ? 'category' : 'other'}`;
+}
+ok('Kaufen hierarchy (T-53c): the three child pages of /container-kaufen/ answer 200 as pages, two categories under the same base stay categories',
+	T53C_CHILDREN.every((p) => t53cBody[p] === '200 page') && T53C_CATS.every((p) => t53cBody[p] === '200 category'), JSON.stringify(t53cBody));
+const t53cTrail = async (p) => {
+	const { text } = await t56Get(p);
+	const nav = (text.match(/<nav class="ccn-breadcrumbs[^"]*" aria-label="Brotkrumen"><ol>([\s\S]*?)<\/ol><\/nav>/) || ['', ''])[1];
+	return [...nav.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((m) => ({
+		name: m[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim(),
+		href: (m[1].match(/href="([^"]+)"/) || ['', ''])[1].replace(BASE, ''),
+	}));
+};
+const t53cCat = await t53cTrail(CAT_STANDARD);
+const t53cProd = await t53cTrail(T49_PRODUCT);
+const t53cShop = await t53cTrail('/container-shop/');
+ok('Breadcrumbs (T-53c): the shop level of a category and a product is «Container kaufen» linking /container-kaufen/ (production), the product shows production\'s primary category (Standardcontainer of two), the shop archive keeps «Startseite › Shop»',
+	t53cCat.map((c) => c.name).join(' › ') === 'Startseite › Container kaufen › Standardcontainer' && t53cCat[1].href === '/container-kaufen/'
+	&& t53cProd.length === 4 && t53cProd[1].name === 'Container kaufen' && t53cProd[1].href === '/container-kaufen/' && t53cProd[2].name === 'Standardcontainer'
+	&& t53cShop.map((c) => c.name).join(' › ') === 'Startseite › Shop',
+	JSON.stringify({ category: t53cCat, product: t53cProd.map((c) => c.name), shop: t53cShop.map((c) => c.name) }));
+const t53cHomeTitle = ((await t56Get('/')).text.match(/<title>([^<]*)<\/title>/) || ['', ''])[1];
+ok('SEO meta (T-53c): production\'s Rank Math meta — a meta description on all six pages of the SEO check, the front page title production\'s own, not the template fallback «Home - …»',
+	T54_PAGES.every((p) => t54[p].desc.length === 1 && t54[p].desc[0] > 50) && t53cHomeTitle.length > 20 && !/^Home\b/.test(t53cHomeTitle),
+	JSON.stringify({ home: t53cHomeTitle, desc: T54_PAGES.map((p) => [p, t54[p].desc]) }));
+const T53C_REDIRECTS = [
+	['/containerzubehoer/', ZUBEHOER],
+	['/gebrauchte-seecontainer-kaufen/', `${CAT_BASE}gebrauchte-seecontainer-kaufen/`],
+	['/container-inspiration-ideen/', '/container-projekte-referenzen/'],
+	['/product-category/cointainer/standardcontainer/', CAT_STANDARD],
+	['/container-kaufen/page/2/', '/container-shop/page/2/'],
+	['/product/20-fuss-container-standardisierter-stahlbehaelter/', '/product/20-fuss-container-one-way/'],
+];
+const t53cRedirects = {};
+for (const [from] of T53C_REDIRECTS) {
+	const { res } = await t56Get(from, { redirect: 'manual' });
+	t53cRedirects[from] = `${res.status} ${(res.headers.get('location') || '').replace(BASE, '').split('?')[0]}`;
+}
+const t53cGone = (await t56Get('/team/max-mustermann/', { redirect: 'manual' })).res.status;
+const t53cMissing = (await t56Get('/t53c-no-such-address/', { redirect: 'manual' })).res.status;
+ok('301 map (T-53c): six old addresses (top-level kaufen page, gebraucht page, inspiration slug, old category base, shop pagination, old product slug) answer 301 with their targets, a theme demo path 410, an unknown path 404',
+	T53C_REDIRECTS.every(([from, to]) => t53cRedirects[from] === `301 ${to}`) && t53cGone === 410 && t53cMissing === 404,
+	JSON.stringify({ ...t53cRedirects, gone: t53cGone, missing: t53cMissing }));
 
 await browser.close();
 console.log(results.join('\n'));
