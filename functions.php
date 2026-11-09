@@ -6,6 +6,12 @@
 // First, before anything asks for the current user: REST credentials sent as
 // X-WP-Authorization on hosts that drop the Authorization header (KAS).
 require_once get_template_directory() . '/inc/rest-auth-header-fallback.php';
+// TranslatePress (T-55): helpers and the memory headroom of the translated
+// render first, before the rest of inc/; then the English SEO layer and the
+// read-only dictionary route. All three stay inert without the plugin.
+require_once get_template_directory() . '/inc/trp-compat.php';
+require_once get_template_directory() . '/inc/trp-seo-en.php';
+require_once get_template_directory() . '/inc/trp-dictionary-rest.php';
 
 add_action( 'after_setup_theme', 'ccn_setup' );
 function ccn_setup() {
