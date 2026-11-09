@@ -39,13 +39,15 @@ mobile emulation) and the numbers go into the commit body.
   and `theme.css` is also the editor style, so previews match the site. Every page is built from these blocks (front page, landings) or
   rendered by a plain template (legal pages, posts, shop); there is no
   flexible-content layer any more.
-- Scoped assets: all block CSS lives in `assets/css/theme.css` and all theme
-  JS in `assets/js/main.js` (none of the 19 blocks ships its own file today;
-  the request forms' focus script `assets/js/forms.js` follows Contact Form
-  7's own assets onto the pages with a form, `inc/assets-cleanup.php`).
-  A block that ever needs one registers a script/style handle and lists it
-  under `'assets'` in the registry; the handle is then enqueued only on pages
-  that contain the block.
+- Scoped assets: block CSS lives in `assets/css/theme.css` and all theme JS
+  in `assets/js/main.js`, with two exceptions: the request forms' focus
+  script `assets/js/forms.js` follows Contact Form 7's own assets onto the
+  pages with a form, and the rare price-table and related-links blocks (plus
+  «Ähnliche Beiträge» under posts) share `assets/css/content-cards.css`,
+  loaded only where they show (`inc/assets-cleanup.php`; the blocks list the
+  handle under `'assets'` in the registry). theme.css blocks every first
+  paint, so sent gzip it stays within the first TCP window (≤ 14 600 bytes,
+  smoke test); a component that only some pages show gets a scoped file.
 - Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
   no jQuery.
 - Motion: blocks opt in with `data-motion="reveal"` / `data-motion-stagger`;

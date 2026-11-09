@@ -1691,16 +1691,20 @@ ok('Shortcodes (T-56): the theme registers exactly one, [ccn_dieselzuschlag], re
 // Price table (blocks/lists/price-table.php): code level until the content migration places it (T-53b; the WP-CLI
 // render check against Site Settings is in the T-56 report): a caption, column and row headers, a focusable region
 // named by the caption, the ranges of Site Settings → Preise (used / One Way / new), the swipe hint behind a
-// container query (shown only while the table overflows its box, no JS).
+// container query (shown only while the table overflows its box, no JS). Its rules and the link cards' live in
+// assets/css/content-cards.css (outside theme.css, see "First TCP window"), on the tokens like theme.css.
 const t56PriceTpl = themeFile('blocks/lists/price-table.php');
 const t56PriceRows = (t56SiteSettings.find((f) => f.name === 'price_rows') || {}).sub_fields || [];
-ok('Price table (T-56): registered; <caption>, th scope col/row, tabindex 0 region labelled by the caption; Site Settings rows size + used/oneway/new min/max; hint only while the table overflows',
+const t56CardsCssFile = themeFile('assets/css/content-cards.css');
+const t56CardsHex = t56CardsCssFile.replace(/\/\*[\s\S]*?\*\//g, '').match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+ok('Price table (T-56): registered; <caption>, th scope col/row, tabindex 0 region labelled by the caption; Site Settings rows size + used/oneway/new min/max; hint only while the table overflows (content-cards.css, tokens only)',
 	blockTemplates.includes('blocks/lists/price-table.php') && /<caption id=/.test(t56PriceTpl)
 	&& t56PriceTpl.includes('<th scope="col">') && t56PriceTpl.includes('<th scope="row">')
 	&& /class="ccn-table-wrap" tabindex="0" role="region" aria-labelledby=/.test(t56PriceTpl)
 	&& ['size', 'used_min', 'used_max', 'oneway_min', 'oneway_max', 'new_min', 'new_max'].every((n) => t56PriceRows.some((f) => f.name === n))
-	&& themeCss.includes('.ccn-table-hint{display:none') && themeCss.includes('@container (max-width:31.99em){.ccn-table-hint{display:block}}'),
-	JSON.stringify({ rows: t56PriceRows.map((f) => f.name) }));
+	&& t56CardsCssFile.includes('.ccn-table-hint{display:none') && t56CardsCssFile.includes('@container (max-width:31.99em){.ccn-table-hint{display:block}}')
+	&& t56CardsHex.length === 0 && !/transition\s*:\s*all/.test(t56CardsCssFile),
+	JSON.stringify({ rows: t56PriceRows.map((f) => f.name), rawHex: t56CardsHex }));
 
 // Internal links (inc/internal-links.php, production's link plan 1:1): the 20 and 40 Fuß products end the summary
 // (after the categories) with «Alle 20/40 Fuß Container» linking to their size page; Kühlcontainer and the shop carry
@@ -1784,6 +1788,41 @@ const t56RestAnswers = { xWp: await t56Rest({ 'X-WP-Authorization': t56Basic }),
 ok('REST (T-56): X-WP-Authorization reaches the Application Password check like Authorization (401 invalid_username); without credentials anonymous (no 200/401)',
 	t56RestAnswers.xWp === '401 invalid_username' && t56RestAnswers.authorization === t56RestAnswers.xWp && !/^(200|401)/.test(t56RestAnswers.none),
 	JSON.stringify(t56RestAnswers));
+
+// First TCP window (T-56 review, DESIGN.md "Do / don't"): theme.css blocks the first paint of every page. Sent gzip it
+// must fit the first window of a new connection (initcwnd 10 x 1 460 = 14 600 bytes; above it Lighthouse adds a round
+// trip: front page FCP 913 -> 1 059 ms in T-56), counted as the bytes of the response body, not its Content-Length.
+// The price table and the link cards keep their rules in assets/css/content-cards.css, loaded after theme.css only
+// where they show: the front page keeps its requests (Lighthouse mobile counts 14 = these 12 plus /favicon.ico and its
+// redirect, which Chrome adds outside Playwright), the product page gets none of it, a post with related posts does.
+const { get: t56HttpGet } = await import(BASE.startsWith('https') ? 'node:https' : 'node:http');
+const t56HomeHead = (await t56Get('/')).text;
+const t56CssHref = ((t56HomeHead.match(/<link[^>]+id=['"]coin-container-css['"][^>]+href=['"]([^'"]+)['"]/) || [])[1] || '').replace(/&#038;/g, '&');
+const t56CssGz = await new Promise((resolve) => {
+	t56HttpGet(t56CssHref, { headers: { 'Accept-Encoding': 'gzip' } }, (res) => {
+		let bytes = 0;
+		res.on('data', (c) => { bytes += c.length; });
+		res.on('end', () => resolve({ status: res.statusCode, encoding: res.headers['content-encoding'] || '', bytes }));
+	}).on('error', (e) => resolve({ status: 0, encoding: '', bytes: -1, error: e.message }));
+});
+ok('First TCP window (T-56): theme.css sent gzip in <= 14 600 bytes (bytes of the response body, not Content-Length)',
+	t56CssGz.status === 200 && t56CssGz.encoding === 'gzip' && t56CssGz.bytes > 0 && t56CssGz.bytes <= 14600, JSON.stringify(t56CssGz));
+const t56Lh = await browser.newContext({
+	viewport: { width: 412, height: 823 }, deviceScaleFactor: 1.75, isMobile: true, hasTouch: true,
+	userAgent: 'Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36',
+});
+const t56HomePage = await t56Lh.newPage();
+const t56HomeReqs = [];
+t56HomePage.on('request', (r) => t56HomeReqs.push(r.url()));
+await t56HomePage.goto(`${BASE}/`, { waitUntil: 'networkidle', timeout: 60000 }).catch(() => t56HomeReqs.push('goto timeout'));
+await t56Lh.close();
+const t56CardsTag = "id='ccn-content-cards-css'";
+const t56ProductHead = (await t56Get('/product/20-fuss-container-gebraucht/')).text;
+const t56PostHead = (await t56Get(t56PostPath || '/iso-container-einfach-erklaert/')).text;
+ok('First TCP window (T-56): front page 12 requests in Lighthouse mobile emulation (Lighthouse: 14 with the favicon pair), none to content-cards.css; product page without it; a post with related posts loads it after theme.css',
+	t56HomeReqs.length === 12 && !t56HomeReqs.some((u) => u.includes('content-cards.css')) && !t56ProductHead.includes(t56CardsTag)
+	&& t56PostHead.indexOf("id='coin-container-css'") > -1 && t56PostHead.indexOf(t56CardsTag) > t56PostHead.indexOf("id='coin-container-css'"),
+	JSON.stringify({ home: t56HomeReqs.length, product: t56ProductHead.includes(t56CardsTag), post: t56PostHead.includes(t56CardsTag) }));
 
 await browser.close();
 console.log(results.join('\n'));

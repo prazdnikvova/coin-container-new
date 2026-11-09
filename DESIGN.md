@@ -185,6 +185,8 @@ The block editor shows the same colours and sizes as the site.
   `assets/css/editor.css` (editor only) lets ACF sections span the canvas,
   which theme.json's `contentSize` would otherwise cap at 720px; constrained
   groups get the same 720px on the front end from `theme.css`.
+  `assets/css/content-cards.css` (price table and link cards, scoped on the
+  front end) is an editor style too, so those previews match.
 - ACF blocks register with `api_version` 3 and `acf_block_version` 3 and
   without the edit/preview toggle (`supports.mode` false): fields live in
   the sidebar, the canvas always shows the rendered preview.
@@ -748,6 +750,10 @@ gebraucht, One Way, fabrikneu.
   `tabular-nums`; note and hint 14px `--ccn-color-secondary`. Inside
   `.entry-content` the block keeps the text column's gutter and takes 24px
   above and below instead of the section rhythm.
+- Styles: `assets/css/content-cards.css` (shared with the link cards), not
+  theme.css: loaded after theme.css, in `<head>`, only on pages with the
+  block (`inc/assets-cleanup.php`; the block also lists the handle under
+  `'assets'`), so theme.css stays in the first TCP window.
 
 ## Internal links
 
@@ -794,6 +800,9 @@ Link cards (T-56): the block `acf/related-links`
   wider containers; the heading 32px above the grid. Inside `.entry-content`
   no list markers or text margins, the text column's gutter and 24px above
   and below.
+- Styles: `assets/css/content-cards.css` with the price table, loaded only on
+  pages with the block and on posts that show «Ähnliche Beiträge» (see Price
+  table); the card base (`.ccn-card`, lift) stays in theme.css.
 
 ## Motion
 
@@ -926,6 +935,11 @@ a later version, not used in v1.
 - Don't add an eyebrow that says nothing.
 - Don't put yellow or orange text on a light background.
 - Don't add raw hex outside `:root` (the smoke test fails).
+- Don't grow theme.css past the first TCP window: sent gzip it stays at or
+  below 14 600 bytes (initcwnd 10 × 1 460; above it Lighthouse adds a round
+  trip to every page's first paint, T-56: FCP 913 → 1 059 ms). The smoke test
+  measures it. A component that only some pages show gets a scoped file
+  (`assets/css/content-cards.css` is the pattern).
 
 ## Content & brand rules
 
@@ -1069,4 +1083,8 @@ for reviewing content:
   `Authorization` (401 `invalid_username`). The block renders against Site
   Settings are WP-CLI checks of the project library
   (`reports/2026-11-09-data/` there), the probes `t56_probe.cjs` and
-  `t56_shots.cjs`.
+  `t56_shots.cjs`. First TCP window: theme.css sent gzip ≤ 14 600 bytes
+  (bytes of the response body); the front page makes 12 requests under
+  Lighthouse's mobile emulation (Lighthouse counts 14 with `/favicon.ico` and
+  its redirect) and none to `content-cards.css`, which only pages with the
+  price table or link cards load, after theme.css.

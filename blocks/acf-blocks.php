@@ -206,6 +206,8 @@ function ccn_register_blocks() {
 			'icon'        => 'editor-table',
 			'keywords'    => array( 'preise', 'prices', 'table', 'tabelle', 'richtwerte' ),
 			'template'    => 'blocks/lists/price-table.php',
+			// Styles outside theme.css (first TCP window): inc/assets-cleanup.php.
+			'assets'      => array( 'ccn-content-cards' ),
 		),
 		array(
 			'name'        => 'related-links',
@@ -215,6 +217,7 @@ function ccn_register_blocks() {
 			'icon'        => 'admin-links',
 			'keywords'    => array( 'links', 'related', 'verwandte leistungen', 'hub' ),
 			'template'    => 'blocks/lists/related-links.php',
+			'assets'      => array( 'ccn-content-cards' ),
 		),
 	);
 

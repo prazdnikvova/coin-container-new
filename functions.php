@@ -28,6 +28,8 @@ function ccn_setup() {
 	// editor.css holds the few editor-only rules (canvas width for ACF blocks).
 	add_theme_support( 'editor-styles' );
 	add_editor_style( array( 'assets/css/theme.css', 'assets/css/editor.css' ) );
+	// The price table and link cards: scoped on the front end (inc/assets-cleanup.php), always in the editor.
+	add_editor_style( 'assets/css/content-cards.css' );
 	// No custom hero size on purpose. A hard crop (1920x1080, true) empties
 	// srcset: wp_calculate_image_srcset() only keeps sizes with a matching
 	// aspect ratio, and every stock WP size is a square box. Heroes use the

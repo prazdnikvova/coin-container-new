@@ -1,0 +1,39 @@
+/*
+ * Price table and link cards (T-56, DESIGN.md "Price table", "Related links"): loaded only
+ * where they show (inc/assets-cleanup.php: pages with the price-table or related-links block,
+ * posts with «Ähnliche Beiträge»; the blocks list the handle under 'assets'), after theme.css.
+ * Kept out of theme.css so it stays inside the first TCP window (T-56 review). Tokens only.
+ */
+/* Block: price table (DESIGN.md "Price table"): the labelled wrapper scrolls sideways; the swipe hint only while the table overflows its box */
+.ccn-price-table .ccn-price-table-heading{margin:0 0 var(--ccn-space-3)}
+.ccn-price-table .ccn-price-table-intro{margin:0 0 var(--ccn-space-4)}
+.ccn-price-table-box{container-type:inline-size}
+.ccn-table-wrap{overflow-x:auto;overscroll-behavior-x:contain}
+.ccn-table{width:100%;min-width:32em;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ccn-table :is(th,td){padding:var(--ccn-space-2) var(--ccn-space-3);border-bottom:1px solid var(--ccn-color-border);text-align:left;vertical-align:top}
+.ccn-table th{font-weight:700}
+.ccn-table td{white-space:nowrap}
+.ccn-table tbody th{min-width:7em}
+.ccn-table thead th{border-bottom:2px solid var(--ccn-color-primary)}
+.ccn-price-row-note{display:block;color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small);font-weight:400}
+.ccn-table-hint{display:none;margin-top:var(--ccn-space-2);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small);text-align:right}
+@container (max-width:31.99em){.ccn-table-hint{display:block}}
+.ccn-price-table-note{margin-top:var(--ccn-space-3);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small)}
+/* Inside running text (page.php): the text column holds the gutter; 24px above and below */
+.entry-content>.ccn-price-table{padding-block:var(--ccn-space-5)}
+.entry-content>.ccn-price-table>.ccn-container{padding-inline:0}
+/* Link cards (DESIGN.md "Related links"): the related-links block and «Ähnliche Beiträge» under posts */
+:is(.ccn-related-links,.ccn-related-posts) :is(.ccn-related-links-heading,.ccn-related-posts-heading){margin:0 0 var(--ccn-space-6)}
+.ccn-related-list{display:grid;gap:var(--ccn-space-5);grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr))}
+.ccn-related-card{display:flex;flex-direction:column;gap:var(--ccn-space-2);padding:var(--ccn-space-4) var(--ccn-space-5)}
+.ccn-related-card .ccn-related-card-title{margin:0;font-size:var(--ccn-fs-lead);line-height:var(--ccn-lh-heading)}
+.ccn-related-card .ccn-related-card-link{color:var(--ccn-color-text);text-decoration:none}
+.ccn-related-card .ccn-related-card-link:hover{color:var(--ccn-color-accent-text);text-decoration:underline}
+.ccn-related-card .ccn-related-card-excerpt{margin:0;color:var(--ccn-color-secondary)}
+/* Inside running text (page.php): no list markers or text margins, the text column holds the gutter, 24px above and below */
+.entry-content .ccn-related-list{margin:0;list-style:none}
+.entry-content .ccn-related-list>li{margin:0}
+.entry-content>.ccn-related-links{padding-block:var(--ccn-space-5)}
+.entry-content>.ccn-related-links>.ccn-container{padding-inline:0}
+/* «Ähnliche Beiträge» under a post: the 820px reading column, after the post navigation */
+.site-main>.ccn-related-posts{max-width:820px;margin:var(--ccn-space-7) auto 0;padding-inline:var(--ccn-space-4)}

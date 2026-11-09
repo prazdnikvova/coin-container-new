@@ -95,6 +95,41 @@ function ccn_enqueue_form_script() {
 }
 
 /**
+ * Price table and link cards (assets/css/content-cards.css, T-56 review): their
+ * rules live in a file of their own, so theme.css, which blocks the first paint
+ * of every page, stays inside the first TCP window (sent gzip at most 14 600
+ * bytes; DESIGN.md "Do / don't"). The file loads after theme.css, in <head>,
+ * only on pages whose content holds the price-table or related-links block and
+ * on posts that show «Ähnliche Beiträge». Both blocks also list the handle
+ * under 'assets' (blocks/acf-blocks.php) for anywhere else they render; the
+ * block editor gets the file as an editor style (functions.php).
+ */
+add_action( 'init', 'ccn_register_content_cards_style' );
+function ccn_register_content_cards_style() {
+	wp_register_style(
+		'ccn-content-cards',
+		get_template_directory_uri() . '/assets/css/content-cards.css',
+		array( 'coin-container' ),
+		ccn_asset_version( '/assets/css/content-cards.css' )
+	);
+}
+
+add_action( 'wp_enqueue_scripts', 'ccn_enqueue_content_cards' );
+function ccn_enqueue_content_cards() {
+	if ( ! is_singular() ) {
+		return;
+	}
+	$post = get_post();
+	if ( ! $post ) {
+		return;
+	}
+	if ( has_block( 'acf/price-table', $post ) || has_block( 'acf/related-links', $post )
+		|| ( 'post' === $post->post_type && ccn_related_post_ids( $post->ID ) ) ) {
+		wp_enqueue_style( 'ccn-content-cards' );
+	}
+}
+
+/**
  * Late dequeues. Cart fragments are disabled everywhere (the header cart count
  * renders server-side); outside the WooCommerce pages the whole jQuery/Woo
  * stack goes away.

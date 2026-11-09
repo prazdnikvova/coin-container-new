@@ -1,16 +1,6 @@
-/*
- * Coin Container base styles: cross-browser reset (from BlankSlate) + WP core
- * classes + accessibility helpers. Add your project styles below or in
- * separate files registered in functions.php.
- */
+/* Coin Container theme styles (DESIGN.md). Blocks every first paint: sent gzip it stays within 14 600 bytes. */
 
-/* --------------------------------------------------------------------------
- * Design tokens
- * Palette from the donor site's Elementor kit (coin-container.local, kit 5665):
- * Primary #F7C600, Secondary #605E5E, Text #202020, Accent #FF7D44.
- * Fonts per the same kit: DM Sans (headings), Nunito Sans (body) — self-hosted,
- * latin subset (covers German umlauts/ß). Never load fonts from external hosts.
- * ------------------------------------------------------------------------ */
+/* Fonts: self-hosted latin subset (DESIGN.md "Type"), never from external hosts */
 @font-face{font-family:'DM Sans';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/dm-sans-v17-latin-regular.woff2') format('woff2')}
 @font-face{font-family:'DM Sans';font-style:normal;font-weight:700;font-display:swap;src:url('../fonts/dm-sans-v17-latin-700.woff2') format('woff2')}
 @font-face{font-family:'Nunito Sans';font-style:normal;font-weight:400;font-display:swap;src:url('../fonts/nunito-sans-v19-latin-regular.woff2') format('woff2')}
@@ -321,39 +311,6 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-logos-list a{display:inline-flex;align-items:center;min-height:var(--ccn-tap)}
 .ccn-logo-img{width:auto;height:3rem;filter:grayscale(1)}
 .ccn-logos-list :is(li:hover,a:focus-visible) .ccn-logo-img{filter:none}
-/* Block: price table (DESIGN.md "Price table"): the labelled wrapper scrolls sideways; the swipe hint only while the table overflows its box */
-.ccn-price-table .ccn-price-table-heading{margin:0 0 var(--ccn-space-3)}
-.ccn-price-table .ccn-price-table-intro{margin:0 0 var(--ccn-space-4)}
-.ccn-price-table-box{container-type:inline-size}
-.ccn-table-wrap{overflow-x:auto;overscroll-behavior-x:contain}
-.ccn-table{width:100%;min-width:32em;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.ccn-table :is(th,td){padding:var(--ccn-space-2) var(--ccn-space-3);border-bottom:1px solid var(--ccn-color-border);text-align:left;vertical-align:top}
-.ccn-table th{font-weight:700}
-.ccn-table td{white-space:nowrap}
-.ccn-table tbody th{min-width:7em}
-.ccn-table thead th{border-bottom:2px solid var(--ccn-color-primary)}
-.ccn-price-row-note{display:block;color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small);font-weight:400}
-.ccn-table-hint{display:none;margin-top:var(--ccn-space-2);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small);text-align:right}
-@container (max-width:31.99em){.ccn-table-hint{display:block}}
-.ccn-price-table-note{margin-top:var(--ccn-space-3);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small)}
-/* Inside running text (page.php): the text column holds the gutter; 24px above and below */
-.entry-content>.ccn-price-table{padding-block:var(--ccn-space-5)}
-.entry-content>.ccn-price-table>.ccn-container{padding-inline:0}
-/* Link cards (DESIGN.md "Related links"): the related-links block and «Ähnliche Beiträge» under posts */
-:is(.ccn-related-links,.ccn-related-posts) :is(.ccn-related-links-heading,.ccn-related-posts-heading){margin:0 0 var(--ccn-space-6)}
-.ccn-related-list{display:grid;gap:var(--ccn-space-5);grid-template-columns:repeat(auto-fill,minmax(min(100%,16rem),1fr))}
-.ccn-related-card{display:flex;flex-direction:column;gap:var(--ccn-space-2);padding:var(--ccn-space-4) var(--ccn-space-5)}
-.ccn-related-card .ccn-related-card-title{margin:0;font-size:var(--ccn-fs-lead);line-height:var(--ccn-lh-heading)}
-.ccn-related-card .ccn-related-card-link{color:var(--ccn-color-text);text-decoration:none}
-.ccn-related-card .ccn-related-card-link:hover{color:var(--ccn-color-accent-text);text-decoration:underline}
-.ccn-related-card .ccn-related-card-excerpt{margin:0;color:var(--ccn-color-secondary)}
-/* Inside running text (page.php): no list markers or text margins, the text column holds the gutter, 24px above and below */
-.entry-content .ccn-related-list{margin:0;list-style:none}
-.entry-content .ccn-related-list>li{margin:0}
-.entry-content>.ccn-related-links{padding-block:var(--ccn-space-5)}
-.entry-content>.ccn-related-links>.ccn-container{padding-inline:0}
-/* «Ähnliche Beiträge» under a post: the 820px reading column, after the post navigation */
-.site-main>.ccn-related-posts{max-width:820px;margin:var(--ccn-space-7) auto 0;padding-inline:var(--ccn-space-4)}
 
 /* Block: contact cards — email / phone / address strip overlapping the hero */
 .ccn-contact-cards{position:relative;z-index:3;margin-top:-3rem}
@@ -497,42 +454,6 @@ body.ccn-transparent-header .ccn-page-hero{min-height:calc(20rem + var(--ccn-hea
 .ccn-news-more{font-weight:700;font-family:var(--ccn-font-heading);color:var(--ccn-color-secondary);margin-top:auto}
 .ccn-news-more:hover{color:var(--ccn-color-accent-text)}
 
-.hero-inner{position:relative;max-width:1200px;margin:0 auto;padding:6rem 1rem;min-height:520px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start}
-.hero-title{color:var(--ccn-color-white);font-size:2.5rem;max-width:44rem;margin-bottom:1rem}
-.hero-subtitle{font-size:1.125rem;max-width:38rem;margin-bottom:1.75rem}
-@media (max-width:48rem){.hero-title{font-size:1.875rem}.hero-inner{min-height:420px;padding:4rem 1rem}}
-
-/* Intro */
-.intro-inner.has-image{display:grid;gap:2.5rem;align-items:center}
-@media (min-width:64rem){.intro-inner.has-image{grid-template-columns:1fr 1fr}}
-.intro-subheading{font-weight:700;color:var(--ccn-color-secondary);margin-bottom:1rem}
-.intro-text p{margin-bottom:1rem}
-
-/* Services */
-.services-grid{display:grid;gap:1.5rem;grid-template-columns:1fr}
-@media (min-width:36rem){.services-grid{grid-template-columns:1fr 1fr}}
-@media (min-width:64rem){.services-grid{grid-template-columns:repeat(4,1fr)}}
-.service-number{display:inline-block;font-family:var(--ccn-font-heading);font-weight:700;font-size:1.5rem;color:var(--ccn-color-primary-text);margin-bottom:.5rem}
-.service-title{font-size:1.25rem;margin-bottom:.5rem}
-.service-text{color:var(--ccn-color-secondary);margin-bottom:1rem;font-size:.95rem}
-
-/* CTA */
-.cta-inner{text-align:center;max-width:720px;margin:0 auto}
-.cta-heading{font-size:1.875rem;margin-bottom:.75rem}
-.cta-text{margin-bottom:1.5rem}
-
-/* News */
-.news-grid{display:grid;gap:1.5rem;grid-template-columns:1fr}
-@media (min-width:36rem){.news-grid{grid-template-columns:1fr 1fr}}
-@media (min-width:64rem){.news-grid{grid-template-columns:repeat(3,1fr)}}
-.news-card-media img{width:100%;height:auto;border-radius:6px;margin-bottom:.75rem}
-.news-card-title{font-size:1.125rem;margin-bottom:.25rem}
-.news-card-date{color:var(--ccn-color-secondary);font-size:.85rem}
-
-/* Products grid (shared with shop) */
-.products-grid{display:grid;gap:1.5rem;grid-template-columns:repeat(2,1fr);list-style:none;margin:0;padding:0}
-@media (min-width:64rem){.products-grid{grid-template-columns:repeat(4,1fr)}}
-
 /* --------------------------------------------------------------------------
  * WooCommerce: product grid + cards, shop, single, cart
  * ------------------------------------------------------------------------ */
@@ -658,7 +579,7 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
  * Blog: single post + archive
  * ------------------------------------------------------------------------ */
 /* Reading column; not on shop pages */
-.site-main > article,.site-main > .page-header,.blog .site-main > *,.archive:not(.woocommerce) .site-main > *,.search:not(.woocommerce) .site-main > *{max-width:820px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}
+.site-main > article,.blog .site-main > *,.archive:not(.woocommerce) .site-main > *,.search:not(.woocommerce) .site-main > *{max-width:820px;margin-left:auto;margin-right:auto;padding-left:1rem;padding-right:1rem}
 .archive-header{margin-bottom:var(--ccn-space-6)}
 .site-main{padding:2.5rem 0}
 .entry-header{margin-bottom:1.5rem}
@@ -674,7 +595,7 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
 .entry-content img{max-width:100%;height:auto;border-radius:6px;margin:1rem 0}
 .entry-content blockquote{border-left:3px solid var(--ccn-color-primary);padding-left:1rem;margin:1rem 0;color:var(--ccn-color-secondary)}
 .archive .site-main article,.blog .site-main article{border-bottom:1px solid var(--ccn-color-light);padding-bottom:1.5rem;margin-bottom:1.5rem}
-/* Last-updated line (inc/freshness.php, DESIGN.md "Last updated"): production's cluster and glossary pages only */
+/* Last updated (DESIGN.md) */
 .ccn-freshness{margin-top:var(--ccn-space-6);padding-top:var(--ccn-space-3);border-top:1px solid var(--ccn-color-border);color:var(--ccn-color-secondary);font-size:var(--ccn-fs-small)}
 .ccn-freshness a{text-decoration:underline}
 .ccn-freshness a:hover{color:var(--ccn-color-accent-text)}
@@ -710,7 +631,7 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
 .catalog-filter-link:hover{border-color:var(--ccn-color-primary)}
 .catalog-filter-link.is-active{background:var(--ccn-color-primary);border-color:var(--ccn-color-primary);color:var(--ccn-color-text)}
 .catalog-filter-child{font-weight:400;font-size:var(--ccn-fs-small);color:var(--ccn-color-secondary)}
-/* Internal links of production (inc/internal-links.php, DESIGN.md "Internal links"): product block and «Siehe auch:» line */
+/* Internal links (DESIGN.md) */
 .ccn-links a{color:var(--ccn-color-link);text-decoration:underline}
 .ccn-links a:hover{color:var(--ccn-color-accent-text)}
 .ccn-links__title{font-weight:700}
