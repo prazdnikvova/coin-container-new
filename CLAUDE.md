@@ -44,6 +44,12 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 - Motion: only `opacity`/`transform`, content visible without JS, reduced
   motion switches it off, a new block root gets `data-motion="reveal"` —
   `DESIGN.md` "Motion", smoke "Motion invariants".
+- Editor: page layouts are patterns in `patterns/` (category «Coin
+  Container», German placeholders in brackets, no locks); the block set of
+  pages and posts, core block style removal and the pattern helpers live in
+  `inc/editor.php` — README "Patterns" and "Editor", smoke "Editor patterns
+  and guardrails (T-52)". Editor strings stay English, the brand is «Coin»,
+  never «COIN».
 
 ## Tests
 

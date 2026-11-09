@@ -32,7 +32,7 @@ mobile emulation) and the numbers go into the commit body.
   one "Site Settings" options page with tabs), Contact Form 7, Rank Math SEO
   (as on production; breadcrumbs and schema rules in `inc/seo.php`, `inc/schema.php`).
 - Content blocks are ACF blocks registered in `blocks/acf-blocks.php` under
-  custom inserter categories (COIN Banners / Lists / Products / Text); each
+  custom inserter categories (Coin: Banners / Lists / Products / Text); each
   block template lives in `blocks/<category>/<name>.php`, its fields in
   `acf-json/`. Blocks register as block API v3 / ACF Blocks v3 for the
   iframe editor of WP 7.1 (fields in the sidebar, previews in the canvas),
@@ -129,6 +129,80 @@ English with German number and price formats.
 Deploy: upload the `inc/trp-*.php` files before `functions.php`, which
 requires them, then save the permalinks once (TranslatePress' `/en/` and the
 `/sitemap-en.xml` rule).
+
+## Patterns
+
+Page layouts the team starts from (T-52), one file each in `patterns/`
+(WordPress registers the theme's patterns folder itself), all in the pattern
+category «Coin Container» (`inc/editor.php`):
+
+| Pattern | Post types | Blocks |
+|---|---|---|
+| «Coin: Service landing page» (`landing-service.php`) | page | intro, text section (light), info cards ×3, FAQ ×3, form card, CTA banner |
+| «Coin: Product landing page» (`landing-product.php`) | page | intro, featured products (light), text + image, price table, trust bar, CTA banner |
+| «Coin: Contact page» (`contact.php`) | page | form card with the contacts beside it, text section |
+| «Coin: Article» (`article.php`) | post, page | paragraph, heading, paragraph, image, heading, list, paragraph |
+
+- A new page offers them at once (WordPress's starter patterns: `Block Types:
+  core/post-content`), later the inserter has them under Patterns → Coin
+  Container. Core's own patterns (`core-block-patterns` support) and the
+  wordpress.org pattern directory (`should_load_remote_block_patterns`) are
+  off, so the Patterns tab shows the theme's four only.
+- Content: German placeholders in square brackets (`ccn_placeholder()`,
+  «[Überschrift]», «[Text]» …), never a fact, figure, price, product name or
+  phone number. Images, the form and the products are picked in the block
+  sidebar; prices, the phone, the CTA button and the trust chips come from
+  Site Settings. A placeholder on a published page fails the smoke test.
+- No locks: neither `templateLock` nor a block `lock` — the team adds,
+  removes and moves sections. One CTA banner and one form card per page is a
+  rule of the project library (`block-pages-instructions.md`).
+- Adding a pattern: `patterns/<slug>.php` with the header `Title` («Coin:
+  …», English like every editor string), `Slug` (`coin-container/<slug>`),
+  `Categories` (`coin-container`), `Block Types` (`core/post-content`),
+  `Post Types`, `Viewport Width` (1200) and an English `Description`. ACF
+  blocks through `ccn_pattern_block()` with the field keys of `acf-json/`
+  (`ccn_block_data()`, `ccn_block_rows()` for repeaters: without the
+  `_field` references the sidebar shows the fields empty); core blocks as the
+  markup the editor saves (else the editor reports invalid content). Then
+  `wp i18n make-pot` + `wp i18n update-po` (`languages/README.md`) and the
+  file name in `T52_PATTERNS` of the smoke test.
+- WordPress caches the list of pattern files (their headers) for 30 minutes
+  per theme version (site transient `wp_theme_files_patterns-*`): after a
+  pattern is added, renamed or its header changed, run
+  `wp eval 'wp_get_theme()->delete_pattern_cache();'` — locally and on the
+  deploy. The blocks of a pattern are read from its file every time.
+
+## Editor
+
+`inc/editor.php` keeps the block editor of pages and posts to what the theme
+styles (T-52; [`DESIGN.md`](DESIGN.md) "Editor"):
+
+- **Allowed blocks** (`ccn_allowed_block_types()` on
+  `allowed_block_types_all`): every `acf/*` block of the registry (a new
+  block is in at once) plus `ccn_editor_core_blocks()` — paragraph, heading,
+  list and list item, image, quote, table, separator, group. Custom HTML and
+  Shortcode only for users with `unfiltered_html`. A page or post also keeps
+  every block its content already holds (older posts with buttons, media &
+  text, social icons, spacers or Rank Math's FAQ block; the Classic block of
+  classic content), so nothing in it turns uneditable; converting those is a
+  card of its own. Products, the WooCommerce pages (shop, cart, checkout,
+  account), other post types and editors without a post keep WordPress's set.
+- **Another core block:** add it to `ccn_editor_core_blocks()` once
+  `theme.css` styles it, and to DESIGN.md "Editor".
+- **Block styles:** the theme registers none (`theme.css` has no
+  `is-style-*` class); core's styles of image, quote, separator and table are
+  removed in the editor only (`ccn_editor_block_styles()`: an inline script on
+  the post editor screen after `wp-edit-post`), so the Styles panel never
+  offers a look the site does not have. Nothing of it reaches the front end.
+- **Inserter examples** (`'example'`, `ccn_block_example()`): placeholder data
+  for the ten blocks that render from their own fields or Site Settings
+  (intro, text section, text + image, info cards, numbered list, FAQ, CTA
+  banner, services, stats, price table). Blocks that query products or posts,
+  start third-party scripts or need a chosen form or media have none
+  (home hero, contact cards, featured products, news, trust bar, reviews
+  widget, logos, form card, related links, gallery rail).
+- Palette, font sizes and spacing in the editor come from `theme.json`
+  (DESIGN.md "Editor parity").
 
 ## Markup standard
 

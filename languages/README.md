@@ -34,7 +34,11 @@ cp languages/de_DE.mo languages/de_DE_formal.mo
   process decides.
 - Visitor-facing strings are all translated. Strings that the code already
   writes in German keep the same text in `de_DE.po`.
-- Editor and admin strings (block names and descriptions, editor hints,
+- Editor and admin strings (block names and descriptions, block categories,
+  editor hints, pattern titles and descriptions, the pattern category,
   template names, `theme.json` labels, menu locations) have no production
   counterpart and stay English for now.
+- The placeholders of the patterns and block examples («[Überschrift]»,
+  «[Text]» …, `ccn_placeholder()` in `inc/editor.php`) are German source
+  strings; their entries stay empty, so the source shows.
 - «Sie», never «du»; German number and price format.

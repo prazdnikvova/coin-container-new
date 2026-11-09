@@ -191,6 +191,37 @@ The block editor shows the same colours and sizes as the site.
   without the edit/preview toggle (`supports.mode` false): fields live in
   the sidebar, the canvas always shows the rendered preview.
 
+## Editor
+
+What the block editor of pages and posts offers (T-52; code and how to extend
+it: README "Patterns" and "Editor"). What it does not offer is not there at
+all, not hidden by CSS.
+
+- **Blocks:** the theme's ACF blocks plus the core blocks theme.css styles —
+  paragraph, heading, list, image, quote, table, separator, group. No
+  columns, cover, buttons, media & text, embeds or WooCommerce blocks:
+  theme.css has no rules for them (core buttons in running text would even be
+  invisible, `.entry-content a` beats `.wp-block-button__link`). Custom HTML
+  and Shortcode for administrators only. Older posts keep the blocks they
+  already hold.
+- **Styles:** no block style variations. Core's «Rounded» image, «Plain»
+  quote, «Wide» and «Dots» separator and «Stripes» table are removed in the
+  editor (the site does not style them), so those blocks show no Styles panel.
+- **Colours and sizes:** the 8 palette colours and 6 font sizes of
+  `theme.json` (see Editor parity), no custom values.
+- **Patterns:** four page layouts in the category «Coin Container». Their
+  texts are German placeholders in square brackets: the layout is the design,
+  the words come from production or the client (Content & brand rules).
+  Images and the form stay empty until picked, and a block without its image
+  prints no `<img>` (all 20 blocks checked with empty data).
+- **Page rules, not locked:** at most one CTA banner and one form card per
+  page; patterns open with an `h2` block because the template prints the
+  `h1` (Markup standard in README).
+- **Inserter previews:** placeholder examples for the blocks that render from
+  their own fields or Site Settings; none where a preview would query
+  products or posts, start a third-party script or need a chosen form or
+  image.
+
 ## Colour rules
 
 1. Yellow and orange are never text on a light background. Yellow is a fill
@@ -1268,3 +1299,17 @@ for reviewing content:
   English title filter off, the formal `.mo` removed, TranslatePress' assets
   back and the switcher without `data-no-translation` fail exactly five of
   these checks.
+- Smoke test, "Editor patterns and guardrails (T-52)": the four pattern files
+  with their headers (Title «Coin: …», Slug, Categories, Block Types, Post
+  Types, Viewport Width) and `php -l`; `inc/editor.php` with the allowed-blocks
+  filter, remote and core patterns off and the pattern category; the inserter
+  categories «Coin: …» and no «COIN» in any inserter string; examples on the
+  ten blocks without queries or scripts only; core block styles dropped by an
+  editor-only script and no block style of the theme; the patterns route 401
+  for visitors; no placeholder on a published page (REST search). With
+  `CCN_PATTERN_TEST=1` and `CCN_WP_AUTH` a page is built from each pattern,
+  checked at 360 and 1440 and deleted again. The editor itself (starter
+  modal, Patterns tab, block list, inserter previews, the canvas of each
+  pattern) is checked by the library probe
+  `reports/2026-11-09-t52-shots/t52_editor.cjs` under a temporary
+  administrator.
