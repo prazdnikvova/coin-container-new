@@ -296,10 +296,10 @@ const restStatus = await page.evaluate(async (base) => {
 }, BASE);
 ok('REST /wp/v2/users closed (404)', restStatus === 404, String(restStatus));
 
-// Shop sorting is the only catalogue "filter" control on this site (no attribute
-// filters): a server-side ?orderby= must change the order, not just return 200.
+// Shop sorting: a server-side ?orderby= must change the order, not just return 200.
 // Added 19.09.2026 together with the forms block below (user request: filters +
-// forms on every site).
+// forms on every site); the attribute filters of the product categories are
+// checked in "Catalog filters (T-57b)" at the end.
 const idsOf = () => page.$$eval('li.product', (els) => els.map((e) => (e.className.match(/post-(\d+)/) || [])[1]).filter(Boolean));
 await page.goto(BASE + '/container-shop/', { waitUntil: 'domcontentloaded' });
 const idsDefault = await idsOf();
@@ -353,9 +353,9 @@ ok('wp_head without json+oembed link', !postHtml.includes('json+oembed'));
 // <main>; every <nav> named by aria-label/aria-labelledby, never "...navigation"
 // (screen readers add the role); heading levels of theme markup never skip —
 // editor content (.entry-content, .rich-text, WooCommerce tab panels, category
-// descriptions .term-description — production texts since T-53a with h3 that
-// production prints below the product grid, WooCommerce here above it; place
-// and levels are a roadmap item) is content, not theme, and is left out;
+// descriptions .term-description — production texts since T-53a with h3, below
+// the product grid as on production since T-57b; their levels are a roadmap
+// item) is content, not theme, and is left out;
 // main#content takes focus from the skip link;
 // anchor targets clear the sticky header. A new page template adds its page here.
 const structurePages = [
@@ -2531,6 +2531,185 @@ ok('B2B (T-57a): functions.php requires inc/b2b.php only with WooCommerce; Site 
 	&& t57aSettings.slice(t57aShopTab + 1, t57aSettings.indexOf(t57aMode)).every((f) => f.type !== 'tab')
 	&& /update_meta_data\(\s*'_coin_b2b_confirm',\s*'ja'\s*\)/.test(t57aCode) && /add_action\(\s*'woocommerce_checkout_create_order',\s*'ccn_b2b_confirm_meta'\s*\)/.test(t57aCode),
 	JSON.stringify({ tab: t57aShopTab, mode: t57aMode ? { type: t57aMode.type, default: t57aMode.default_value } : null }));
+
+// Catalog filters (T-57b, inc/catalog-filter.php, DESIGN.md "Shop: filters"): production's three filter groups of the
+// BeRocket plugin (Zustand, Containertyp, Größe; OR inside a group, AND between groups) as server-side links to
+// WooCommerce's layered-nav query vars (?filter_<attribute>=…&query_type_<attribute>=or), without the plugin and
+// without JS. The used-container category, production's archive with filters: 23 products; one <details> with the
+// groups, terms and order of production, the counts of the category, closed until a filter is active; every link
+// answers with as many results as its count; filtered listings noindex; the category text under the grid on the
+// first unfiltered page only; the stylesheet only where the filter prints. Read-only: nothing is written.
+const T57B_CAT = `${CAT_BASE}gebrauchte-seecontainer-kaufen/`;
+const T57B_GROUPS = [
+	['Zustand', ['Gebraucht', 'Neuwertig']],
+	['Containertyp', ['Flat Rack', 'Hard Top Container', 'Isoliercontainer', 'Kühlcontainer', 'Lagercontainer', 'Open Top Container', 'Pallet Wide Container', 'Standard Container', 'Tank Container', 'Wechselbrücken']],
+	['Größe', ['20 Fuß', '20 Fuß HC', '40 Fuß', '40 Fuß HC']],
+];
+const t57bRead = (html) => {
+	const h = String(html);
+	const all = [...h.matchAll(/<details class="ccn-filter"( open)?><summary>([^<]*)<\/summary>([\s\S]*?)<\/details>/g)];
+	const body = all[0] ? all[0][3] : '';
+	const groups = [...body.matchAll(/<fieldset><legend>([^<]*)<\/legend>([\s\S]*?)<\/fieldset>/g)].map((g) => ({
+		legend: g[1],
+		links: (g[2].match(/<a /g) || []).length,
+		chips: [...g[2].matchAll(/<a href="([^"]+)" rel="nofollow"( aria-current="true")?>([^<]+) \((\d+)\)<\/a>/g)]
+			.map((c) => ({ href: c[1].replace(/&#0?38;|&amp;/g, '&'), active: !!c[2], name: c[3], count: Number(c[4]) })),
+	}));
+	const reset = body.match(/<a class="ccn-filter-reset" href="([^"]+)">([^<]*)<\/a>/);
+	const rc = ((h.match(/<p class="woocommerce-result-count[^>]*>([\s\S]*?)<\/p>/) || [])[1] || '').replace(/<[^>]+>[^<]*<\/[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+	return {
+		details: all.length, open: !!(all[0] && all[0][1]), summary: all[0] ? all[0][2] : '', groups,
+		reset: reset ? { href: reset[1], text: reset[2] } : null, rc,
+		total: !rc ? 0 : /von (\d+)/.test(rc) ? Number(rc.match(/von (\d+)/)[1]) : /\d/.test(rc) ? Number(rc.match(/\d+/)[0]) : 1,
+		cards: (h.match(/<li class="[^"]*\bproduct\b[^"]*\btype-product\b/g) || []).length,
+		robots: (h.match(/<meta name="robots" content="([^"]*)"/) || [])[1] || '',
+		canonical: (h.match(/<link rel="canonical" href="([^"]*)"/) || [])[1] || '',
+		ogUrl: (h.match(/<meta property="og:url" content="([^"]*)"/) || [])[1] || '',
+		desc: (h.match(/class="term-description"/g) || []).length,
+		at: (needle) => h.indexOf(needle),
+		empty: h.includes('woocommerce-no-products-found'),
+	};
+};
+const t57bChip = (v, legend, name) => ((v.groups.find((g) => g.legend === legend) || { chips: [] }).chips.find((c) => c.name === name) || null);
+const t57bAt = async (href) => {
+	const u = new URL(href || `${BASE}${T57B_CAT}`);
+	const r = await t56Get(`${u.pathname}${u.search}`);
+	return { status: r.res.status, url: u, html: r.text, v: t57bRead(r.text) };
+};
+const t57bCat = await t57bAt(`${BASE}${T57B_CAT}`);
+const t57bP2 = await t57bAt(`${BASE}${T57B_CAT}page/2/`);
+const t57b = t57bCat.v;
+ok('Catalog filters (T-57b): the used-container category answers 200 with 23 products (result count «… von 23», 12 cards on page 1 + 11 on page 2)',
+	t57bCat.status === 200 && t57bP2.status === 200 && t57b.total === 23 && t57b.cards === 12 && t57bP2.v.cards === 11,
+	JSON.stringify({ status: [t57bCat.status, t57bP2.status], result: t57b.rc, cards: [t57b.cards, t57bP2.v.cards] }));
+const t57bShape = t57b.groups.map((g) => [g.legend, g.chips.map((c) => c.name)]);
+const t57bSums = t57b.groups.map((g) => g.chips.reduce((s, c) => s + c.count, 0));
+ok('Catalog filters (T-57b): one closed <details class="ccn-filter"> «Filter» with production\'s groups, terms and order (Zustand 2 / Containertyp 10 / Größe 4 links «Term (count)», counts summing to 32 / 28 / 23), every link rel="nofollow", nothing chosen, no «Zurücksetzen»',
+	t57b.details === 1 && !t57b.open && t57b.summary === 'Filter' && JSON.stringify(t57bShape) === JSON.stringify(T57B_GROUPS)
+	&& JSON.stringify(t57bSums) === '[32,28,23]' && t57b.groups.every((g) => g.links === g.chips.length && g.chips.every((c) => !c.active)) && !t57b.reset,
+	JSON.stringify({ details: t57b.details, open: t57b.open, summary: t57b.summary, groups: t57b.groups.map((g) => `${g.legend} ${g.chips.length}/${g.links}`), sums: t57bSums }));
+// Every link of the unfiltered category, one after the other: its results are its count, it is the one chosen term.
+const t57bEach = [];
+for (const g of t57b.groups) {
+	for (const c of g.chips) {
+		const r = await t57bAt(c.href);
+		const self = t57bChip(r.v, g.legend, c.name);
+		t57bEach.push({
+			chip: `${g.legend}:${c.name}`, status: r.status, count: c.count, total: r.v.total, cards: r.v.cards, open: r.v.open,
+			summary: r.v.summary, chosen: r.v.groups.flatMap((x) => x.chips.filter((y) => y.active).map((y) => `${x.legend}:${y.name}`)),
+			query: [...r.url.searchParams.keys()].join(','), reset: r.v.reset ? r.v.reset.href : '', back: self ? self.href : '',
+		});
+	}
+}
+const t57bEachBad = t57bEach.filter((e) => !(e.status === 200 && e.total === e.count && e.cards === Math.min(e.count, 12) && e.open
+	&& e.summary === 'Filter (1 aktiv)' && e.chosen.join() === e.chip && /^filter_[a-z]+,query_type_[a-z]+$/.test(e.query)
+	&& e.reset === `${BASE}${T57B_CAT}` && e.back === `${BASE}${T57B_CAT}`));
+ok('Catalog filters (T-57b): each of the 16 links answers 200 with as many results as its count (the cards of page 1 too), that term chosen (aria-current), the <details> open as «Filter (1 aktiv)», «Zurücksetzen» and the chosen term back to the category',
+	t57bEach.length === 16 && t57bEachBad.length === 0, JSON.stringify({ links: t57bEach.length, bad: t57bEachBad.slice(0, 3) }));
+// Combinations, followed through the links of the filtered pages: AND between groups, OR inside a group, and a
+// choice without products (the filter stays above WooCommerce's notice).
+const t57bNeu = await t57bAt((t57bChip(t57b, 'Zustand', 'Neuwertig') || {}).href);
+const t57bAnd = await t57bAt((t57bChip(t57bNeu.v, 'Größe', '20 Fuß') || {}).href);
+const t57bFlat = await t57bAt((t57bChip(t57b, 'Containertyp', 'Flat Rack') || {}).href);
+const t57bOr = await t57bAt((t57bChip(t57bFlat.v, 'Containertyp', 'Tank Container') || {}).href);
+const t57bNone = await t57bAt((t57bChip(t57bNeu.v, 'Containertyp', 'Flat Rack') || {}).href);
+const t57bN = (legend, name) => (t57bChip(t57b, legend, name) || { count: -1 }).count;
+const t57bCombo = {
+	and: { status: t57bAnd.status, total: t57bAnd.v.total, summary: t57bAnd.v.summary, query: t57bAnd.url.search,
+		dropNeu: (t57bChip(t57bAnd.v, 'Zustand', 'Neuwertig') || {}).href === (t57bChip(t57b, 'Größe', '20 Fuß') || {}).href },
+	or: { status: t57bOr.status, total: t57bOr.v.total, summary: t57bOr.v.summary, typ: t57bOr.url.searchParams.get('filter_typ') },
+	none: { status: t57bNone.status, total: t57bNone.v.total, empty: t57bNone.v.empty, details: t57bNone.v.details, open: t57bNone.v.open,
+		reset: !!t57bNone.v.reset, before: t57bNone.v.at('class="ccn-filter"') < t57bNone.v.at('woocommerce-no-products-found') },
+};
+ok('Catalog filters (T-57b): AND between groups (Neuwertig + 20 Fuß: 200, fewer results than either alone, «Filter (2 aktiv)», Neuwertig\'s link drops only Neuwertig), OR inside a group (Flat Rack + Tank Container: at least the larger count, at most the sum), a choice without products (Neuwertig + Flat Rack: 200, WooCommerce\'s notice under the open filter with «Zurücksetzen»)',
+	t57bCombo.and.status === 200 && t57bCombo.and.total > 0 && t57bCombo.and.total < t57bN('Zustand', 'Neuwertig') && t57bCombo.and.total < t57bN('Größe', '20 Fuß')
+	&& t57bCombo.and.summary === 'Filter (2 aktiv)' && /filter_zustand=[^&]+&query_type_zustand=or&filter_grosse=[^&]+&query_type_grosse=or/.test(t57bCombo.and.query) && t57bCombo.and.dropNeu
+	&& t57bCombo.or.status === 200 && t57bCombo.or.total >= Math.max(t57bN('Containertyp', 'Flat Rack'), t57bN('Containertyp', 'Tank Container'))
+	&& t57bCombo.or.total <= t57bN('Containertyp', 'Flat Rack') + t57bN('Containertyp', 'Tank Container') && t57bCombo.or.summary === 'Filter (2 aktiv)'
+	&& (t57bCombo.or.typ || '').split(',').length === 2
+	&& t57bCombo.none.status === 200 && t57bCombo.none.total === 0 && t57bCombo.none.empty && t57bCombo.none.details === 1 && t57bCombo.none.open
+	&& t57bCombo.none.reset && t57bCombo.none.before, JSON.stringify(t57bCombo));
+// SEO: a filtered listing is noindex, follow (Rank Math then prints no canonical tag, by design; og:url carries the
+// category), the category itself stays indexed, no filter URL in the category sitemap; /en/ filters too.
+const t57bEn = await t57bAt(`${BASE}/en${t57bNeu.url.pathname}${t57bNeu.url.search}`);
+const t57bSitemap = await t53aLocs('/product_cat-sitemap.xml');
+ok('Catalog filters (T-57b): filtered listings noindex, follow, og:url the category, no canonical tag (Rank Math drops it on noindex) — /en/ too, with the English results and /en/ og:url; the category itself index with itself as canonical; the category sitemap without filter URLs',
+	t57bNeu.v.robots === 'noindex, follow' && t57bNeu.v.ogUrl === `${BASE}${T57B_CAT}` && !t57bNeu.v.canonical
+	&& /^index, follow/.test(t57b.robots) && t57b.canonical === `${BASE}${T57B_CAT}`
+	&& t57bEn.status === 200 && t57bEn.v.total === t57bN('Zustand', 'Neuwertig') && t57bEn.v.robots === 'noindex, follow' && t57bEn.v.ogUrl === `${BASE}/en${T57B_CAT}`
+	&& t57bSitemap.status === 200 && t57bSitemap.locs.includes(`${BASE}${T57B_CAT}`) && !t57bSitemap.locs.some((u) => /filter_|query_type_/.test(u)),
+	JSON.stringify({ filtered: { robots: t57bNeu.v.robots, canonical: t57bNeu.v.canonical, og: t57bNeu.v.ogUrl }, category: { robots: t57b.robots, canonical: t57b.canonical },
+		en: { status: t57bEn.status, total: t57bEn.v.total, robots: t57bEn.v.robots, og: t57bEn.v.ogUrl }, sitemap: t57bSitemap.locs.length }));
+// The category text (production's, printed under the h1 by WooCommerce) under the grid, as on production.
+const t57bSorted = await t57bAt(`${BASE}${T57B_CAT}?orderby=price`);
+const t57bDesc = { at: t57b.at('class="term-description"'), grid: t57b.at('<ul class="products'), pager: t57b.at('woocommerce-pagination'), links: t57b.at('ccn-links--archive') };
+ok('Catalog filters (T-57b): the category text stands under the grid on page 1 (after the products and the pagination, before «Siehe auch:»), once; not on page 2, a filtered or a sorted listing',
+	t57b.desc === 1 && t57bDesc.grid > -1 && t57bDesc.at > t57bDesc.grid && t57bDesc.at > t57bDesc.pager && t57bDesc.links > t57bDesc.at
+	&& t57bP2.v.desc === 0 && t57bNeu.v.desc === 0 && t57bSorted.status === 200 && t57bSorted.v.desc === 0,
+	JSON.stringify({ page1: t57bDesc, page2: t57bP2.v.desc, filtered: t57bNeu.v.desc, sorted: t57bSorted.v.desc }));
+// Assets: assets/css/catalog-filter.css after theme.css only where the filter prints; the front page keeps its 12
+// requests (Lighthouse: 14), no request to the BeRocket plugin.
+const t57bCssFile = themeFile('assets/css/catalog-filter.css');
+const t57bVars = [...t57bCssFile.matchAll(/var\(--([a-z0-9-]+)\)/g)].map((m) => m[1]);
+const t57bCtx = await browser.newContext();
+const t57bLoad = await t57bCtx.newPage();
+const t57bReqs = [];
+t57bLoad.on('response', (r) => t57bReqs.push({ url: r.url(), status: r.status() }));
+await t57bLoad.goto(`${BASE}${T57B_CAT}?cb=${Date.now()}`, { waitUntil: 'load' });
+await t57bCtx.close();
+const t57bCssReqs = t57bReqs.filter((r) => r.url.includes('/assets/css/catalog-filter.css'));
+const t57bHead = t57bCat.html.split('</head>')[0];
+const t57bNoTerms = (await t56Get(`${CAT_BASE}containerzubehor/`)).text;
+ok('Catalog filters (T-57b): assets/css/catalog-filter.css (<= 1 500 bytes, theme tokens only, no colour literal) once with 200 on the category, in <head> after theme.css; not on the front page (12 requests in the Lighthouse emulation), a landing or a category without filter terms (no filter there either); no request to the BeRocket plugin; inc/catalog-filter.php only with WooCommerce',
+	Buffer.byteLength(t57bCssFile) <= 1500 && t57bVars.length >= 10 && t57bVars.every((v) => !!tokenValue(v)) && !/#[0-9a-fA-F]{3,8}(?![\w-])|rgba?\(|hsla?\(/.test(t57bCssFile)
+	&& t57bCssReqs.length === 1 && t57bCssReqs[0].status === 200 && t57bHead.indexOf("id='coin-container-css'") > -1
+	&& t57bHead.indexOf("id='ccn-catalog-filter-css'") > t57bHead.indexOf("id='coin-container-css'")
+	&& t56HomeReqs.length === 12 && !t56HomeReqs.some((u) => u.includes('catalog-filter.css')) && !homeHtml.includes('catalog-filter.css')
+	&& !t53bKaufen.includes('catalog-filter.css') && !t57bNoTerms.includes('catalog-filter.css') && !t57bNoTerms.includes('class="ccn-filter')
+	&& !t57bReqs.some((r) => /woocommerce-ajax-filters|berocket/i.test(r.url))
+	&& /if \( class_exists\( 'WooCommerce' \) \) \{[^}]*require_once get_template_directory\(\) \. '\/inc\/catalog-filter\.php';[^}]*\}/.test(functionsPhp),
+	JSON.stringify({ bytes: Buffer.byteLength(t57bCssFile), vars: t57bVars.length, requests: t57bCssReqs, home: t56HomeReqs.length, berocket: t57bReqs.filter((r) => /berocket|ajax-filters/i.test(r.url)).length }));
+// 360: the closed summary is a 44px target and hides the terms; Tab from the category strip reaches it with the focus
+// ring and Enter opens it; then every term is a 44px target inside the page width; a chosen term (filtered page) is
+// the yellow fill with #202020 text and a check mark that is not read out.
+const t57bMob = await browser.newPage({ viewport: { width: 360, height: 800 } });
+await t57bMob.goto(`${BASE}${T57B_CAT}?cb=${Date.now()}`, { waitUntil: 'load' });
+const t57bClosed = await t57bMob.evaluate(() => {
+	const d = document.querySelector('details.ccn-filter');
+	return d ? { open: d.open, summary: Math.round(d.querySelector('summary').getBoundingClientRect().height),
+		shown: [...d.querySelectorAll('fieldset a')].filter((a) => a.checkVisibility()).length } : null;
+});
+await t57bMob.locator('nav.catalog-filter a').last().focus();
+await t57bMob.keyboard.press('Tab');
+const t57bFocus = await t57bMob.evaluate(() => {
+	const a = document.activeElement;
+	const s = getComputedStyle(a);
+	return { tag: a.tagName, outline: `${s.outlineStyle} ${s.outlineWidth}` };
+});
+// Enter only on the summary: on anything else (a broken filter) it could follow a link away.
+if (t57bFocus.tag === 'SUMMARY') await t57bMob.keyboard.press('Enter');
+const t57bOpened = await t57bMob.evaluate(() => {
+	const d = document.querySelector('details.ccn-filter');
+	if (!d) return null;
+	const chips = [...d.querySelectorAll('fieldset a')].filter((a) => a.checkVisibility());
+	return { open: d.open, shown: chips.length, minH: Math.min(...chips.map((a) => a.getBoundingClientRect().height)),
+		right: Math.max(...chips.map((a) => a.getBoundingClientRect().right)), overflowX: d.scrollWidth > d.clientWidth };
+});
+await t57bMob.goto(`${t57bNeu.url.href}&cb=${Date.now()}`, { waitUntil: 'load' });
+const t57bChosen = await t57bMob.evaluate(() => {
+	const a = document.querySelector('details.ccn-filter a[aria-current="true"]');
+	const r = document.querySelector('.ccn-filter-reset');
+	if (!a) return null;
+	const s = getComputedStyle(a);
+	return { color: s.color, bg: s.backgroundColor, h: Math.round(a.getBoundingClientRect().height), mark: getComputedStyle(a, '::before').content,
+		reset: r ? Math.round(r.getBoundingClientRect().height) : 0 };
+});
+await t57bMob.close();
+ok('Catalog filters (T-57b): at 360 the closed «Filter» is a >= 44px target with the terms hidden; Tab from the category strip gives it the 3px focus ring, Enter opens it: 16 terms, each >= 44px, inside the 360px width; a chosen term is #202020 on the brand yellow with a check mark not read out, «Zurücksetzen» >= 44px',
+	!!t57bClosed && !t57bClosed.open && t57bClosed.summary >= 44 && t57bClosed.shown === 0 && t57bFocus.tag === 'SUMMARY' && t57bFocus.outline === 'solid 3px'
+	&& !!t57bOpened && t57bOpened.open && t57bOpened.shown === 16 && t57bOpened.minH >= 44 && t57bOpened.right <= 360 && !t57bOpened.overflowX
+	&& !!t57bChosen && t57bChosen.color === 'rgb(32, 32, 32)' && t57bChosen.bg === 'rgb(247, 198, 0)' && t57bChosen.h >= 44 && /✓"\s*\/\s*""/.test(t57bChosen.mark) && t57bChosen.reset >= 44,
+	JSON.stringify({ closed: t57bClosed, focus: t57bFocus, opened: t57bOpened, chosen: t57bChosen }));
 
 await browser.close();
 console.log(results.join('\n'));
