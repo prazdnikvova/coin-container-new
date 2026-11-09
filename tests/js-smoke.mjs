@@ -1,7 +1,7 @@
 // Coin Container smoke test: rendering, accessibility basics, security hardening.
 // Requires a local WordPress site running this theme.
 import { chromium } from 'playwright';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 
 const BASE = process.env.CCN_BASE_URL || 'http://coin-container-new.local';
@@ -1675,6 +1675,18 @@ for (const path of [new URL(postUrl).pathname, '/kontakt-beratung/', '/container
 }
 ok('Last updated (T-56): not on a post, the contact page, a landing outside the list, the glossary hub or the front page',
 	Object.values(t56FreshOff).every((n) => n === 0), JSON.stringify(t56FreshOff));
+
+// Diesel surcharge: the theme registers exactly one shortcode, [ccn_dieselzuschlag], fed by Site Settings → Preise →
+// diesel_surcharge (code level: no page uses it before the content migration renames production's
+// [coin_dieselzuschlag], T-53b; the rendering is checked with WP-CLI in the T-56 report).
+const t56PhpFiles = readdirSync(themeDir, { recursive: true }).map(String)
+	.filter((f) => f.endsWith('.php') && !/^(vendor|tests|node_modules)[\\/]/.test(f));
+const t56Shortcodes = t56PhpFiles.flatMap((f) => [...themeFile(f).matchAll(/add_shortcode\(\s*'([^']+)'/g)].map((m) => m[1]));
+const t56SiteSettings = JSON.parse(themeFile('acf-json/group_ccn_site_settings.json') || '{}').fields || [];
+ok('Shortcodes (T-56): the theme registers exactly one, [ccn_dieselzuschlag], read from the Site Settings field diesel_surcharge',
+	t56Shortcodes.length === 1 && t56Shortcodes[0] === 'ccn_dieselzuschlag' && t56SiteSettings.some((f) => f.name === 'diesel_surcharge')
+	&& themeFile('inc/shortcodes.php').includes("ccn_setting( 'diesel_surcharge' )"),
+	JSON.stringify({ shortcodes: t56Shortcodes, phpFiles: t56PhpFiles.length }));
 
 await browser.close();
 console.log(results.join('\n'));

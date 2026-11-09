@@ -69,7 +69,10 @@ mobile emulation) and the numbers go into the commit body.
   every saved page or post, and the web server must send the noindex header
   for it, as production's root `.htaccess` does), `freshness.php` (the
   «Zuletzt aktualisiert» line of production's cluster and glossary pages,
-  printed by the page templates after the content).
+  printed by the page templates after the content), `shortcodes.php` (the
+  theme's only shortcode, `[ccn_dieselzuschlag]`: the diesel surcharge of
+  Site Settings → Preise inside running text, as production's
+  `[coin_dieselzuschlag]`).
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live

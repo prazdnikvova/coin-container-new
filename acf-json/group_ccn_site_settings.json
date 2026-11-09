@@ -341,6 +341,21 @@
             "type": "text",
             "instructions": "\"Anfrage\" button of the bottom action bar on phones (and the landing button when its URL is empty). The bar is hidden on this page itself and on cart, checkout and account.",
             "default_value": "/container-angebot-anfordern/"
+        },
+        {
+            "key": "field_ccn_tab_prices",
+            "label": "Preise",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_diesel_surcharge",
+            "label": "Diesel surcharge (%)",
+            "name": "diesel_surcharge",
+            "type": "text",
+            "instructions": "Percent without the sign, e.g. 20 (production: 20). Shown in running text through the shortcode [ccn_dieselzuschlag] (transport cost post) as on production: one decimal, a trailing «,0» dropped, then « %». Empty = nothing is shown."
         }
     ],
     "location": [
