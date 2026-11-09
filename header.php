@@ -59,6 +59,7 @@
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<?php get_template_part( 'template-parts/language-switcher' ); ?>
 		</div>
 	</div>
 
@@ -77,6 +78,8 @@
 					'fallback_cb'    => false,
 				)
 			);
+			// Below 64rem the switcher closes the mobile menu (from 64rem: the top bar).
+			get_template_part( 'template-parts/language-switcher' );
 			?>
 		</nav>
 
