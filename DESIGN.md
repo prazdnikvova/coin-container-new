@@ -908,6 +908,33 @@ Coin Container Team, Hamburg», the name linking to `/ueber-uns/`.
   `--ccn-color-border` line, 32px after the content; the link underlined
   with the accent-text hover.
 
+## Glossary
+
+`inc/glossary.php` (T-57c, README "Glossary"): production's A–Z index under
+the text of the hub `/glossar/`, its markup and order
+(`transmax-child/inc/seo-migration-glossar.php`) without its inline margins,
+and no CSS of its own (theme.css stays in the first TCP window).
+
+- Markup: `<div class="ccn-glossary-index">` after the hub text; per first
+  letter an `<h2>` (13 today, C to W) over a `<ul>` of «<a>Name</a> –
+  definition», the name linking to the term page. The outline stays
+  unbroken: the page h1, then the letters as h2.
+- Look: the prose rules of `.entry-content` — h2 at `--ccn-fs-h2` with
+  1.75rem above and .75rem below, disc bullets 1.25rem in, .35rem between
+  items, links `--ccn-color-link` underlined with the accent-text hover,
+  text `#202020` on white (16.29:1). The 68ch measure of running text
+  applies to the direct children of `.entry-content` only, so at 1440 the
+  index lines run to 768px (the 788px text column less the bullet indent)
+  where the two intro paragraphs above stop at 734px (68ch); at 360 both
+  fill the 328px column. Measured: no sideways scroll at 360 or 1440, text
+  contrast 0 failures on the hub (German and English) and a term page.
+- Words are content: the name is the title of the term page, the definition
+  its meta description. The dash between them is production's list markup,
+  not a dash in running text (Content & brand rules 5).
+- Nothing else is visible: the DefinedTermSet / DefinedTerm schema lives in
+  Rank Math's graph; the term pages keep «Zuletzt aktualisiert» (Last
+  updated).
+
 ## Price table
 
 `acf/price-table` (`blocks/lists/price-table.php`, T-56): the price ranges of
@@ -1422,3 +1449,20 @@ for reviewing content:
   contrast probe of the category: the T-57b report of the project library
   (`reports/2026-11-09-t57b-report.md`, probes in
   `reports/2026-11-09-data/t57b-scripts/`).
+- Smoke test, "Glossary (T-57c)": the hub 200 with production's h1 and text
+  and the index once after it (no inline style, no CSS rule), on no other
+  page; every published child page of the hub (REST) in it once, in ≥ 10
+  letter groups from A to Z, each name under its letter in production's
+  natural order; each link 200 on its page, h1 = link text, meta
+  description = the definition; the DefinedTermSet of the hub (production's
+  keys and order, one term per child page, publisher = the Organization
+  @id of the front page, the same set on `/en/`) and one DefinedTerm on
+  every child page (description = meta description, inside that set) with
+  one header, one h1 and the last-updated line; the 24 `/glossar/` URLs in
+  the page sitemap; `/en/glossar/` with the index; plain pages, no post
+  type. Read-only; the child pages come from REST, so index and schema
+  checks fail apart. Negative runs (index filter off: the four index checks
+  fail; JSON-LD off: the two schema checks; sort order off: the order
+  check), parity with production and screenshots: the T-57c report of the
+  project library (`reports/2026-11-10-t57c-report.md`, probes in
+  `reports/2026-11-10-data/t57c-scripts/`).

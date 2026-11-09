@@ -61,6 +61,12 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
   plugin, no JS; filtered listings are noindex; the category text stands
   under the grid; their CSS lives only in `assets/css/catalog-filter.css` —
   README "Shop", smoke "Catalog filters (T-57b)".
+- Glossary: plain pages, as on production (the hub `/glossar/` and one child
+  page per term), no post type and no data file: `inc/glossary.php` builds
+  production's A–Z index under the hub text and the DefinedTermSet /
+  DefinedTerm schema from the pages themselves (title, Rank Math meta
+  description, permalink), without CSS or gettext of its own — README
+  "Glossary", smoke "Glossary (T-57c)".
 
 ## Tests
 

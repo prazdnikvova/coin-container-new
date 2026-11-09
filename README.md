@@ -93,7 +93,9 @@ mobile emulation) and the numbers go into the commit body.
   the shop: «ab» before prices, the B2B note, the required confirmation at
   the checkout; see "Shop"), `catalog-filter.php` (the attribute filters of
   the product categories as server-side links instead of production's AJAX
-  filter plugin, and the category text under the product grid; see "Shop").
+  filter plugin, and the category text under the product grid; see "Shop"),
+  `glossary.php` (the A–Z index of the glossary hub and its DefinedTermSet /
+  DefinedTerm schema, read from the glossary pages; see "Glossary").
   Redirects of old addresses
   are not theme code: the project's 301 map goes to the web server
   ([`DESIGN.md`](DESIGN.md) "URLs and redirects").
@@ -228,6 +230,38 @@ same three groups without a plugin and without JS:
   only) after theme.css, only on a category that prints the filter
   (`inc/assets-cleanup.php`); DESIGN.md "Shop: filters".
 - **Tests:** smoke section "Catalog filters (T-57b)".
+
+## Glossary
+
+The Container-Glossar is plain pages, as on production: the hub
+`/glossar/` (top-level page, slug `glossar`) and one child page per term,
+`/glossar/<slug>/` (23 today). No post type and no data file: production
+builds its index and schema from `transmax-child/inc/glossar-terms.php`,
+the rebuild reads the pages (`inc/glossary.php`, T-57c).
+
+- **One source:** the name of a term is the title of its child page, its
+  short definition the page's Rank Math meta description (production's
+  one-sentence «short»; Rank Math variables resolved, the first sentence of
+  the text without one), its address the permalink. A term is added by
+  publishing a child page of the hub with a meta description: index and
+  schema pick it up at once. Hub text, term texts and meta stay content.
+- **A–Z index** (production's `the_content` filter of
+  `seo-migration-glossar.php`): under the hub text, in the main query only,
+  `<div class="ccn-glossary-index">` with an `<h2>` per first letter (others
+  under «#»), letters and names in production's natural order
+  (`strnatcasecmp`), one «<a>Name</a> – definition» per list item. Markup
+  and order are production's, without its inline styles; no CSS and no
+  gettext of its own (DESIGN.md "Glossary").
+- **Schema** (production's `seo-rankmath.php` 3d, `rank_math/json_ld` 99):
+  the hub carries a `DefinedTermSet` (`<hub>#definedtermset`,
+  «Container-Glossar», publisher `/#organization`) with every term in page
+  order (menu order, then ID), each child page a `DefinedTerm` (`<url>#definedterm`,
+  name, description, url, its set) — production's keys in production's
+  order. On `/en/` TranslatePress turns the addresses into `/en/…`.
+- **Cost:** two SQL queries on the hub (the children, their meta in one
+  query), at most one on a child page; no transient, so nothing to flush.
+- «Zuletzt aktualisiert» on the child pages is `inc/freshness.php` (T-56).
+- **Tests:** smoke section "Glossary (T-57c)".
 
 ## Patterns
 
