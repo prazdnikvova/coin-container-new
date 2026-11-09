@@ -1869,8 +1869,13 @@ ok('Migration (T-53b): [coin_hero_trust] → trust bar on /seecontainer-kaufen-h
 	/<section class="ccn-trust-bar /.test(t53bHtml['/seecontainer-kaufen-hamburg/'].html) && /class="ccn-reviews-facade/.test(t53bHtml['/ueber-uns/bewertungen/'].html));
 // Legal pages: production's texts (e-mail of production, no Elementor), the inspiration landing under production's slug
 // with production's counters (decision V (a): 10 000 as on production), its old slug not answering 200 (301 map: T-53c).
-const t53bLegalMail = ['/datenschutzerklaerung/', '/impressum-und-kontakt-coin-container-inspiration-gmbh/']
-	.every((p) => /<div class="entry-content">[\s\S]*info@coin-container\.de[\s\S]*<\/div>/.test(t53bHtml[p].html));
+// The e-mail counts inside the content only (entry-content up to </main>): the footer prints it on every page.
+const t53bLegalMail = ['/datenschutzerklaerung/', '/impressum-und-kontakt-coin-container-inspiration-gmbh/'].every((p) => {
+	const h = t53bHtml[p].html;
+	const start = h.indexOf('<div class="entry-content">');
+	const end = h.indexOf('</main>', start);
+	return start > -1 && end > start && h.slice(start, end).includes('info@coin-container.de');
+});
 ok('Migration (T-53b): legal pages converted (Impressum and Datenschutz name info@coin-container.de in their content)', t53bLegalMail);
 const t53bInsp = t53bHtml[INSPIRATION].html;
 const t53bOld = await fetch(`${BASE}/container-inspiration-ideen/?cb=${Date.now()}`, { redirect: 'manual' });
