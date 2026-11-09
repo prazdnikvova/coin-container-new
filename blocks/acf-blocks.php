@@ -13,26 +13,28 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Theme block categories, shown above the core ones in the inserter.
+ * Theme block categories, shown above the core ones in the inserter. Titles
+ * carry the brand as «Coin» (never «COIN», DESIGN.md "Content & brand rules");
+ * the slugs stay, stored content does not name them.
  */
 add_filter( 'block_categories_all', 'ccn_block_categories' );
 function ccn_block_categories( $categories ) {
 	$custom = array(
 		array(
 			'slug'  => 'ccn-banners',
-			'title' => __( 'COIN Banners', 'coin-container' ),
+			'title' => __( 'Coin: Banners', 'coin-container' ),
 		),
 		array(
 			'slug'  => 'ccn-lists',
-			'title' => __( 'COIN Lists', 'coin-container' ),
+			'title' => __( 'Coin: Lists', 'coin-container' ),
 		),
 		array(
 			'slug'  => 'ccn-products',
-			'title' => __( 'COIN Products', 'coin-container' ),
+			'title' => __( 'Coin: Products', 'coin-container' ),
 		),
 		array(
 			'slug'  => 'ccn-text',
-			'title' => __( 'COIN Text', 'coin-container' ),
+			'title' => __( 'Coin: Text', 'coin-container' ),
 		),
 	);
 	return array_merge( $custom, $categories );
