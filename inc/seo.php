@@ -3,9 +3,10 @@
  * Visible breadcrumbs (T-49, DESIGN.md "Breadcrumbs") from Rank Math (T-54).
  * The plugin builds the trail and its BreadcrumbList schema from the same
  * crumbs; the theme only prints them as an ordered list. The trail follows
- * production (transmax-child/inc/breadcrumbs.php): «Startseite», the shop page
- * after it on products and product categories, parent categories, a product's
- * primary category, names with HTML entities decoded.
+ * production (transmax-child/inc/breadcrumbs.php): «Startseite», the shop level
+ * after it on products and product categories (named after the landing at the
+ * category base, «Container kaufen», since T-53c), parent categories, a
+ * product's primary category, names with HTML entities decoded.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -73,6 +74,19 @@ add_filter( 'rank_math/frontend/breadcrumb/items', 'ccn_breadcrumb_items' );
 function ccn_breadcrumb_items( $crumbs ) {
 	if ( ! is_array( $crumbs ) ) {
 		return $crumbs;
+	}
+	// The shop level of products and categories names the landing at the category
+	// base (/container-kaufen/), as production does: there that page is the shop.
+	// The shop archive keeps its own page here (/container-shop/, decision T-53c 1).
+	if ( function_exists( 'is_product' ) && ( is_product() || is_product_category() ) && function_exists( 'ccn_category_base_page' ) ) {
+		$landing  = ccn_category_base_page();
+		$shop_url = wc_get_page_permalink( 'shop' );
+		foreach ( $crumbs as $key => $crumb ) {
+			if ( $landing && isset( $crumb[1] ) && $crumb[1] === $shop_url ) {
+				$crumbs[ $key ][0] = get_the_title( $landing );
+				$crumbs[ $key ][1] = get_permalink( $landing );
+			}
+		}
 	}
 	if ( function_exists( 'is_product' ) && is_product() && count( $crumbs ) >= 2 ) {
 		$cat      = ccn_breadcrumb_primary_cat( get_queried_object_id() );
