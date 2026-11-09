@@ -11,5 +11,6 @@ while ( have_posts() ) :
 endwhile;
 ?>
 <?php get_template_part( 'nav', 'below-single' ); ?>
+<?php get_template_part( 'template-parts/related-posts' ); ?>
 
 <?php get_footer(); ?>

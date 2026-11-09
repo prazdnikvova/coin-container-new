@@ -44,3 +44,61 @@ function ccn_card_excerpt( $post, $length = 120 ) {
 	}
 	return rtrim( $cut, " \t,.;:–-" ) . '…';
 }
+
+/**
+ * IDs of up to three published posts that share a category with the post,
+ * newest first, the post itself left out (production's K69 lesson). Cached
+ * per post for 12 hours; saving, trashing, restoring or deleting a post
+ * starts a new cache generation, so a changed post shows at once.
+ *
+ * @param int $post_id Post ID.
+ * @return int[]
+ */
+function ccn_related_post_ids( $post_id ) {
+	$post_id = (int) $post_id;
+	if ( $post_id <= 0 || 'post' !== get_post_type( $post_id ) ) {
+		return array();
+	}
+	$key = 'ccn_related_posts_' . $post_id . '_' . (int) get_option( 'ccn_related_posts_gen', 0 );
+	$ids = get_transient( $key );
+	if ( is_array( $ids ) ) {
+		return array_map( 'intval', $ids );
+	}
+	$cats = array_map( 'intval', (array) wp_get_post_categories( $post_id ) );
+	$ids  = array();
+	if ( $cats ) {
+		$ids = get_posts(
+			array(
+				'post_type'           => 'post',
+				'post_status'         => 'publish',
+				'category__in'        => $cats,
+				'post__not_in'        => array( $post_id ),
+				'posts_per_page'      => 3,
+				'orderby'             => 'date',
+				'order'               => 'DESC',
+				'ignore_sticky_posts' => true,
+				'no_found_rows'       => true,
+				'fields'              => 'ids',
+			)
+		);
+	}
+	$ids = array_map( 'intval', (array) $ids );
+	set_transient( $key, $ids, 12 * HOUR_IN_SECONDS );
+	return $ids;
+}
+
+add_action( 'save_post_post', 'ccn_related_posts_flush' );
+add_action( 'trashed_post', 'ccn_related_posts_flush' );
+add_action( 'untrashed_post', 'ccn_related_posts_flush' );
+add_action( 'before_delete_post', 'ccn_related_posts_flush' );
+/**
+ * New cache generation of «Ähnliche Beiträge» when a post changes.
+ *
+ * @param int $post_id Post ID.
+ */
+function ccn_related_posts_flush( $post_id ) {
+	if ( 'post' !== get_post_type( $post_id ) || wp_is_post_revision( $post_id ) ) {
+		return;
+	}
+	update_option( 'ccn_related_posts_gen', (int) get_option( 'ccn_related_posts_gen', 0 ) + 1, true );
+}

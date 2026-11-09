@@ -768,7 +768,8 @@ texts; filter `ccn_internal_links_config`).
 ## Related links
 
 Link cards (T-56): the block `acf/related-links`
-(`blocks/lists/related-links.php`), one card style.
+(`blocks/lists/related-links.php`) and «Ähnliche Beiträge» under posts
+(`template-parts/related-posts.php`), one card style.
 
 - Block: heading (h2, default «Verwandte Leistungen», as the production
   hubs), up to six hand-picked pages, posts or products, optional excerpt
@@ -776,6 +777,12 @@ Link cards (T-56): the block `acf/related-links`
   around a list of cards; renders nothing without a published link, skips
   unpublished links and the page it stands on. Two blocks on one page need
   different headings (each names its nav).
+- Posts: up to three published posts of the same categories, newest first,
+  never the post itself (production's K69 bug), as a `<section
+  aria-labelledby>` with the h2 «Ähnliche Beiträge» after the post
+  navigation, in the 820px reading column; nothing when a category holds no
+  other post. IDs cached per post for 12 hours (transient; a saved, trashed,
+  restored or deleted post starts a new cache generation).
 - Card: `.ccn-card` (border, `--ccn-radius-md`, `--ccn-shadow-1`, lift on
   hover/focus), title h3 at `--ccn-fs-lead` linking without underline
   (underline and accent-text on hover), optional excerpt of at most 120

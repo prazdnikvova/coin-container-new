@@ -1754,6 +1754,21 @@ ok('Related links block (T-56): registered; returns before any markup without li
 	&& ['page', 'post', 'product'].every((t) => (t56RelLinks.post_type || []).includes(t)),
 	JSON.stringify({ type: t56RelLinks.type, max: t56RelLinks.max, postTypes: t56RelLinks.post_type }));
 
+// «Ähnliche Beiträge» (template-parts/related-posts.php): a post of the largest category shows 1-3 cards of other posts
+// of its categories under the h2 «Ähnliche Beiträge», after the post navigation, never itself (production's K69 bug).
+const t56TopCat = ((await (await fetch(`${BASE}/wp-json/wp/v2/categories?orderby=count&order=desc&per_page=1&_fields=id,count&cb=${Date.now()}`)).json()) || [])[0];
+const t56CatPost = t56TopCat ? ((await (await fetch(`${BASE}/wp-json/wp/v2/posts?categories=${t56TopCat.id}&per_page=1&_fields=link&cb=${Date.now()}`)).json()) || [])[0] : null;
+const t56PostPath = t56CatPost ? new URL(t56CatPost.link).pathname : '';
+const t56PostHtml = t56PostPath ? (await t56Get(t56PostPath)).text : '';
+const t56RelPosts = t56PostHtml.match(/<section class="ccn-related-posts" aria-labelledby="ccn-related-posts-title">\s*<h2 id="ccn-related-posts-title" class="ccn-related-posts-heading">([^<]+)<\/h2>([\s\S]*?)<\/section>/);
+const t56RelHrefs = t56RelPosts ? [...t56RelPosts[2].matchAll(/class="ccn-related-card-link" href="([^"]+)"/g)].map((m) => new URL(m[1]).pathname) : [];
+const t56PostNav = t56PostHtml.indexOf('post-navigation');
+ok('Related posts (T-56): «Ähnliche Beiträge» (h2) with 1-3 cards of other posts after the post navigation, never the post itself',
+	!!t56RelPosts && t56RelPosts[1] === 'Ähnliche Beiträge' && t56RelHrefs.length >= 1 && t56RelHrefs.length <= 3
+	&& !t56RelHrefs.includes(t56PostPath) && new Set(t56RelHrefs).size === t56RelHrefs.length
+	&& t56PostNav > -1 && t56PostNav < t56PostHtml.indexOf('class="ccn-related-posts"'),
+	JSON.stringify({ post: t56PostPath, category: t56TopCat, cards: t56RelHrefs }));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
