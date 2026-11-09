@@ -149,6 +149,9 @@ the six key pages, the blog index, the search results and Containerzubehör).
 - Catalogue order (shop and product categories, as on production):
   discounted products first, then menu order and title; a sort order the
   visitor picks (`?orderby=`) is left alone (`inc/woocommerce.php`, T-49).
+- Product categories, top to bottom (T-57b, as on production): h1, result
+  count, category strip, filter, sort order, products, pagination, the
+  category text (first page only, unfiltered and unsorted), «Siehe auch:».
 - Posts, blog index and archives keep the 820px reading column; shop,
   categories and product search use the full container.
 - One gutter: the landing column (`.ccn-landing.ccn-container`) and the text
@@ -596,6 +599,42 @@ never rewrites copy, the dash of the checkout notice included).
   the product, cart and checkout pages, never in theme.css (first TCP window)
   and never on other pages: the front page and the landings keep their CSS;
   their product cards gain only the «ab».
+
+## Shop: filters
+
+T-57b, production's three filter groups of the product archives as links in a
+native disclosure (`inc/catalog-filter.php`, README "Shop"): no JS, no plugin,
+nothing moves while the page loads.
+
+- **Closed by default:** `<details class="ccn-filter">` under the category
+  strip and above the sort order: a box with a 1px `--ccn-color-border` line
+  and `--ccn-radius-md`; its `<summary>` «Filter» (bold, the browser's own
+  disclosure triangle, `--ccn-space-3` / `--ccn-space-4` padding: 50px tall)
+  opens it. A filtered listing opens with it open and says «Filter (2 aktiv)».
+- **Groups:** a `<fieldset>` per group with its `<legend>` (14px bold
+  `--ccn-color-secondary`, 6.44:1) — Zustand, Containertyp, Größe, in
+  production's order and words; the terms as chips «Gebraucht (23)», wrapping
+  with an 8px gap.
+- **Chips:** links 44px tall (`--ccn-tap`), pill-shaped (radius
+  `--ccn-tap` / 2), a 1px `--ccn-color-secondary` border (6.44:1: the
+  boundary of a control needs 3:1), 14px `#202020`, not underlined. Hover:
+  `--ccn-color-light` fill and the accent-text colour (5.04:1). Chosen: the
+  `--ccn-color-primary` fill with a `#202020` border and bold `#202020` text
+  (10.11:1), plus a check mark that screen readers skip (`content: "✓" /
+  ""`), so the state never rests on colour alone; the link carries
+  `aria-current="true"`. Focus: the global 3px ring.
+- **Zurücksetzen:** an underlined link, 44px tall, after the groups, only
+  while a filter is active.
+- **360:** the chips wrap inside the 328px column; open, the panel is about
+  850–900px tall, so it stays closed until the visitor opens it or a filter
+  is active. Tab from the category strip lands on the summary; Enter or
+  Space toggles it.
+- **Styles:** `assets/css/catalog-filter.css` (1 312 bytes, ~510 gzip,
+  tokens only), loaded after theme.css on the categories that print the
+  filter, like `content-cards.css`; theme.css gains nothing (first TCP
+  window).
+- **Category text** under the grid and the pagination, before «Siehe auch:»
+  (production's order since 20.09.2026); it keeps its own markup.
 
 ## Breadcrumbs
 
@@ -1368,3 +1407,18 @@ for reviewing content:
   library (`reports/2026-11-09-t57a-report.md`; probes
   `reports/2026-11-09-data/t57a-scripts/t57a_shots.cjs` (note, box and their
   geometry at 360/1440) and `t57a_cards.cjs` (card prices)).
+- Smoke test, "Catalog filters (T-57b)": the used-container category 200 with
+  its 23 products; one closed filter with production's groups, terms and
+  order, the counts of the category, nofollow links; each of its 16 links
+  answering with as many results as its count, that term chosen, the filter
+  open, «Zurücksetzen» to the category; AND between groups, OR inside one, a
+  choice without products under the open filter; filtered listings noindex,
+  follow with og:url the category (also on `/en/`), no filter URL in the
+  category sitemap; the category text under the grid on page 1 only;
+  `catalog-filter.css` once on the category after theme.css and nowhere else
+  (front page 12 requests), no request to the BeRocket plugin; at 360 the
+  44px targets, the focus ring and Enter on the summary, the chosen chip's
+  colours and check mark. Read-only. Negative run, screenshots and the
+  contrast probe of the category: the T-57b report of the project library
+  (`reports/2026-11-09-t57b-report.md`, probes in
+  `reports/2026-11-09-data/t57b-scripts/`).

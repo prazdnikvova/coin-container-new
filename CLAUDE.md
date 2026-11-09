@@ -55,7 +55,12 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
   through the editorial process), the order meta `_coin_b2b_confirm` = `ja`
   is production's key, and its CSS stays inline on product, cart and
   checkout — README "Shop", smoke "B2B shop (T-57a)", `tests/checkout-e2e.mjs`
-  (places a real order).
+  (places a real order). The attribute filters of the product categories
+  (`inc/catalog-filter.php`) are server-side links to WooCommerce's
+  `filter_<attribute>` / `query_type_<attribute>` query vars — no AJAX filter
+  plugin, no JS; filtered listings are noindex; the category text stands
+  under the grid; their CSS lives only in `assets/css/catalog-filter.css` —
+  README "Shop", smoke "Catalog filters (T-57b)".
 
 ## Tests
 

@@ -40,12 +40,14 @@ mobile emulation) and the numbers go into the commit body.
   rendered by a plain template (legal pages, posts, shop); there is no
   flexible-content layer any more.
 - Scoped assets: block CSS lives in `assets/css/theme.css` and all theme JS
-  in `assets/js/main.js`, with two exceptions: the request forms' focus
+  in `assets/js/main.js`, with three exceptions: the request forms' focus
   script `assets/js/forms.js` follows Contact Form 7's own assets onto the
-  pages with a form, and the rare price-table and related-links blocks (plus
+  pages with a form, the rare price-table and related-links blocks (plus
   «Ähnliche Beiträge» under posts) share `assets/css/content-cards.css`,
   loaded only where they show (`inc/assets-cleanup.php`; the blocks list the
-  handle under `'assets'` in the registry). theme.css blocks every first
+  handle under `'assets'` in the registry), and the attribute filters of the
+  product categories bring `assets/css/catalog-filter.css` to the categories
+  that print them (see "Shop"). theme.css blocks every first
   paint, so sent gzip it stays within the first TCP window (≤ 14 600 bytes,
   smoke test); a component that only some pages show gets a scoped file.
 - Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
@@ -89,7 +91,10 @@ mobile emulation) and the numbers go into the commit body.
   child, as production's `seo-migration-kaufen-hierarchie.php`; flush the
   rules once after adding or moving such a page), `b2b.php` (the B2B mode of
   the shop: «ab» before prices, the B2B note, the required confirmation at
-  the checkout; see "Shop"). Redirects of old addresses
+  the checkout; see "Shop"), `catalog-filter.php` (the attribute filters of
+  the product categories as server-side links instead of production's AJAX
+  filter plugin, and the category text under the product grid; see "Shop").
+  Redirects of old addresses
   are not theme code: the project's 301 map goes to the web server
   ([`DESIGN.md`](DESIGN.md) "URLs and redirects").
 - Admin-editable globals live on the Site Settings page and are read through a
@@ -171,6 +176,58 @@ it as on). Off, prices, cart and checkout are WooCommerce's own.
   not into this file.
 - **Tests:** smoke section "B2B shop (T-57a)" and `tests/checkout-e2e.mjs`
   (see Tests).
+
+### Catalog filters
+
+Production filters its product archives with the BeRocket plugin «AJAX
+Product Filters»: Zustand, Containertyp, Größe. `inc/catalog-filter.php`
+(T-57b, required only with WooCommerce) gives every product category the
+same three groups without a plugin and without JS:
+
+- **Links, not a form:** each term links to WooCommerce's own layered-nav
+  query, e.g. `?filter_zustand=neuwertig&query_type_zustand=or&filter_grosse=20-fus&query_type_grosse=or`:
+  OR inside a group, AND between groups, applied by `WC_Query` on every
+  product archive (the attributes stay non-public: no attribute archives).
+  A link adds its term to the current choice or, once chosen
+  (`aria-current`), removes it; the sort order stays, the listing goes back
+  to page 1, and WooCommerce's pagination keeps the filter.
+- **Groups:** attribute => name in production's order and names (filter
+  `ccn_catalog_filter_groups`; the attribute «typ» is shown as
+  «Containertyp», as production does). A group lists the terms that the
+  published, visible products of the category and its subcategories carry,
+  in the attribute's own order in WooCommerce (menu order, then the name),
+  each with its count in the category without filters. Empty groups, and
+  categories without such terms (Containerzubehör), print nothing.
+- **Counts:** one SQL query per category (the term relationships of the
+  three taxonomies, catalogue visibility respected), cached for a day in
+  the transient `ccn_catalog_filter_<generation>_<category id>`. A saved
+  product, a product's changed category, visibility or filter terms, an
+  edited, deleted or reordered term and a product's status change raise the
+  option `ccn_catalog_filter_gen`, so every category counts afresh.
+- **Markup:** one `<details class="ccn-filter">` after the category strip
+  (`woocommerce_before_shop_loop` 26, before the sort order), closed until a
+  filter is active; a `<fieldset>` with its `<legend>` per group; the links
+  `rel="nofollow"`; «Zurücksetzen» back to the category while filtered. A
+  choice without products keeps the filter above WooCommerce's notice
+  (`woocommerce_no_products_found` 5).
+- **SEO:** a filtered listing (any `filter_*` or `query_type_*`, also
+  WooCommerce's `min_price`, `max_price`, `rating_filter`) is `noindex,
+  follow`, and its canonical URL is the category
+  (`rank_math/frontend/robots`, `rank_math/frontend/canonical`; Rank Math
+  prints no canonical tag on a noindex page by design, its og:url carries
+  the category). The category itself stays indexed; no sitemap lists a
+  filter URL.
+- **Category text under the grid** (production's
+  `transmax-child/inc/product-order.php`): on product taxonomy archives
+  WooCommerce's description moves from under the h1 to
+  `woocommerce_after_shop_loop` 20, after the pagination and before
+  «Siehe auch:» (25), and shows on the first page only, without a filter or
+  a sort order the visitor picked. A category without products keeps it
+  under the h1. The shop page is untouched.
+- **Styles:** `assets/css/catalog-filter.css` (at most 1 500 bytes, tokens
+  only) after theme.css, only on a category that prints the filter
+  (`inc/assets-cleanup.php`); DESIGN.md "Shop: filters".
+- **Tests:** smoke section "Catalog filters (T-57b)".
 
 ## Patterns
 
