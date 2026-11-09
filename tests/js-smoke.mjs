@@ -1507,6 +1507,78 @@ ok('Request form after sending (synthetic CF7 events): the focus moves to the me
 	!t51Sent.whileResetting && t51Sent.after && t51Sent.ariaHidden === null && t51Sent.tabindex === '-1' && t51Sent.visible, JSON.stringify(t51Sent));
 await t51.close();
 
+// SEO plugin (T-54, DESIGN.md "Breadcrumbs", inc/schema.php): Rank Math replaces Yoast. One <title>, at most one
+// meta description (Rank Math prints none without a source: product and post have one now, the pages get theirs with
+// the production meta in T-53c); breadcrumbs from Rank Math with «Startseite» and one BreadcrumbList that names the
+// visible crumbs; one company node on the front page (Organization + Store, as production); the sitemap index.
+const T54_PAGES = ['/', '/container-kaufen/', '/container-mieten/', '/kontakt-beratung/', T49_PRODUCT, '/gebrauchte-seecontainer-in-cuxhaven/'];
+const T54_BUSINESS = ['LocalBusiness', 'Store'];
+const t54Types = (n) => [].concat(n['@type'] || []);
+const t54 = {};
+for (const p of T54_PAGES) {
+	const html = await (await fetch(`${BASE}${p}?cb=${Date.now()}`)).text();
+	const head = html.slice(0, html.indexOf('</head>'));
+	const nodes = [...html.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g)]
+		.flatMap((m) => { try { const d = JSON.parse(m[1]); return d['@graph'] || [d]; } catch { return [{ '@type': 'INVALID' }]; } });
+	const crumbs = (html.match(/<nav class="ccn-breadcrumbs[^"]*" aria-label="Brotkrumen"><ol>([\s\S]*?)<\/ol><\/nav>/) || ['', ''])[1];
+	const bc = nodes.filter((n) => t54Types(n).includes('BreadcrumbList'));
+	t54[p] = {
+		titles: (head.match(/<title>[^<]+<\/title>/g) || []).length, emptyTitle: /<title>\s*<\/title>/.test(head),
+		desc: [...head.matchAll(/<meta name="description" content="([^"]*)"/g)].map((m) => m[1].length),
+		yoast: (html.match(/yoast-schema-graph|optimized with the Yoast SEO plugin/g) || []).length, rankMath: html.includes('class="rank-math-schema"'),
+		invalid: nodes.filter((n) => t54Types(n).includes('INVALID')).length,
+		business: nodes.filter((n) => t54Types(n).some((t) => T54_BUSINESS.includes(t))).map((n) => `${t54Types(n).join('+')}${n['@id'] ? ' ' + n['@id'].replace(BASE, '') : ''}`),
+		org: nodes.filter((n) => t54Types(n).includes('Organization')).length, website: nodes.filter((n) => t54Types(n).includes('WebSite')).length,
+		bc: bc.length, bcNames: bc.length ? bc[0].itemListElement.map((i) => i.item.name) : [],
+		crumbs: [...crumbs.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/g)].map((m) => m[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').trim()),
+	};
+}
+const t54Html = (s) => s.replace(/&#0?39;|&#x27;/g, "'");
+ok('SEO plugin: Rank Math only (its JSON-LD on six pages, valid), 0 Yoast marks',
+	T54_PAGES.every((p) => t54[p].rankMath && t54[p].yoast === 0 && t54[p].invalid === 0), JSON.stringify(T54_PAGES.map((p) => [p, t54[p].rankMath, t54[p].yoast, t54[p].invalid])));
+ok('SEO plugin: one non-empty <title> and at most one non-empty meta description on six pages; product and post have theirs (pages: T-53c)',
+	T54_PAGES.every((p) => t54[p].titles === 1 && !t54[p].emptyTitle && t54[p].desc.length <= 1 && t54[p].desc.every((l) => l > 0))
+	&& t54[T49_PRODUCT].desc.length === 1 && t54['/gebrauchte-seecontainer-in-cuxhaven/'].desc.length === 1,
+	JSON.stringify(T54_PAGES.map((p) => [p, t54[p].titles, t54[p].desc])));
+ok('Breadcrumbs (Rank Math): landing, product and post — one BreadcrumbList naming the visible crumbs, «Startseite» first, the product path with its category',
+	['/container-kaufen/', T49_PRODUCT, '/gebrauchte-seecontainer-in-cuxhaven/'].every((p) => t54[p].bc === 1 && t54[p].crumbs[0] === 'Startseite'
+		&& JSON.stringify(t54[p].crumbs) === JSON.stringify(t54[p].bcNames.map(t54Html))) && t54[T49_PRODUCT].crumbs.length >= 4,
+	JSON.stringify(['/container-kaufen/', T49_PRODUCT, '/gebrauchte-seecontainer-in-cuxhaven/'].map((p) => [p, t54[p].bc, t54[p].crumbs.join(' > ')])));
+ok('Schema: one company node on the front page (Rank Math Organization + Store, /#organization), no second Organization or WebSite; none doubled on the product',
+	t54['/'].business.length === 1 && /^Organization\+Store \/#organization$/.test(t54['/'].business[0]) && t54['/'].org === 1 && t54['/'].website === 1
+	&& t54[T49_PRODUCT].business.length <= 1 && t54[T49_PRODUCT].org <= 1 && t54[T49_PRODUCT].website <= 1,
+	JSON.stringify({ home: t54['/'].business, homeOrg: t54['/'].org, homeWebsite: t54['/'].website, product: t54[T49_PRODUCT].business }));
+const t54Index = await fetch(`${BASE}/sitemap_index.xml?cb=${Date.now()}`);
+const t54IndexXml = await t54Index.text();
+const t54Robots = await (await fetch(`${BASE}/robots.txt?cb=${Date.now()}`)).text();
+const t54Maps = [...t54IndexXml.matchAll(/<sitemap>\s*<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(BASE, ''));
+ok('Sitemap: /sitemap_index.xml 200 with >= 4 sitemaps (page, post, product, product_cat), robots.txt points to it',
+	t54Index.status === 200 && t54Maps.length >= 4 && ['/page-sitemap.xml', '/post-sitemap.xml', '/product-sitemap.xml', '/product_cat-sitemap.xml'].every((s) => t54Maps.includes(s))
+	&& t54Robots.includes(`Sitemap: ${BASE}/sitemap_index.xml`), JSON.stringify({ status: t54Index.status, maps: t54Maps, robots: t54Robots.includes('sitemap_index.xml') }));
+// Breadcrumbs geometry (roadmap 149): on the landings and contact pages at 1440 the trail starts at the container edge
+// like the hero text (x 136), not in the 820px column of posts; at 360 a long product trail wraps and keeps the current page.
+const t54Geo = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+const t54X = {};
+for (const p of ['/container-kaufen/', '/container-mieten/', '/kontakt-beratung/', '/container-angebot-anfordern/']) {
+	await t54Geo.goto(`${BASE}${p}?cb=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+	t54X[p] = await t54Geo.evaluate(() => {
+		const li = document.querySelector('nav[aria-label="Brotkrumen"] li');
+		const hero = document.querySelector('.ccn-page-hero-inner');
+		return li && hero ? [Math.round(li.getBoundingClientRect().x), Math.round(hero.getBoundingClientRect().x + parseFloat(getComputedStyle(hero).paddingLeft))] : null;
+	});
+}
+ok('Breadcrumbs 1440: landings and contact pages start the trail at the container edge (x of the hero text, 136px)',
+	Object.values(t54X).every((v) => v && Math.abs(v[0] - v[1]) <= 1 && Math.abs(v[0] - 136) <= 1), JSON.stringify(t54X));
+await t54Geo.setViewportSize({ width: 360, height: 800 });
+await t54Geo.goto(`${BASE}${T49_PRODUCT}?cb=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+const t54Fit = await t54Geo.evaluate(() => {
+	const ol = document.querySelector('nav[aria-label="Brotkrumen"] ol');
+	return ol ? { items: ol.children.length, scroll: ol.scrollWidth, client: ol.clientWidth, last: Math.round(ol.lastElementChild.getBoundingClientRect().width), page: document.documentElement.scrollWidth } : null;
+});
+ok('Breadcrumbs 360: the product trail (>= 4 crumbs) fits its line box, the current page keeps >= 80px, no page overflow',
+	!!t54Fit && t54Fit.items >= 4 && t54Fit.scroll <= t54Fit.client && t54Fit.last >= 80 && t54Fit.page <= 360, JSON.stringify(t54Fit));
+await t54Geo.close();
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;
