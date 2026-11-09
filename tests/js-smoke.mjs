@@ -1702,6 +1702,45 @@ ok('Price table (T-56): registered; <caption>, th scope col/row, tabindex 0 regi
 	&& themeCss.includes('.ccn-table-hint{display:none') && themeCss.includes('@container (max-width:31.99em){.ccn-table-hint{display:block}}'),
 	JSON.stringify({ rows: t56PriceRows.map((f) => f.name) }));
 
+// Internal links (inc/internal-links.php, production's link plan 1:1): the 20 and 40 Fuß products end the summary
+// (after the categories) with «Alle 20/40 Fuß Container» linking to their size page; Kühlcontainer and the shop carry
+// one «Siehe auch:» line after the product grid; every target answers 200.
+const t56ProductLinks = {};
+for (const path of ['/product/20-fuss-container-gebraucht/', '/product/40-fuss-container-gebraucht/']) {
+	const html = (await t56Get(path)).text;
+	const nav = html.match(/<nav class="ccn-links ccn-links--product" aria-labelledby="([^"]+)"><p id="([^"]+)" class="ccn-links__title">([^<]+)<\/p><ul>(.*?)<\/ul><\/nav>/);
+	const at = nav ? html.indexOf(nav[0]) : -1;
+	t56ProductLinks[path] = nav ? {
+		title: nav[3], named: nav[1] === nav[2], hrefs: [...nav[4].matchAll(/href="([^"]+)"/g)].map((m) => new URL(m[1]).pathname),
+		afterMeta: at > html.indexOf('class="product_meta"'), beforeTabs: at < html.indexOf('woocommerce-tabs'),
+	} : null;
+}
+const t56P20 = t56ProductLinks['/product/20-fuss-container-gebraucht/'];
+const t56P40 = t56ProductLinks['/product/40-fuss-container-gebraucht/'];
+ok('Internal links (T-56): 20/40 Fuß products end the summary with «Alle 20/40 Fuß Container» -> /20-|/40-fuss-container-kaufen/ (nav named by its title, after the categories, before the tabs)',
+	!!t56P20 && !!t56P40 && t56P20.title === 'Alle 20 Fuß Container' && t56P40.title === 'Alle 40 Fuß Container'
+	&& t56P20.hrefs.join() === '/20-fuss-container-kaufen/' && t56P40.hrefs.join() === '/40-fuss-container-kaufen/'
+	&& [t56P20, t56P40].every((v) => v.named && v.afterMeta && v.beforeTabs), JSON.stringify(t56ProductLinks));
+const t56Archive = {};
+for (const path of [CAT_COOLING, '/container-shop/']) {
+	const html = (await t56Get(path)).text;
+	const line = html.match(/<p class="ccn-links ccn-links--archive">Siehe auch: (.*?)<\/p>/);
+	t56Archive[path] = line ? {
+		hrefs: [...line[1].matchAll(/href="([^"]+)"/g)].map((m) => new URL(m[1]).pathname),
+		afterGrid: html.indexOf('<ul class="products') > -1 && html.indexOf(line[0]) > html.indexOf('<ul class="products'),
+	} : null;
+}
+const t56Targets = {};
+for (const p of new Set([...Object.values(t56ProductLinks), ...Object.values(t56Archive)].flatMap((v) => (v ? v.hrefs : [])))) {
+	t56Targets[p] = (await fetch(`${BASE}${p}?cb=${Date.now()}`, { redirect: 'manual' })).status;
+}
+const t56Cool = t56Archive[CAT_COOLING];
+const t56Shop = t56Archive['/container-shop/'];
+ok('Internal links (T-56): «Siehe auch:» after the grid — Kühlcontainer -> /kuehlcontainer-mieten/ + /container-kaufen/, the shop -> 4 categories; every target 200',
+	!!t56Cool && !!t56Shop && t56Cool.hrefs.join() === '/kuehlcontainer-mieten/,/container-kaufen/' && t56Shop.hrefs.length === 4
+	&& t56Cool.afterGrid && t56Shop.afterGrid && Object.keys(t56Targets).length >= 7 && Object.values(t56Targets).every((s) => s === 200),
+	JSON.stringify({ archive: t56Archive, targets: t56Targets }));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

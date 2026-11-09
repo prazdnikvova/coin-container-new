@@ -749,6 +749,22 @@ gebraucht, One Way, fabrikneu.
   `.entry-content` the block keeps the text column's gutter and takes 24px
   above and below instead of the section rhythm.
 
+## Internal links
+
+`inc/internal-links.php` (T-56): production's link plan ported 1:1
+(`transmax-child/inc/seo-internal-links.php`, 45 rows, the same config and
+texts; filter `ccn_internal_links_config`).
+
+- Product page, end of the summary (after the categories, before the tabs):
+  `<nav class="ccn-links ccn-links--product">` named by its visible title
+  «Alle 20 Fuß Container» / «Alle 40 Fuß Container» («Passende
+  Alternativen» for any other target) over a list of links, each 44px tall.
+- Product categories and the shop, after the product grid: one line
+  `<p class="ccn-links ccn-links--archive">` «Siehe auch: <a>…</a> ·
+  <a>…</a>» (inline links in a sentence).
+- Never a link to the current page, never a target twice. Links are
+  `--ccn-color-link` and underlined, accent-text on hover.
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the

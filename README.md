@@ -74,7 +74,9 @@ mobile emulation) and the numbers go into the commit body.
   Site Settings → Preise inside running text, as production's
   `[coin_dieselzuschlag]`), `price-table.php` (the price ranges of Site
   Settings → Preise for the `price-table` block, production's
-  `inc/preise.php`).
+  `inc/preise.php`), `internal-links.php` (production's link plan: the
+  size-page link at the end of a product summary, «Siehe auch:» after the
+  grid of categories and the shop).
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live
@@ -99,7 +101,8 @@ Every page renders:
   "navigation" (screen readers add the role): `Hauptmenü` (header),
   `Rechtliches` (footer), `Schnellkontakt` (bottom action bar on phones),
   `Kategorien` (catalogue filter), the landing
-  sidebar via `aria-labelledby` on its visible heading; WordPress and
+  sidebar via `aria-labelledby` on its visible heading, the size-page links
+  of a product via `aria-labelledby` on their visible title; WordPress and
   WooCommerce pagination bring their own labels. Search stays a
   `<form role="search">`.
 - no `aria-label` on an element with visible text (it replaces the text for

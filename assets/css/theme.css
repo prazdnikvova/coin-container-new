@@ -695,6 +695,13 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
 .catalog-filter-link:hover{border-color:var(--ccn-color-primary)}
 .catalog-filter-link.is-active{background:var(--ccn-color-primary);border-color:var(--ccn-color-primary);color:var(--ccn-color-text)}
 .catalog-filter-child{font-weight:400;font-size:var(--ccn-fs-small);color:var(--ccn-color-secondary)}
+/* Internal links of production (inc/internal-links.php, DESIGN.md "Internal links"): product block and «Siehe auch:» line */
+.ccn-links a{color:var(--ccn-color-link);text-decoration:underline}
+.ccn-links a:hover{color:var(--ccn-color-accent-text)}
+.ccn-links__title{font-weight:700}
+.ccn-links--product ul{display:grid}
+.ccn-links--product a{display:inline-flex;align-items:center;min-height:var(--ccn-tap)}
+.ccn-links--archive{clear:both;margin-block:var(--ccn-space-5)}
 
 /* --------------------------------------------------------------------------
  * Editor presets (theme.json): no global-styles on the front end

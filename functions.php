@@ -309,4 +309,5 @@ require_once get_template_directory() . '/inc/shortcodes.php';
 require_once get_template_directory() . '/inc/price-table.php';
 if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
+	require_once get_template_directory() . '/inc/internal-links.php';
 }
