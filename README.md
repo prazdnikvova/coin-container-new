@@ -82,7 +82,13 @@ mobile emulation) and the numbers go into the commit body.
   «Ähnliche Beiträge» under posts), `rest-auth-header-fallback.php`
   (included first: REST clients send an Application Password as
   `X-WP-Authorization` where the host drops `Authorization`, as on the KAS
-  hosting of production).
+  hosting of production), `rewrites.php` (the child pages of the landing at
+  the product category base, e.g. `/container-kaufen/buerocontainer-kaufen/`,
+  answer as pages although WooCommerce owns that base: one rewrite rule per
+  child, as production's `seo-migration-kaufen-hierarchie.php`; flush the
+  rules once after adding or moving such a page). Redirects of old addresses
+  are not theme code: the project's 301 map goes to the web server
+  ([`DESIGN.md`](DESIGN.md) "URLs and redirects").
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live

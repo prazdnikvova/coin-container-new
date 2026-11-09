@@ -319,4 +319,5 @@ require_once get_template_directory() . '/inc/related.php';
 if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
 	require_once get_template_directory() . '/inc/internal-links.php';
+	require_once get_template_directory() . '/inc/rewrites.php';
 }
