@@ -352,4 +352,6 @@ if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
 	require_once get_template_directory() . '/inc/internal-links.php';
 	require_once get_template_directory() . '/inc/rewrites.php';
+	// B2B shop (T-57a): production's B2B mode, switched in Site Settings → Shop.
+	require_once get_template_directory() . '/inc/b2b.php';
 }

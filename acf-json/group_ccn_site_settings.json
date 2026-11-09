@@ -446,6 +446,23 @@
             "name": "diesel_surcharge",
             "type": "text",
             "instructions": "Percent without the sign, e.g. 20 (production: 20). Shown in running text through the shortcode [ccn_dieselzuschlag] (transport cost post) as on production: one decimal, a trailing «,0» dropped, then « %». Empty = nothing is shown."
+        },
+        {
+            "key": "field_ccn_tab_shop",
+            "label": "Shop",
+            "name": "",
+            "type": "tab",
+            "placement": "top",
+            "endpoint": 0
+        },
+        {
+            "key": "field_ccn_b2b_mode",
+            "label": "B2B mode",
+            "name": "b2b_mode",
+            "type": "true_false",
+            "instructions": "The web shop sells to businesses only (§ 14 BGB), as on production: «ab» before every shown price, no price suffix, the B2B note on the product page, the cart and the checkout, and the required confirmation at the checkout (stored on the order as _coin_b2b_confirm). Off: WooCommerce's own prices, cart and checkout. The texts are production's and live in the theme (inc/b2b.php), not here.",
+            "default_value": 1,
+            "ui": 1
         }
     ],
     "location": [

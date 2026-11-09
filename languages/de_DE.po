@@ -864,3 +864,48 @@ msgstr ""
 msgctxt "Pattern description"
 msgid "Intro, text section on light grey, three info cards, FAQ, request form and the CTA band. For a Landing template (the featured image is the hero band)."
 msgstr ""
+
+#: inc/b2b.php:73
+msgctxt "price prefix: from"
+msgid "ab"
+msgstr "ab"
+
+#: inc/b2b.php:78
+msgid "Aktueller Preis: ab"
+msgstr "Aktueller Preis: ab"
+
+#. translators: 1: opening <strong> tag, 2: closing </strong> tag.
+#: inc/b2b.php:117
+#, php-format
+msgid "%1$sVerkauf ausschließlich an Unternehmer%2$s, Gewerbetreibende, Behörden und juristische Personen (§ 14 BGB)."
+msgstr "%1$sVerkauf ausschließlich an Unternehmer%2$s, Gewerbetreibende, Behörden und juristische Personen (§ 14 BGB)."
+
+#: inc/b2b.php:121
+msgid "Alle Preise netto zzgl. MwSt. und Lieferung."
+msgstr "Alle Preise netto zzgl. MwSt. und Lieferung."
+
+#: inc/b2b.php:122
+msgid "Sie bestellen als Privatperson?"
+msgstr "Sie bestellen als Privatperson?"
+
+#. translators: 1: opening link tag to the request page, 2: closing link tag.
+#: inc/b2b.php:125
+#, php-format
+msgid "%1$sFordern Sie ein individuelles Angebot an%2$s."
+msgstr "%1$sFordern Sie ein individuelles Angebot an%2$s."
+
+#: inc/b2b.php:169
+msgid "Ich bestelle als Unternehmer, Gewerbetreibender, Behörde oder juristische Person zu gewerblichen Zwecken (§ 14 BGB)."
+msgstr "Ich bestelle als Unternehmer, Gewerbetreibender, Behörde oder juristische Person zu gewerblichen Zwecken (§ 14 BGB)."
+
+#: inc/b2b.php:192
+msgid "Bitte bestätigen Sie, dass Sie als Unternehmer bestellen. Der Webshop richtet sich ausschließlich an gewerbliche Kunden — Privatkunden erhalten ein individuelles Angebot."
+msgstr "Bitte bestätigen Sie, dass Sie als Unternehmer bestellen. Der Webshop richtet sich ausschließlich an gewerbliche Kunden — Privatkunden erhalten ein individuelles Angebot."
+
+#: inc/b2b.php:220
+msgid "B2B bestätigt:"
+msgstr "B2B bestätigt:"
+
+#: inc/b2b.php:221
+msgid "Kunde hat gewerbliche Bestellung nach § 14 BGB bestätigt."
+msgstr "Kunde hat gewerbliche Bestellung nach § 14 BGB bestätigt."

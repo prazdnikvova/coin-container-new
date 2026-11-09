@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-09T18:37:48+00:00\n"
+"POT-Creation-Date: 2026-11-09T20:32:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: coin-container\n"
@@ -493,6 +493,51 @@ msgstr ""
 
 #: home.php:13
 msgid "Blog"
+msgstr ""
+
+#: inc/b2b.php:73
+msgctxt "price prefix: from"
+msgid "ab"
+msgstr ""
+
+#: inc/b2b.php:78
+msgid "Aktueller Preis: ab"
+msgstr ""
+
+#. translators: 1: opening <strong> tag, 2: closing </strong> tag.
+#: inc/b2b.php:117
+#, php-format
+msgid "%1$sVerkauf ausschließlich an Unternehmer%2$s, Gewerbetreibende, Behörden und juristische Personen (§ 14 BGB)."
+msgstr ""
+
+#: inc/b2b.php:121
+msgid "Alle Preise netto zzgl. MwSt. und Lieferung."
+msgstr ""
+
+#: inc/b2b.php:122
+msgid "Sie bestellen als Privatperson?"
+msgstr ""
+
+#. translators: 1: opening link tag to the request page, 2: closing link tag.
+#: inc/b2b.php:125
+#, php-format
+msgid "%1$sFordern Sie ein individuelles Angebot an%2$s."
+msgstr ""
+
+#: inc/b2b.php:169
+msgid "Ich bestelle als Unternehmer, Gewerbetreibender, Behörde oder juristische Person zu gewerblichen Zwecken (§ 14 BGB)."
+msgstr ""
+
+#: inc/b2b.php:192
+msgid "Bitte bestätigen Sie, dass Sie als Unternehmer bestellen. Der Webshop richtet sich ausschließlich an gewerbliche Kunden — Privatkunden erhalten ein individuelles Angebot."
+msgstr ""
+
+#: inc/b2b.php:220
+msgid "B2B bestätigt:"
+msgstr ""
+
+#: inc/b2b.php:221
+msgid "Kunde hat gewerbliche Bestellung nach § 14 BGB bestätigt."
 msgstr ""
 
 #: inc/editor.php:39
