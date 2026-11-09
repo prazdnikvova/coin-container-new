@@ -1,30 +1,38 @@
 <?php
 /**
- * LocalBusiness JSON-LD — Yoast (free) outputs Organization but not a postal
- * address / geo. This adds a LocalBusiness node on the front page for local
- * SEO (the strongest competitor ranks partly on this). Data comes from Site
- * Settings so it stays admin-editable.
+ * Company JSON-LD from Site Settings (admin-editable): name, phone, e-mail,
+ * postal address, geo, area served and social profiles, typed Organization
+ * plus Store (a LocalBusiness) as on production
+ * (transmax-child/inc/seo-rankmath.php: one @id, one entity, two roles).
+ * With Rank Math (T-54) the data goes into the Organization node of its graph
+ * wherever the plugin prints one (front page, shop, categories, products); a
+ * front page whose graph has no Organization gets the node added to the
+ * graph. Without Rank Math the front page gets the node as its own script.
+ * Either way the front page carries exactly one LocalBusiness.
+ *
+ * Also as on production: no top-level FAQPage / Question / Answer node from
+ * the plugin (Google switched FAQ rich results off on 07.05.2026, OPEN #22).
  *
  * FAQ (T-50): the question/answer pairs of the acf/faq blocks of a page, emitted
  * as Site Settings → Schema → faq_schema_mode says. Default = production
  * (transmax-child/inc/seo-qapage.php): the questions as mainEntity of the
- * WebPage node of Rank Math's graph, no FAQPage node; that needs Rank Math
- * (T-54), so before it nothing is printed. "faqpage" prints an own FAQPage
- * node, "none" nothing. aggregateRating / Review are never emitted: reviews of
- * the own business are self-serving for Google (team decision 22.09.2026).
+ * WebPage node of Rank Math's graph, no FAQPage node. "faqpage" prints an own
+ * FAQPage node, "none" nothing. aggregateRating / Review are never emitted:
+ * reviews of the own business are self-serving for Google (team decision
+ * 22.09.2026).
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-add_action( 'wp_head', 'ccn_local_business_schema', 20 );
-function ccn_local_business_schema() {
-	if ( ! is_front_page() || ! function_exists( 'ccn_setting' ) ) {
-		return;
-	}
-
-	$address = ccn_setting( 'address' ); // "Weidestraße 122B, 22083 Hamburg"
+/**
+ * The company node: Organization + Store, @id /#organization (Rank Math's).
+ *
+ * @return array
+ */
+function ccn_local_business_node() {
+	$address = (string) ccn_setting( 'address' ); // "Weidestraße 122B, 22083 Hamburg"
 	$street  = $address;
 	$zip     = '';
 	$city    = '';
@@ -34,23 +42,22 @@ function ccn_local_business_schema() {
 		$city   = trim( $m[3] );
 	}
 
-	$schema = array(
-		'@context'  => 'https://schema.org',
-		'@type'     => 'LocalBusiness',
-		'@id'       => home_url( '/#localbusiness' ),
-		'name'      => ccn_setting( 'company_name', get_bloginfo( 'name' ) ),
-		'url'       => home_url( '/' ),
-		'image'     => get_template_directory_uri() . '/assets/img/logo.webp',
-		'telephone' => ccn_setting( 'phone' ),
-		'email'     => ccn_setting( 'email' ),
-		'address'   => array(
+	$node = array(
+		'@type'      => array( 'Organization', 'Store' ),
+		'@id'        => home_url( '/#organization' ),
+		'name'       => ccn_setting( 'company_name', get_bloginfo( 'name' ) ),
+		'url'        => home_url( '/' ),
+		'image'      => get_template_directory_uri() . '/assets/img/logo.webp',
+		'telephone'  => ccn_setting( 'phone' ),
+		'email'      => ccn_setting( 'email' ),
+		'address'    => array(
 			'@type'           => 'PostalAddress',
 			'streetAddress'   => $street,
 			'postalCode'      => $zip,
 			'addressLocality' => $city,
 			'addressCountry'  => 'DE',
 		),
-		'geo'       => array(
+		'geo'        => array(
 			'@type'     => 'GeoCoordinates',
 			'latitude'  => '53.5753',
 			'longitude' => '10.0409',
@@ -70,9 +77,70 @@ function ccn_local_business_schema() {
 		)
 	);
 	if ( $sameas ) {
-		$schema['sameAs'] = array_values( $sameas );
+		$node['sameAs'] = array_values( $sameas );
 	}
+	return $node;
+}
 
+/**
+ * Whether this request's Rank Math graph already carries the company node.
+ *
+ * @param bool $set Mark it as carried.
+ * @return bool
+ */
+function ccn_local_business_in_graph( $set = false ) {
+	static $done = false;
+	if ( $set ) {
+		$done = true;
+	}
+	return $done;
+}
+
+// Rank Math's graph: drop FAQ nodes, merge the company data into its Organization node.
+add_filter( 'rank_math/json_ld', 'ccn_rank_math_graph', 99, 2 );
+function ccn_rank_math_graph( $data, $jsonld ) {
+	unset( $jsonld );
+	if ( ! is_array( $data ) || ! function_exists( 'ccn_setting' ) ) {
+		return $data;
+	}
+	foreach ( $data as $key => $node ) {
+		if ( is_array( $node ) && array_intersect( (array) ( $node['@type'] ?? '' ), array( 'FAQPage', 'Question', 'Answer' ) ) ) {
+			unset( $data[ $key ] );
+		}
+	}
+	$company = ccn_local_business_node();
+	foreach ( $data as $key => $node ) {
+		if ( ! is_array( $node ) || ! in_array( 'Organization', (array) ( $node['@type'] ?? '' ), true ) ) {
+			continue;
+		}
+		$types = array_values( array_unique( array_merge( (array) $node['@type'], $company['@type'] ) ) );
+		$same  = array_values( array_unique( array_merge( (array) ( $node['sameAs'] ?? array() ), (array) ( $company['sameAs'] ?? array() ) ) ) );
+		if ( isset( $node['logo'] ) ) {
+			unset( $company['image'] );
+		}
+		unset( $company['@type'], $company['@id'], $company['name'], $company['sameAs'] );
+		$data[ $key ]          = array_merge( $node, $company );
+		$data[ $key ]['@type'] = $types;
+		if ( $same ) {
+			$data[ $key ]['sameAs'] = $same;
+		}
+		ccn_local_business_in_graph( true );
+		return $data;
+	}
+	if ( is_front_page() ) {
+		$data['ccnLocalBusiness'] = $company;
+		ccn_local_business_in_graph( true );
+	}
+	return $data;
+}
+
+// Without Rank Math's graph: the company node as an own script on the front page.
+add_action( 'wp_head', 'ccn_local_business_schema', 20 );
+function ccn_local_business_schema() {
+	if ( ! is_front_page() || ! function_exists( 'ccn_setting' ) || ccn_local_business_in_graph() ) {
+		return;
+	}
+	$schema = array_merge( array( '@context' => 'https://schema.org' ), ccn_local_business_node() );
 	echo '<script type="application/ld+json">' . wp_json_encode( $schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) . "</script>\n";
 }
 

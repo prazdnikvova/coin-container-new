@@ -171,7 +171,7 @@ function ccn_sale_flash() {
 // Full-width shop: drop the default sidebar.
 remove_action( 'woocommerce_sidebar', 'woocommerce_get_sidebar', 10 );
 
-// Show result count / ordering but keep it simple; leave breadcrumbs to Yoast (T-20).
+// Show result count / ordering but keep it simple; the breadcrumbs come from inc/seo.php (Rank Math, T-54).
 remove_action( 'woocommerce_before_main_content', 'woocommerce_breadcrumb', 20 );
 
 /**

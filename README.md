@@ -29,7 +29,8 @@ mobile emulation) and the numbers go into the commit body.
 ## Stack & conventions
 
 - WordPress + WooCommerce, ACF Pro (content as ACF blocks in the block editor,
-  one "Site Settings" options page with tabs), Contact Form 7, Yoast SEO.
+  one "Site Settings" options page with tabs), Contact Form 7, Rank Math SEO
+  (as on production; breadcrumbs and schema rules in `inc/seo.php`, `inc/schema.php`).
 - Content blocks are ACF blocks registered in `blocks/acf-blocks.php` under
   custom inserter categories (COIN Banners / Lists / Products / Text); each
   block template lives in `blocks/<category>/<name>.php`, its fields in
