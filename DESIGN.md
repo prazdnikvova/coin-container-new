@@ -532,7 +532,9 @@ schema of its own. Without Rank Math nothing is printed.
   categories (`…/settings`, `show_ancestors`), a product's primary category
   with its parents (Rank Math's primary-term meta, else the deepest
   category) and decoded HTML entities (`…/items`); the schema gets the same
-  crumbs. Names come from the shop page and the categories of the site.
+  crumbs. Names come from the shop page and the categories of the site
+  (since T-53a the production categories, top level, without a parent
+  category of their own).
 - Where: products, the shop and product categories (above the h1,
   `woocommerce.php`), landings and contact pages (under the hero band, on
   white, in the 1200px container like the hero text,
@@ -944,3 +946,15 @@ for reviewing content:
   `reports/2026-11-09-data/t54_seo_probe.py` (head bytes, meta tags and
   JSON-LD nodes per page), `reports/2026-11-09-t54-shots/t54_shots.cjs`
   (trail geometry and screenshots at 1440/360).
+- Smoke test, "Migration (T-53a)": no page names the donor host
+  (`coin-container.local`) on nine pages, the JSON-LD logo included; the
+  product sitemap lists the 42 production products and the category sitemap
+  only categories under `/container-kaufen/` (the production category base);
+  every link of the product categories menu group answers 200; the product
+  trail is «Startseite › shop page › one of its categories › product» without
+  the rebuild's old parent category. Category paths of the smoke test are
+  constants at the top of the file (`CAT_BASE`, `CAT_STANDARD`, …). The
+  migration scripts live in the project library (`tools/migration/`, outside
+  this public repo): `validate.php` there checks product and form IDs,
+  categories, donor hosts left in `post_content`, `[coin_*]` shortcodes, menu
+  links and options; `dom_metrics.py` runs over the list of migrated URLs.
