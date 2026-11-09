@@ -1741,6 +1741,19 @@ ok('Internal links (T-56): «Siehe auch:» after the grid — Kühlcontainer -> 
 	&& t56Cool.afterGrid && t56Shop.afterGrid && Object.keys(t56Targets).length >= 7 && Object.values(t56Targets).every((s) => s === 200),
 	JSON.stringify({ archive: t56Archive, targets: t56Targets }));
 
+// Related links block (blocks/lists/related-links.php): code level until the content migration places it (T-53b; the
+// WP-CLI render check is in the T-56 report): no markup without a published link, at most six hand-picked pages, posts
+// or products, a nav named by its h2 (default «Verwandte Leistungen»).
+const t56RelTpl = themeFile('blocks/lists/related-links.php');
+const t56RelLinks = (JSON.parse(themeFile('acf-json/group_ccn_block_related_links.json') || '{}').fields || []).find((f) => f.name === 'links') || {};
+const t56RelEmpty = t56RelTpl.indexOf('if ( ! $ccn_links )');
+ok('Related links block (T-56): registered; returns before any markup without links; nav aria-labelledby its h2, default «Verwandte Leistungen»; relationship page/post/product, max 6',
+	blockTemplates.includes('blocks/lists/related-links.php') && t56RelEmpty > -1 && t56RelEmpty < t56RelTpl.indexOf('<section')
+	&& t56RelTpl.includes('<nav aria-labelledby="<?php echo esc_attr( $ccn_id ); ?>">') && t56RelTpl.includes('<h2 id="<?php echo esc_attr( $ccn_id ); ?>"')
+	&& t56RelTpl.includes("__( 'Verwandte Leistungen', 'coin-container' )") && t56RelLinks.type === 'relationship' && t56RelLinks.max === 6
+	&& ['page', 'post', 'product'].every((t) => (t56RelLinks.post_type || []).includes(t)),
+	JSON.stringify({ type: t56RelLinks.type, max: t56RelLinks.max, postTypes: t56RelLinks.post_type }));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

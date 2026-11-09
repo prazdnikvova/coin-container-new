@@ -765,6 +765,29 @@ texts; filter `ccn_internal_links_config`).
 - Never a link to the current page, never a target twice. Links are
   `--ccn-color-link` and underlined, accent-text on hover.
 
+## Related links
+
+Link cards (T-56): the block `acf/related-links`
+(`blocks/lists/related-links.php`), one card style.
+
+- Block: heading (h2, default «Verwandte Leistungen», as the production
+  hubs), up to six hand-picked pages, posts or products, optional excerpt
+  (production's hub boxes show titles only). `<nav aria-labelledby="<h2>">`
+  around a list of cards; renders nothing without a published link, skips
+  unpublished links and the page it stands on. Two blocks on one page need
+  different headings (each names its nav).
+- Card: `.ccn-card` (border, `--ccn-radius-md`, `--ccn-shadow-1`, lift on
+  hover/focus), title h3 at `--ccn-fs-lead` linking without underline
+  (underline and accent-text on hover), optional excerpt of at most 120
+  characters in `--ccn-color-secondary`: the manual excerpt or the start of
+  the stored text (`ccn_card_excerpt()`, `inc/related.php`), never a
+  rendered post (production printed Elementor CSS into card texts that way).
+- Grid: `repeat(auto-fill, minmax(min(100%, 16rem), 1fr))`, gap
+  `--ccn-space-5`: one column at 360, two in the 820px text column, more in
+  wider containers; the heading 32px above the grid. Inside `.entry-content`
+  no list markers or text margins, the text column's gutter and 24px above
+  and below.
+
 ## Motion
 
 Vanilla CSS plus one module in `assets/js/main.js` (T-46); values from the

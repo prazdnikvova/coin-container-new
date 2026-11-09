@@ -207,6 +207,15 @@ function ccn_register_blocks() {
 			'keywords'    => array( 'preise', 'prices', 'table', 'tabelle', 'richtwerte' ),
 			'template'    => 'blocks/lists/price-table.php',
 		),
+		array(
+			'name'        => 'related-links',
+			'title'       => __( 'Related links', 'coin-container' ),
+			'description' => __( 'Up to six hand-picked pages, posts or products as link cards under a heading (default «Verwandte Leistungen»), optionally with a short excerpt.', 'coin-container' ),
+			'category'    => 'ccn-lists',
+			'icon'        => 'admin-links',
+			'keywords'    => array( 'links', 'related', 'verwandte leistungen', 'hub' ),
+			'template'    => 'blocks/lists/related-links.php',
+		),
 	);
 
 	foreach ( $blocks as $block ) {

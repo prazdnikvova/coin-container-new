@@ -307,6 +307,7 @@ require_once get_template_directory() . '/inc/llms-txt.php';
 require_once get_template_directory() . '/inc/freshness.php';
 require_once get_template_directory() . '/inc/shortcodes.php';
 require_once get_template_directory() . '/inc/price-table.php';
+require_once get_template_directory() . '/inc/related.php';
 if ( class_exists( 'WooCommerce' ) ) {
 	require_once get_template_directory() . '/inc/woocommerce.php';
 	require_once get_template_directory() . '/inc/internal-links.php';

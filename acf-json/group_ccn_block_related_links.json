@@ -1,0 +1,58 @@
+{
+    "key": "group_ccn_block_related_links",
+    "title": "Block: Related links",
+    "fields": [
+        {
+            "key": "field_ccn_rl_heading",
+            "label": "Heading",
+            "name": "heading",
+            "type": "text",
+            "instructions": "Section heading (h2); empty = «Verwandte Leistungen», as on the production hubs. Two of these blocks on one page need different headings (they name their link lists).",
+            "default_value": "Verwandte Leistungen"
+        },
+        {
+            "key": "field_ccn_rl_links",
+            "label": "Links",
+            "name": "links",
+            "type": "relationship",
+            "instructions": "Up to six pages, posts or products, in this order. Unpublished ones and the page itself are skipped; without a link the block shows nothing.",
+            "post_type": [
+                "page",
+                "post",
+                "product"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search",
+                "post_type"
+            ],
+            "elements": "",
+            "min": "",
+            "max": 6,
+            "return_format": "id"
+        },
+        {
+            "key": "field_ccn_rl_show_excerpt",
+            "label": "Show excerpt",
+            "name": "show_excerpt",
+            "type": "true_false",
+            "instructions": "A line of at most 120 characters under each title: the manual excerpt, else the start of the text. The production hub boxes show titles only.",
+            "default_value": 0,
+            "ui": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/related-links"
+            }
+        ]
+    ],
+    "active": true,
+    "description": "Fields for the related links block (blocks\/lists\/related-links.php)."
+}
