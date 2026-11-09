@@ -1635,6 +1635,22 @@ ok('Migration: the product trail is «Startseite › shop page › one of its ca
 	t53aTrail.length === 4 && t53aTrail[0] === 'Startseite' && t53aCats.includes(t53aTrail[2]) && !t53aTrail.some((c) => /COIN/.test(c)),
 	JSON.stringify({ trail: t53aTrail, categories: t53aCats }));
 
+// Production features (T-56, DESIGN.md "How to measure"): ports of transmax-child modules and two blocks for the
+// content migration. llms.txt: the curated list of production, answered by PHP as text/plain with X-Robots-Tag
+// noindex (production serves a static copy, the header comes from .htaccess there); entries without a published
+// page are left out, so every link points to this host.
+const t56Get = async (path, init) => {
+	const res = await fetch(`${BASE}${path}${path.includes('?') ? '&' : '?'}cb=${Date.now()}`, init);
+	return { res, text: await res.text() };
+};
+const t56Llms = await t56Get('/llms.txt');
+const t56LlmsLinks = t56Llms.text.match(/^- \[[^\]]+\]\([^)]+\)/gm) || [];
+ok('llms.txt (T-56): 200 text/plain, X-Robots-Tag noindex, «# Coin Container» and >= 20 links, all on this host',
+	t56Llms.res.status === 200 && /^text\/plain/.test(t56Llms.res.headers.get('content-type') || '')
+	&& /noindex/i.test(t56Llms.res.headers.get('x-robots-tag') || '') && t56Llms.text.startsWith('# Coin Container\n')
+	&& t56LlmsLinks.length >= 20 && t56LlmsLinks.every((l) => l.includes(`](${BASE}/`)),
+	JSON.stringify({ status: t56Llms.res.status, type: t56Llms.res.headers.get('content-type'), robots: t56Llms.res.headers.get('x-robots-tag'), links: t56LlmsLinks.length }));
+
 await browser.close();
 console.log(results.join('\n'));
 const fails = results.filter((r) => r.startsWith('FAIL')).length;

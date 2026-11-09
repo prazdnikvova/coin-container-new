@@ -62,6 +62,12 @@ mobile emulation) and the numbers go into the commit body.
   (WPML-ready); site content is German, code and docs are English.
 - ACF field groups sync to `acf-json/` and are committed together with the
   templates that use them.
+- Features of the production theme (`transmax-child`) are ported one file
+  each into `inc/`, with the production behaviour and texts:
+  `llms-txt.php` (the curated `/llms.txt`: answered by PHP as text/plain
+  with `X-Robots-Tag: noindex`; in production a static copy is rewritten on
+  every saved page or post, and the web server must send the noindex header
+  for it, as production's root `.htaccess` does).
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live
