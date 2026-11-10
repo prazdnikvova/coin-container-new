@@ -4,12 +4,15 @@
 // B2B shop (T-57a, inc/b2b.php): no order without the confirmation «Ich bestelle als Unternehmer …»; the order
 // placed with it carries _coin_b2b_confirm = ja, read through WP-CLI. Every run places one real order in the
 // database of the site.
+// The product (T-60): CCN_E2E_PRODUCT, the slug of a published product with a price, in stock; without it the
+// 20 Fuß One Way container. README "Tests".
 import { chromium } from 'playwright';
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 
 const BASE = process.env.CCN_BASE_URL || 'http://coin-container-new.local';
+const PRODUCT = String(process.env.CCN_E2E_PRODUCT || '20-fuss-container-one-way').replace(/^\/+|\/+$/g, '');
 const results = [];
 const ok = (name, cond, extra = '') => results.push(`${cond ? 'PASS' : 'FAIL'} ${name}${extra ? ' — ' + extra : ''}`);
 
@@ -43,9 +46,9 @@ const ctx = await browser.newContext();
 const page = await ctx.newPage();
 
 // A product with a price (containers without a price can't be ordered).
-await page.goto(BASE + '/product/20-fuss-container-one-way/', { waitUntil: 'domcontentloaded' });
+const productResp = await page.goto(`${BASE}/product/${PRODUCT}/`, { waitUntil: 'domcontentloaded' });
 const addBtn = page.locator('button.single_add_to_cart_button');
-ok('Add-to-cart present', await addBtn.count() === 1);
+ok('Add-to-cart present', !!productResp && productResp.status() === 200 && await addBtn.count() === 1, `${PRODUCT} ${productResp ? productResp.status() : 'no response'}`);
 await addBtn.click();
 await page.waitForLoadState('networkidle');
 

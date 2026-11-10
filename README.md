@@ -409,29 +409,42 @@ template; a new template adds its page there.
 
 ## Tests
 
-Playwright smoke test (rendering, a11y basics, markup structure, security
-hardening, zero JS errors):
+Two Playwright scripts in `tests/`, run against a local WordPress with this
+theme (`npm install` in `tests/` once):
 
 ```bash
 cd tests
-npm install   # first time only
-node js-smoke.mjs
-# override target: CCN_BASE_URL=http://your-site.local node js-smoke.mjs
+npm install                  # first time only
+node js-smoke.mjs            # smoke test, about 12 minutes
+node checkout-e2e.mjs        # checkout end to end, places a real order
+# another site or product:
+CCN_BASE_URL=http://your-site.local CCN_E2E_PRODUCT=20-fuss-container-gebraucht node checkout-e2e.mjs
 ```
 
-The check count grows with the theme — every new interactive block adds its checks
-here. Any FAIL blocks the commit.
+- **Smoke test** (`js-smoke.mjs`): rendering, markup structure, accessibility
+  basics, design tokens, motion, security hardening, SEO, translations, the
+  production features of the theme and zero JS errors. Any FAIL blocks the
+  commit; every new block or feature adds its checks. It asks for one page at
+  a time: run nothing else against the same local site meanwhile (Local by
+  Flywheel serves a site with two PHP workers), and repeat a run that fails
+  with «no live upstreams» (a PHP worker was restarting).
+- **Checkout end to end** (`checkout-e2e.mjs`): product → cart → checkout with
+  cash on delivery. In B2B mode the order is refused without the
+  confirmation (production's notice) and goes through with it; its
+  `_coin_b2b_confirm` meta is read through WP-CLI. Every run places one real
+  order in the site's database.
 
-Checkout end to end (`node checkout-e2e.mjs`): product → cart → checkout with
-cash on delivery. In B2B mode the order is refused without the confirmation
-(production's notice) and goes through with it; its `_coin_b2b_confirm` meta
-is read through WP-CLI (`CCN_PHP`, `CCN_PHP_INI`, `CCN_WP_CLI` for the
-`wp-cli.phar`, `CCN_WP_PATH`; without them the PHP, php.ini and folder of the
-Local by Flywheel site whose domain is the host of `CCN_BASE_URL`). Every run
-places one real order in the site's database.
+| Variable | Script | Meaning |
+|---|---|---|
+| `CCN_BASE_URL` | both | Site under test; default `http://coin-container-new.local` |
+| `CCN_E2E_PRODUCT` | e2e | Slug of a published product with a price, in stock; default `20-fuss-container-one-way` |
+| `CCN_PATTERN_TEST=1` and `CCN_WP_AUTH=<user>:<application password>` | smoke | Builds a page from each pattern, checks it at 360 and 1440 and deletes it again; without them the step is skipped (one `SKIP` line) |
+| `CCN_PHP` | both | PHP binary — smoke: `php -l` of the patterns (default: the newest PHP 8 of Local by Flywheel); e2e: WP-CLI (default: the PHP of the Local site) |
+| `CCN_PHP_INI`, `CCN_WP_CLI`, `CCN_WP_PATH` | e2e | php.ini, `wp-cli.phar` and WordPress folder for WP-CLI; default: those of the Local by Flywheel site whose domain is the host of `CCN_BASE_URL` |
 
 CI (GitHub Actions) runs `php -l` on PHP 8.2/8.3 and PHPCS (security + i18n
-ruleset) on every push.
+ruleset) on every push; the Playwright scripts need a live site and run
+locally.
 
 ## Author
 
