@@ -46,12 +46,14 @@
 	--ccn-container:1200px;--ccn-container-wide:1400px;--ccn-container-prose:720px;
 	--ccn-dur-fast:200ms;--ccn-dur-base:250ms;--ccn-dur-reveal:500ms;
 	--ccn-ease-out:cubic-bezier(.2,.7,.2,1);
+	--ccn-topbar-h:2.5rem;--ccn-header-h:4rem;--ccn-header-h-compact:4rem;--ccn-header-total:var(--ccn-header-h);--ccn-tap:2.75rem;
+	--wp--preset--spacing--1:var(--ccn-space-1);--wp--preset--spacing--2:var(--ccn-space-2);--wp--preset--spacing--3:var(--ccn-space-3);--wp--preset--spacing--4:var(--ccn-space-4);--wp--preset--spacing--5:var(--ccn-space-5);--wp--preset--spacing--6:var(--ccn-space-6);--wp--preset--spacing--7:var(--ccn-space-7);--wp--preset--spacing--8:var(--ccn-space-8);--wp--preset--spacing--9:var(--ccn-space-9);
 }
 /* Breakpoints stay literal (36/48/64rem): var() does not work in @media */
-@media (min-width:64rem){:root{--ccn-fs-body:1.125rem}}
+@media (min-width:64rem){:root{--ccn-fs-body:1.125rem;--ccn-header-h:5rem;--ccn-header-total:calc(var(--ccn-topbar-h) + var(--ccn-header-h))}}
 
 /* Reset */
-html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline}body{line-height:1}a{text-decoration-skip-ink:auto}a:where([href^="tel"]){color:inherit;text-decoration:none}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}q{display:inline;font-style:italic}q:before{content:'"';font-style:normal}q:after{content:'"';font-style:normal}textarea,input[type="text"],input[type="button"],input[type="submit"],input[type="reset"],input[type="search"],input[type="password"]{appearance:none;border-radius:0}input[type="search"]{appearance:textfield}table{border-collapse:collapse;border-spacing:0}th,td{padding:2px}big{font-size:120%}small,sup,sub{font-size:80%}sup{vertical-align:super}sub{vertical-align:sub}dd{margin-left:20px}kbd,tt{font-family:courier;font-size:12px}ins{text-decoration:underline}del,strike,s{text-decoration:line-through}dt{font-weight:bold}address,cite,var{font-style:italic}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline}a{text-decoration-skip-ink:auto}a:where([href^="tel"]){color:inherit;text-decoration:none}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}q{display:inline;font-style:italic}q:before{content:'"';font-style:normal}q:after{content:'"';font-style:normal}textarea,input[type="text"],input[type="button"],input[type="submit"],input[type="reset"],input[type="search"],input[type="password"]{appearance:none;border-radius:0}input[type="search"]{appearance:textfield}table{border-collapse:collapse;border-spacing:0}th,td{padding:2px}big{font-size:120%}small,sup,sub{font-size:80%}sup{vertical-align:super}sub{vertical-align:sub}dd{margin-left:20px}kbd,tt{font-family:courier;font-size:12px}ins{text-decoration:underline}del,strike,s{text-decoration:line-through}dt{font-weight:bold}address,cite,var{font-style:italic}article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
 /* WordPress core classes */
 .sticky{}.bypostauthor{}.wp-caption{}.wp-caption-text{}.gallery-caption{}.alignright{}.alignleft{}.aligncenter{}
@@ -91,8 +93,6 @@ em,i{font-style:italic}
  * Header + navigation (mobile-first; burger below 64rem), DESIGN.md "Header":
  * fixed, body reserves --ccn-header-total.
  * ------------------------------------------------------------------------ */
-:root{--ccn-topbar-h:2.5rem;--ccn-header-h:4rem;--ccn-header-h-compact:4rem;--ccn-header-total:var(--ccn-header-h);--ccn-tap:2.75rem}
-@media (min-width:64rem){:root{--ccn-header-h:5rem;--ccn-header-total:calc(var(--ccn-topbar-h) + var(--ccn-header-h))}}
 /* Anchors clear the header; smooth scroll only without reduced motion */
 html{scroll-padding-top:calc(var(--ccn-header-total) + 1rem)}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
@@ -647,7 +647,6 @@ ul.products li.product .onsale.onsale{position:absolute;top:var(--ccn-space-5);l
  * Editor presets (theme.json): no global-styles on the front end
  * (inc/assets-cleanup.php), so the classes the editor can add map here.
  * ------------------------------------------------------------------------ */
-:root{--wp--preset--spacing--1:var(--ccn-space-1);--wp--preset--spacing--2:var(--ccn-space-2);--wp--preset--spacing--3:var(--ccn-space-3);--wp--preset--spacing--4:var(--ccn-space-4);--wp--preset--spacing--5:var(--ccn-space-5);--wp--preset--spacing--6:var(--ccn-space-6);--wp--preset--spacing--7:var(--ccn-space-7);--wp--preset--spacing--8:var(--ccn-space-8);--wp--preset--spacing--9:var(--ccn-space-9)}
 .has-ccn-primary-color{color:var(--ccn-color-primary)!important}.has-ccn-primary-background-color{background-color:var(--ccn-color-primary)!important}
 .has-ccn-primary-text-strong-color{color:var(--ccn-color-primary-text-strong)!important}.has-ccn-primary-text-strong-background-color{background-color:var(--ccn-color-primary-text-strong)!important}
 .has-ccn-secondary-color{color:var(--ccn-color-secondary)!important}.has-ccn-secondary-background-color{background-color:var(--ccn-color-secondary)!important}

@@ -2735,8 +2735,9 @@ const t57cNat = (a, b) => {
 };
 const t57cRead = (html) => {
 	const h = String(html);
-	const idx = [...h.matchAll(/<div class="ccn-glossary-index"[^>]*>([\s\S]*?)<\/div>/g)];
-	const groups = idx[0] ? [...idx[0][1].matchAll(/<h2>([^<]*)<\/h2><ul>([\s\S]*?)<\/ul>/g)].map((g) => ({
+	// The index has no wrapper since T-60: it is the run of letter groups «<h2>X</h2><ul>…</ul>» after the hub text.
+	const idx = [...h.matchAll(/(?:<h2>[A-ZÄÖÜ#]<\/h2><ul>[\s\S]*?<\/ul>)+/g)];
+	const groups = idx[0] ? [...idx[0][0].matchAll(/<h2>([^<]*)<\/h2><ul>([\s\S]*?)<\/ul>/g)].map((g) => ({
 		letter: t57cText(g[1]),
 		items: [...g[2].matchAll(/<li><a href="([^"]+)">([^<]*)<\/a>(?: – ([^<]*))?<\/li>/g)]
 			.map((i) => ({ href: t57cText(i[1]), name: t57cText(i[2]), desc: t57cText(i[3] || '') })),
@@ -2775,11 +2776,12 @@ for (const k of t57cKids) {
 const t57cChild = Object.fromEntries(t57cChildren.map((c) => [c.link, c]));
 const t57cHrefs = t57cHub.items.map((i) => i.href);
 const t57cThemeCss = themeFile('assets/css/theme.css');
-const t57cLeak = { home: homeHtml.includes('ccn-glossary-index'), kaufen: t53bKaufen.includes('ccn-glossary-index'), child: t57cChildren.filter((c) => c.v.idx > 0).length };
-ok('Glossary (T-57c): the hub /glossar/ answers 200 with production\'s h1 and text, then the A–Z index exactly once (div.ccn-glossary-index after «Fehlt ein Begriff?», no inline style, no rule of its own in theme.css); no index on the front page, a landing or a child page',
+const t57cLeak = { home: t57cRead(homeHtml).idx, kaufen: t57cRead(t53bKaufen).idx, child: t57cChildren.filter((c) => c.v.idx > 0).length };
+ok('Glossary (T-57c): the hub /glossar/ answers 200 with production\'s h1 and text, then the A–Z index exactly once (letter groups after «Fehlt ein Begriff?», no wrapper since T-60, no inline style, no rule of its own in theme.css); no index on the front page, a landing or a child page',
 	t57cHubRes.res.status === 200 && t57cHub.h1.length === 1 && t57cHub.h1[0] === T57C_H1 && t57cHub.idx === 1
-	&& t57cHub.at('<p>Das <strong>Container-Glossar</strong>') > -1 && t57cHub.at('<p>Fehlt ein Begriff?') > -1 && t57cHub.at('<div class="ccn-glossary-index">') > t57cHub.at('<p>Fehlt ein Begriff?')
-	&& !/style=/.test(t57cHub.raw) && !t57cThemeCss.includes('ccn-glossary') && !t57cLeak.home && !t57cLeak.kaufen && t57cLeak.child === 0,
+	&& t57cHub.at('<p>Das <strong>Container-Glossar</strong>') > -1 && t57cHub.at('<p>Fehlt ein Begriff?') > -1 && t57cHub.at(t57cHub.raw) > t57cHub.at('<p>Fehlt ein Begriff?')
+	&& !t57cHubRes.text.includes('ccn-glossary-index') && !/style=/.test(t57cHub.raw) && !t57cThemeCss.includes('ccn-glossary')
+	&& t57cLeak.home === 0 && t57cLeak.kaufen === 0 && t57cLeak.child === 0,
 	JSON.stringify({ status: t57cHubRes.res.status, h1: t57cHub.h1, index: t57cHub.idx, bytes: Buffer.byteLength(t57cHub.raw), leak: t57cLeak }));
 const t57cLetters = t57cHub.groups.map((g) => g.letter);
 const t57cLetterOf = (name) => { const l = name.charAt(0).toUpperCase(); return /[A-ZÄÖÜ]/.test(l) ? l : '#'; };
@@ -2848,6 +2850,31 @@ ok('Glossary (T-57c): plain pages, as on production — inc/glossary.php require
 	/\nrequire_once get_template_directory\(\) \. '\/inc\/glossary\.php';/.test(functionsPhp.split("if ( class_exists( 'WooCommerce' ) ) {")[0])
 	&& t57cCpt.length === 0 && typeof t57cTypesRest === 'object' && !!t57cTypesRest.page && !t57cTypesRest.glossar,
 	JSON.stringify({ cpt: t57cCpt, types: Object.keys(t57cTypesRest || {}).length, glossar: !!(t57cTypesRest || {}).glossar }));
+
+// Hygiene (T-60, README "Tests"): code and markup without leftovers. Read-only.
+// The glossary index has no wrapper of its own: its letter h2 and lists are direct children of .entry-content, so the
+// 68ch measure of running text applies to them as to the hub text (roadmap 222); at 1440 no list of the index runs
+// wider than the first paragraph of the hub.
+const t60Gloss = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+await t60Gloss.goto(`${BASE}${T57C_HUB}?cb=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+const t60G = await t60Gloss.evaluate(() => {
+	const ec = document.querySelector('main .entry-content');
+	if (!ec) return null;
+	const letters = [...ec.querySelectorAll('h2')].filter((h) => /^[A-ZÄÖÜ#]$/.test(h.textContent.trim()));
+	const lists = letters.map((h) => h.nextElementSibling).filter((u) => u && u.tagName === 'UL');
+	const para = [...ec.children].find((e) => e.tagName === 'P');
+	const w = (e) => Math.round(e.getBoundingClientRect().width);
+	return {
+		letters: letters.length, lists: lists.length, direct: letters.every((h) => h.parentElement === ec) && lists.every((u) => u.parentElement === ec),
+		wrapper: !!document.querySelector('.ccn-glossary-index'), p: para ? w(para) : 0, ul: lists.length ? Math.max(...lists.map(w)) : 0,
+		max: lists.length ? getComputedStyle(lists[0]).maxWidth : '', pMax: para ? getComputedStyle(para).maxWidth : '',
+	};
+});
+await t60Gloss.close();
+ok('Glossary (T-60): the A–Z index without a wrapper — its letter h2 and lists are direct children of .entry-content with the 68ch measure of the hub text (at 1440 no list wider than the first paragraph)',
+	!!t60G && t60G.letters >= 10 && t60G.lists === t60G.letters && t60G.direct && !t60G.wrapper && t60G.p > 0 && t60G.ul <= t60G.p
+	&& t60G.max === t60G.pMax && t60G.max !== 'none',
+	JSON.stringify(t60G));
 
 await browser.close();
 console.log(results.join('\n'));

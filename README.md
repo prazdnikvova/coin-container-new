@@ -247,11 +247,12 @@ the rebuild reads the pages (`inc/glossary.php`, T-57c).
   schema pick it up at once. Hub text, term texts and meta stay content.
 - **A–Z index** (production's `the_content` filter of
   `seo-migration-glossar.php`): under the hub text, in the main query only,
-  `<div class="ccn-glossary-index">` with an `<h2>` per first letter (others
-  under «#»), letters and names in production's natural order
-  (`strnatcasecmp`), one «<a>Name</a> – definition» per list item. Markup
-  and order are production's, without its inline styles; no CSS and no
-  gettext of its own (DESIGN.md "Glossary").
+  an `<h2>` per first letter (others under «#») with its `<ul>`, letters and
+  names in production's natural order (`strnatcasecmp`), one «<a>Name</a> –
+  definition» per list item. Markup and order are production's, without its
+  wrapper and inline styles: the headings and lists are prose of
+  `.entry-content` like the hub text (the 68ch measure included); no CSS and
+  no gettext of its own (DESIGN.md "Glossary").
 - **Schema** (production's `seo-rankmath.php` 3d, `rank_math/json_ld` 99):
   the hub carries a `DefinedTermSet` (`<hub>#definedtermset`,
   «Container-Glossar», publisher `/#organization`) with every term in page

@@ -15,12 +15,13 @@
  * the hub joins the index and the schema by itself.
  *
  * - Index: after the hub text (the_content 20, main query, in the loop, as
- *   production), one <div class="ccn-glossary-index"> with an <h2> per first
- *   letter (anything outside A–Z and Ä/Ö/Ü under «#»), letters in natural
- *   order, a <ul> of «<a>Name</a> – definition» per letter, names in natural,
- *   case-insensitive order. No CSS of its own: the prose rules of
- *   .entry-content style the headings and lists. No gettext: every word is
- *   content, so TranslatePress translates it as page text on /en/.
+ *   production), an <h2> per first letter (anything outside A–Z and Ä/Ö/Ü
+ *   under «#»), letters in natural order, each followed by a <ul> of
+ *   «<a>Name</a> – definition», names in natural, case-insensitive order. No
+ *   wrapper and no CSS of its own: the headings and lists are prose of
+ *   .entry-content like the hub text above them, so its rules style them, the
+ *   68ch measure of its direct children included (T-60). No gettext: every
+ *   word is content, so TranslatePress translates it as page text on /en/.
  * - JSON-LD (rank_math/json_ld 99, production's priority): a DefinedTermSet
  *   on the hub with every term in the order of the pages (menu order, then
  *   ID: production's data order), a DefinedTerm on each child page inside
@@ -160,7 +161,7 @@ function ccn_glossary_index_html( $terms ) {
 	}
 	uksort( $groups, 'strnatcasecmp' );
 
-	$out = '<div class="ccn-glossary-index">';
+	$out = '';
 	foreach ( $groups as $letter => $names ) {
 		asort( $names, SORT_NATURAL | SORT_FLAG_CASE );
 		$out .= '<h2>' . esc_html( (string) $letter ) . '</h2><ul>';
@@ -171,7 +172,7 @@ function ccn_glossary_index_html( $terms ) {
 		}
 		$out .= '</ul>';
 	}
-	return $out . '</div>';
+	return $out;
 }
 
 add_filter( 'the_content', 'ccn_glossary_index_content', 20 );
