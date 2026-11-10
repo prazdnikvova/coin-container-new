@@ -42,6 +42,22 @@
             "required": 0
         },
         {
+            "key": "field_ccn_geo_lat",
+            "label": "Latitude",
+            "name": "geo_lat",
+            "type": "text",
+            "instructions": "Decimal degrees with a dot, e.g. 53.5753: the company's position (GeoCoordinates) in the JSON-LD of the front page, the shop, categories and products. Fill in both fields or neither; while one is empty or invalid, the theme uses 53.5753 / 10.0409.",
+            "required": 0
+        },
+        {
+            "key": "field_ccn_geo_lng",
+            "label": "Longitude",
+            "name": "geo_lng",
+            "type": "text",
+            "instructions": "Decimal degrees with a dot, e.g. 10.0409. See Latitude.",
+            "required": 0
+        },
+        {
             "key": "field_ccn_tab_footer",
             "label": "Footer",
             "name": "",

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-09T22:14:19+00:00\n"
+"POT-Creation-Date: 2026-11-10T00:56:51+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: coin-container\n"
@@ -399,18 +399,6 @@ msgstr ""
 msgid "Text section: add a heading or text in the block sidebar."
 msgstr ""
 
-#. translators: %s: number of comments
-#: comments.php:12
-#, php-format
-msgid "%s comment"
-msgid_plural "%s comments"
-msgstr[0] ""
-msgstr[1] ""
-
-#: comments.php:23
-msgid "Comments are closed."
-msgstr ""
-
 #: entry-footer.php:3
 msgid "Categories: "
 msgstr ""
@@ -448,13 +436,13 @@ msgstr ""
 msgid "Footer Menu"
 msgstr ""
 
-#: functions.php:311
+#: functions.php:310
 msgid "Skip to the content"
 msgstr ""
 
 #. translators: %s: post title, visually hidden
-#: functions.php:323
-#: functions.php:334
+#: functions.php:322
+#: functions.php:333
 #, php-format
 msgid "&hellip;%s"
 msgstr ""

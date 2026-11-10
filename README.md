@@ -99,12 +99,19 @@ mobile emulation) and the numbers go into the commit body.
   Redirects of old addresses
   are not theme code: the project's 301 map goes to the web server
   ([`DESIGN.md`](DESIGN.md) "URLs and redirects").
+- Comments are off site-wide, as on production (`inc/disable-comments.php`):
+  no comments template, no `comments_template()` call and no comment reply
+  script in the theme; comment feeds redirect, the REST route is closed to
+  visitors.
 - Admin-editable globals live on the Site Settings page and are read through a
   single cached helper — editable content must never add render-blocking or
   external requests. The one exception is the reviews widget block (live
   Google reviews and the Trustpilot TrustBox, as on production): its widget
   HTML comes from `/wp-json/ccn/v1/reviews` and its third-party scripts start
-  only when the block comes near ([`DESIGN.md`](DESIGN.md) "Trust").
+  only when the block comes near ([`DESIGN.md`](DESIGN.md) "Trust"). The
+  company data of the JSON-LD (`inc/schema.php`) come from Site Settings too,
+  the coordinates included (Contacts → Latitude / Longitude; while either is
+  empty or invalid, the theme's fallback).
 
 ## Languages
 
@@ -346,9 +353,11 @@ Every page renders:
   `<main id="content" tabindex="-1">` (the skip-link target) and one
   `<footer>` (`footer.php`). Templates never wrap entry titles or meta in
   `<header>`/`<footer>`: they use `<div class="entry-header">` and
-  `<div class="entry-footer">`, and `woocommerce/loop/header.php` does the
-  same for WooCommerce. There is no second header for mobile or for the
-  fixed/compact state — it is the same element.
+  `<div class="entry-footer">`. WooCommerce's archive header
+  (`loop/header.php`, a `<header>`) never renders: `woocommerce.php` prints
+  the shop and category titles through `woocommerce_content()`, without it.
+  There is no second header for mobile or for the fixed/compact state — it
+  is the same element.
 - exactly one `<h1>`, then `h2` per section and `h3` inside it, without
   skipping a level. Footer and sidebar headings are fixed `h2`.
 - a name on every `<nav>`, unique on the page and without the word

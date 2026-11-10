@@ -11,7 +11,7 @@ Requires PHP: 8.0
 License: GNU General Public License v3 or Later
 License URI: https://www.gnu.org/licenses/gpl.html
 Text Domain: coin-container
-Tags: one-column, custom-menu, featured-images, threaded-comments, translation-ready, accessibility-ready
+Tags: one-column, custom-menu, featured-images, translation-ready, accessibility-ready
 
 This file intentionally contains only the theme header.
 Styles live in assets/css/theme.css (enqueued with a filemtime version).

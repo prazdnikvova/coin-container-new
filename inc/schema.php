@@ -1,7 +1,8 @@
 <?php
 /**
  * Company JSON-LD from Site Settings (admin-editable): name, phone, e-mail,
- * postal address, geo, area served and social profiles, typed Organization
+ * postal address, geo (with a fallback in code), area served and social
+ * profiles, typed Organization
  * plus Store (a LocalBusiness) as on production
  * (transmax-child/inc/seo-rankmath.php: one @id, one entity, two roles).
  * With Rank Math (T-54) the data goes into the Organization node of its graph
@@ -27,6 +28,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Coordinates of the company for its GeoCoordinates: Site Settings → Contacts
+ * → geo_lat / geo_lng (decimal degrees, a comma taken as the decimal point).
+ * Only both together and only valid values count; otherwise the theme's
+ * fallback, the coordinates the theme carried before T-60.
+ *
+ * @return string[] Latitude and longitude.
+ */
+function ccn_company_geo() {
+	$lat = str_replace( ',', '.', trim( (string) ccn_setting( 'geo_lat' ) ) );
+	$lng = str_replace( ',', '.', trim( (string) ccn_setting( 'geo_lng' ) ) );
+	if ( is_numeric( $lat ) && is_numeric( $lng ) && abs( (float) $lat ) <= 90 && abs( (float) $lng ) <= 180 ) {
+		return array( $lat, $lng );
+	}
+	return array( '53.5753', '10.0409' );
+}
+
+/**
  * The company node: Organization + Store, @id /#organization (Rank Math's).
  *
  * @return array
@@ -41,6 +59,7 @@ function ccn_local_business_node() {
 		$zip    = $m[2];
 		$city   = trim( $m[3] );
 	}
+	list( $lat, $lng ) = ccn_company_geo();
 
 	$node = array(
 		'@type'      => array( 'Organization', 'Store' ),
@@ -59,8 +78,8 @@ function ccn_local_business_node() {
 		),
 		'geo'        => array(
 			'@type'     => 'GeoCoordinates',
-			'latitude'  => '53.5753',
-			'longitude' => '10.0409',
+			'latitude'  => $lat,
+			'longitude' => $lng,
 		),
 		'areaServed' => 'Europe',
 	);

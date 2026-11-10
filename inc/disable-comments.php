@@ -3,10 +3,11 @@
  * Comments are switched off on the whole site — parity with production
  * (owner's decision 19.10.2026, card K40).
  *
- * Code only, no DB writes. Fully reversible: remove the require in
- * functions.php. The DB side (comment_status/ping_status = 'closed',
- * default_comment_status) is a separate, optional step; this file works
- * without it.
+ * Code only, no DB writes. Reversible: remove the require in functions.php,
+ * and bring back a comments template and its comments_template() calls in
+ * single.php and page.php, which the theme no longer has (T-60). The DB side
+ * (comment_status/ping_status = 'closed', default_comment_status) is a
+ * separate, optional step; this file works without it.
  *
  * Existing comments (incl. WooCommerce order notes) are not deleted or
  * modified.
@@ -32,12 +33,12 @@ add_filter( 'comments_open', '__return_false', 20 );
 add_filter( 'pings_open', '__return_false', 20 );
 
 /*
- * 2. No comment list / form anywhere on the front end. single.php and
- * page.php only call comments_template() when comments are open or a post
- * has comments; these filters cover the second case too (a post that already
- * has approved comments). comments.php stays in the theme but is never
- * rendered: the template path points back to this file. WooCommerce drops
- * the reviews tab by itself once comments_open() is false.
+ * 2. No comment list / form anywhere on the front end. The theme's
+ * templates never call comments_template() and the theme ships no comments
+ * template (T-60). For anything else that calls it (a plugin), the template
+ * path points back to this file, which prints nothing (self-guard above),
+ * and comment lists and counts stay empty. WooCommerce drops the reviews
+ * tab by itself once comments_open() is false.
  */
 add_filter( 'comments_template', 'ccn_disable_comments_template', 20 );
 function ccn_disable_comments_template() {

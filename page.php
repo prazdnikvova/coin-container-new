@@ -19,9 +19,6 @@ while ( have_posts() ) :
 		<?php ccn_freshness(); ?>
 	</article>
 	<?php
-	if ( comments_open() || get_comments_number() ) {
-		comments_template();
-	}
 endwhile;
 ?>
 

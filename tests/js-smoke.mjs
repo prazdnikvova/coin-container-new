@@ -2226,7 +2226,8 @@ const t55Ids = (txt) => (txt.match(/^msgid ".+"$/gm) || []).length;
 ok('Theme translations (T-55): coin-container.pot has >= 73 msgids, de_DE.po covers the same entries, de_DE.mo and de_DE_formal.mo exist and are identical',
 	t55Ids(t55Pot) >= 73 && t55Ids(t55Po) === t55Ids(t55Pot) && !!t55MoDe && !!t55MoFormal && Buffer.compare(t55MoDe, t55MoFormal) === 0,
 	JSON.stringify({ pot: t55Ids(t55Pot), po: t55Ids(t55Po), mo: t55MoDe ? t55MoDe.length : null, formal: t55MoFormal ? t55MoFormal.length : null }));
-// German theme strings on the pages that showed English ones (T-44): every English msgid that de_DE.po translates.
+// German theme strings on the pages that showed English ones (T-44): every English msgid that de_DE.po translates
+// (9 since T-60: the two strings of comments.php went with the file).
 const t55Translated = [...t55Po.matchAll(/^msgid "(.+)"\n(?:msgid_plural ".*"\n)?msgstr(?:\[0\])? "(.+)"$/gm)].filter((m) => m[1] !== m[2])
 	.map((m) => m[1].split(/%(?:\d\$)?[sd]/).sort((a, b) => b.length - a.length)[0]).filter((s) => s.trim().length >= 5);
 const t55Text = (html) => html.replace(/<(script|style|template)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<!--[\s\S]*?-->/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&#8217;/g, "'");
@@ -2237,7 +2238,7 @@ for (const p of ['/kein-solcher-pfad/', '/?s=zzqxjv', '/?s=container', t56PostPa
 }
 const t55English = Object.fromEntries(Object.entries(t55UiPages).map(([p, d]) => [p, t55Translated.filter((s) => d.text.includes(s))]));
 ok('Theme translations (T-55): the 404, the search pages and a post show the German theme strings, 0 English ones (de_DE_formal locale active: «Seite nicht gefunden», «Nichts gefunden», «Zum Inhalt springen»)',
-	t55Translated.length >= 10 && Object.values(t55English).every((l) => l.length === 0)
+	t55Translated.length >= 9 && Object.values(t55English).every((l) => l.length === 0)
 	&& t55UiPages['/kein-solcher-pfad/'].status === 404 && t55UiPages['/kein-solcher-pfad/'].text.includes('Seite nicht gefunden')
 	&& t55UiPages['/?s=zzqxjv'].text.includes('Nichts gefunden') && Object.values(t55UiPages).every((d) => d.text.includes('Zum Inhalt springen'))
 	&& t55Doc['/'].html.includes('translatepress-de_DE_formal'),
@@ -2875,6 +2876,74 @@ ok('Glossary (T-60): the A–Z index without a wrapper — its letter h2 and lis
 	!!t60G && t60G.letters >= 10 && t60G.lists === t60G.letters && t60G.direct && !t60G.wrapper && t60G.p > 0 && t60G.ul <= t60G.p
 	&& t60G.max === t60G.pMax && t60G.max !== 'none',
 	JSON.stringify(t60G));
+// Code of the theme (PHP outside vendor/ and tests/, comments stripped): no comments template and no comment reply
+// script — comments are off site-wide (inc/disable-comments.php) —, WooCommerce theme support declared once, and no
+// trace of the multilingual plugin planned before TranslatePress.
+const t60Php = readdirSync(themeDir, { recursive: true }).map((f) => String(f).replace(/\\/g, '/'))
+	.filter((f) => f.endsWith('.php') && !/^(vendor|tests|node_modules|\.git)\//.test(f));
+const t60Code = Object.fromEntries(t60Php.map((f) => [f, themeFile(f).replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:'"\\])\/\/.*$/gm, '$1')]));
+const t60In = (re) => Object.entries(t60Code).filter(([, s]) => re.test(s)).map(([f]) => f);
+ok('Hygiene (T-60): no comments template in the theme — comments.php gone, 0 comments_template() calls and 0 comment-reply enqueues in its PHP; inc/disable-comments.php still required',
+	t60Php.length >= 70 && !existsSync(new URL('comments.php', themeDir)) && t60In(/\bcomments_template\s*\(/).length === 0
+	&& t60In(/comment-reply/).length === 0 && /\nrequire_once get_template_directory\(\) \. '\/inc\/disable-comments\.php';/.test(functionsPhp),
+	JSON.stringify({ php: t60Php.length, calls: t60In(/\bcomments_template\s*\(/), reply: t60In(/comment-reply/) }));
+const T60_PAGE = '/datenschutzerklaerung/'; // a page on page.php
+const t60PageRes = await t56Get(T60_PAGE);
+const t60NoComments = (h) => !/id=["']comments["']|comment-respond|comments-area|comment-reply(\.min)?\.js/.test(h);
+ok('Hygiene (T-60): the newest post and a page on page.php print no comments area, form or reply script (#comments, .comment-respond, .comments-area, comment-reply.min.js: 0)',
+	postResp.status === 200 && t60PageRes.res.status === 200 && /\bpage-template-default\b/.test(t60PageRes.text)
+	&& t60NoComments(postHtml) && t60NoComments(t60PageRes.text),
+	JSON.stringify({ post: [postResp.status, t60NoComments(postHtml)], page: [T60_PAGE, t60PageRes.res.status, t60NoComments(t60PageRes.text)] }));
+const t60WooSupport = Object.entries(t60Code).flatMap(([f, s]) => (s.match(/add_theme_support\(\s*'woocommerce'/g) || []).map(() => f));
+// The multilingual plugin planned before TranslatePress (T-55), spelled in parts so that this file does not name it.
+const T60_OLD_I18N = new RegExp(['w', 'p', 'm', 'l'].join(''), 'i');
+const t60OldI18n = readdirSync(themeDir, { recursive: true }).map((f) => String(f).replace(/\\/g, '/'))
+	.filter((f) => /\.(php|mjs|cjs|js|css|json|md|xml|txt|pot|po)$/.test(f) && !/(^|\/)(vendor|node_modules|\.git)\//.test(f))
+	.filter((f) => T60_OLD_I18N.test(themeFile(f)));
+ok('Hygiene (T-60): add_theme_support( \'woocommerce\' ) exactly once, with its image sizes (inc/woocommerce.php); no file of the theme names the multilingual plugin planned before TranslatePress (T-55)',
+	JSON.stringify(t60WooSupport) === JSON.stringify(['inc/woocommerce.php']) && t60OldI18n.length === 0,
+	JSON.stringify({ woocommerce: t60WooSupport, files: t60OldI18n }));
+// Hero preload (ccn_hero_preload_link(), functions.php): one image preload on the front page and on a landing — the
+// hero's own file at the soft 1536x1536 size, so the browser fetches it once —, none on a post.
+const t60Preloads = (h) => [...String(h).matchAll(/<link rel="preload" as="image" href="([^"]+)" imagesrcset="([^"]+)" imagesizes="100vw" fetchpriority="high">/g)]
+	.map((m) => ({ href: m[1].replace(/&amp;/g, '&'), srcset: m[2].replace(/&amp;/g, '&') }));
+const t60HeroImg = (h, cls) => {
+	const tag = (String(h).match(new RegExp(`<img[^>]*class="[^"]*\\b${cls}\\b[^"]*"[^>]*>`)) || [])[0] || '';
+	return { src: ((tag.match(/ src="([^"]+)"/) || [])[1] || '').replace(/&amp;/g, '&'), srcset: ((tag.match(/ srcset="([^"]+)"/) || [])[1] || '').replace(/&amp;/g, '&') };
+};
+const t60Landing = (await t56Get('/container-mieten/')).text;
+const t60Pre = { home: t60Preloads(homeHtml), landing: t60Preloads(t60Landing), post: t60Preloads(postHtml) };
+const t60Img = { home: t60HeroImg(homeHtml, 'ccn-hero-img'), landing: t60HeroImg(t60Landing, 'ccn-page-hero-img') };
+ok('Hygiene (T-60): the hero preload — exactly one image preload on the front page and on a landing (href = the hero <img> src, imagesrcset = its srcset, imagesizes 100vw, fetchpriority high), none on a post; functions.php prints it from one helper',
+	['home', 'landing'].every((k) => t60Pre[k].length === 1 && !!t60Img[k].src && t60Pre[k][0].href === t60Img[k].src && t60Pre[k][0].srcset === t60Img[k].srcset)
+	&& t60Pre.post.length === 0 && (t60Code['functions.php'].match(/<link rel="preload" as="image"/g) || []).length === 1
+	&& /function ccn_hero_preload_link\(\s*\$attachment_id\s*\)/.test(functionsPhp),
+	JSON.stringify({ preloads: Object.fromEntries(Object.entries(t60Pre).map(([k, v]) => [k, v.length])), home: t60Img.home.src.split('/').pop(), landing: t60Img.landing.src.split('/').pop() }));
+// Company coordinates: Site Settings → Contacts → geo_lat / geo_lng (text, acf-json), read by inc/schema.php; while one
+// is empty or invalid, the fallback 53.5753 / 10.0409 (the values before T-60). The fields are empty: which coordinates
+// are right (production's Rank Math has others) is the client's decision (roadmap 153); once they are filled in,
+// T60_GEO here takes their values.
+const T60_GEO = { latitude: '53.5753', longitude: '10.0409' };
+const t60Settings = (() => { try { return JSON.parse(themeFile('acf-json/group_ccn_site_settings.json')); } catch { return {}; } })();
+const t60Tab = (name) => {
+	let tab = '';
+	for (const f of t60Settings.fields || []) {
+		if (f.type === 'tab') tab = f.label;
+		else if (f.name === name) return `${tab}|${f.type}`;
+	}
+	return '';
+};
+const t60AllCode = Object.values(t60Code).join('\n');
+const t60HomeGeo = [...homeHtml.matchAll(/<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/g)]
+	.flatMap((m) => { try { const d = JSON.parse(m[1]); return d['@graph'] || [d]; } catch { return []; } })
+	.filter((n) => n && n.geo).map((n) => n.geo);
+ok('Hygiene (T-60): company geo from Site Settings — text fields geo_lat / geo_lng in the Contacts tab, read by inc/schema.php with one fallback; the front page JSON-LD carries one GeoCoordinates = the fields or the fallback (fields empty: 53.5753 / 10.0409, as before T-60)',
+	t60Tab('geo_lat') === 'Contacts|text' && t60Tab('geo_lng') === 'Contacts|text'
+	&& /ccn_setting\(\s*'geo_lat'\s*\)/.test(t60Code['inc/schema.php']) && /ccn_setting\(\s*'geo_lng'\s*\)/.test(t60Code['inc/schema.php'])
+	&& t60AllCode.split(T60_GEO.latitude).length === 2 && t60AllCode.split(T60_GEO.longitude).length === 2
+	&& t60HomeGeo.length === 1 && t60HomeGeo[0]['@type'] === 'GeoCoordinates'
+	&& t60HomeGeo[0].latitude === T60_GEO.latitude && t60HomeGeo[0].longitude === T60_GEO.longitude,
+	JSON.stringify({ fields: [t60Tab('geo_lat'), t60Tab('geo_lng')], geo: t60HomeGeo }));
 
 await browser.close();
 console.log(results.join('\n'));

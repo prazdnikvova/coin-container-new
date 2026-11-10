@@ -26,7 +26,7 @@ function ccn_setup() {
 	add_theme_support( 'html5', array( 'search-form', 'comment-list', 'comment-form', 'gallery', 'caption', 'script', 'navigation-widgets' ) );
 	add_theme_support( 'responsive-embeds' );
 	add_theme_support( 'align-wide' );
-	add_theme_support( 'woocommerce' );
+	// WooCommerce's theme support, with its image sizes: inc/woocommerce.php.
 	// Block editor (always an iframe on WP 7.1): theme.css styles the canvas, so
 	// ACF block previews use the same tokens and rules as the front end. In the
 	// iframe the editor style is not prefixed, only its url()s are rebased, so
@@ -85,8 +85,10 @@ function ccn_asset_version( $relative_path ) {
 /**
  * Global assets. style.css holds only the theme header; real styles live in
  * assets/css/theme.css. JS loads from the footer with defer — never
- * render-blocking. Register per-feature scripts/styles here and enqueue them
- * only where used (see README: scoped assets pattern).
+ * render-blocking. A file only some pages need is registered next to its
+ * feature and enqueued only where it is used (README "Stack & conventions",
+ * scoped assets). No comment reply script: comments are off site-wide
+ * (inc/disable-comments.php).
  */
 add_action( 'wp_enqueue_scripts', 'ccn_enqueue_assets' );
 function ccn_enqueue_assets() {
@@ -104,10 +106,6 @@ function ccn_enqueue_assets() {
 			'strategy'  => 'defer',
 		)
 	);
-
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
-		wp_enqueue_script( 'comment-reply' );
-	}
 }
 
 /**
@@ -130,13 +128,6 @@ function ccn_preload_fonts() {
 	}
 }
 
-/**
- * Preload the front-page hero image. The acf/home-hero block renders a
- * responsive <img>, so the preload uses imagesrcset/imagesizes — the browser
- * picks the same candidate as the <img> and the requests dedupe. The legacy
- * flexible-content hero is a CSS background (discovered late), preloaded by
- * plain URL.
- */
 /**
  * Pages that open with a full-width hero get a translucent glass header at
  * the top of the page (solid white once scrolled); everywhere else the
@@ -211,45 +202,53 @@ function ccn_action_bar_body_class( $classes ) {
 	return $classes;
 }
 
+/**
+ * Preload link of a hero image: the soft '1536x1536' size with its srcset and
+ * imagesizes="100vw", the same candidates as the hero's <img>, so the browser
+ * picks the same file and fetches it once. Prints nothing without a srcset.
+ *
+ * @param int $attachment_id Image attachment ID.
+ */
+function ccn_hero_preload_link( $attachment_id ) {
+	$srcset = wp_get_attachment_image_srcset( $attachment_id, '1536x1536' );
+	$src    = wp_get_attachment_image_url( $attachment_id, '1536x1536' );
+	if ( $srcset && $src ) {
+		printf(
+			'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",
+			esc_url( $src ),
+			esc_attr( $srcset )
+		);
+	}
+}
+
+/**
+ * Preload the hero image, the LCP element: on the landing templates the
+ * featured image of the hero band (template-parts/page-hero.php), on the
+ * front page the image of its first acf/home-hero block
+ * (blocks/banners/home-hero.php). Both render a responsive <img> of the same
+ * soft size (ccn_hero_preload_link()).
+ */
 add_action( 'wp_head', 'ccn_preload_hero', 3 );
 function ccn_preload_hero() {
-	// Landing templates: the hero band is the featured image (LCP element).
-	// Same soft size as template-parts/page-hero.php so the preload dedupes.
 	if ( is_page_template( array( 'template-landing.php', 'template-landing-full.php' ) ) && has_post_thumbnail() ) {
-		$img    = get_post_thumbnail_id();
-		$srcset = wp_get_attachment_image_srcset( $img, '1536x1536' );
-		$src    = wp_get_attachment_image_url( $img, '1536x1536' );
-		if ( $srcset && $src ) {
-			printf(
-				'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",
-				esc_url( $src ),
-				esc_attr( $srcset )
-			);
-		}
+		ccn_hero_preload_link( get_post_thumbnail_id() );
 		return;
 	}
 	if ( ! is_front_page() ) {
 		return;
 	}
 	$post = get_post();
-	if ( $post && has_block( 'acf/home-hero', $post ) ) {
-		foreach ( parse_blocks( $post->post_content ) as $parsed ) {
-			if ( 'acf/home-hero' === $parsed['blockName'] ) {
-				$data = $parsed['attrs']['data'] ?? array();
-				$img  = (int) ( $data['image'] ?? $data['field_ccn_hh_image'] ?? 0 );
-				if ( $img ) {
-					$srcset = wp_get_attachment_image_srcset( $img, '1536x1536' );
-					$src    = wp_get_attachment_image_url( $img, '1536x1536' );
-					if ( $srcset && $src ) {
-						printf(
-							'<link rel="preload" as="image" href="%s" imagesrcset="%s" imagesizes="100vw" fetchpriority="high">' . "\n",
-							esc_url( $src ),
-							esc_attr( $srcset )
-						);
-					}
-				}
-				break;
+	if ( ! $post || ! has_block( 'acf/home-hero', $post ) ) {
+		return;
+	}
+	foreach ( parse_blocks( $post->post_content ) as $parsed ) {
+		if ( 'acf/home-hero' === $parsed['blockName'] ) {
+			$data = $parsed['attrs']['data'] ?? array();
+			$img  = (int) ( $data['image'] ?? $data['field_ccn_hh_image'] ?? 0 );
+			if ( $img ) {
+				ccn_hero_preload_link( $img );
 			}
+			return;
 		}
 	}
 }

@@ -386,18 +386,6 @@ msgstr ""
 msgid "Text section: add a heading or text in the block sidebar."
 msgstr ""
 
-#. translators: %s: number of comments
-#: comments.php:12
-#, php-format
-msgid "%s comment"
-msgid_plural "%s comments"
-msgstr[0] "%s Kommentar"
-msgstr[1] "%s Kommentare"
-
-#: comments.php:23
-msgid "Comments are closed."
-msgstr "Die Kommentare sind geschlossen."
-
 #: entry-footer.php:3
 msgid "Categories: "
 msgstr "Kategorien: "
@@ -435,13 +423,13 @@ msgstr ""
 msgid "Footer Menu"
 msgstr ""
 
-#: functions.php:311
+#: functions.php:310
 msgid "Skip to the content"
 msgstr "Zum Inhalt springen"
 
 #. translators: %s: post title, visually hidden
-#: functions.php:323
-#: functions.php:334
+#: functions.php:322
+#: functions.php:333
 #, php-format
 msgid "&hellip;%s"
 msgstr "&hellip;%s"
