@@ -14,6 +14,9 @@ Everything about the project lives OUTSIDE this repo, in the project library:
 
 - `tasks\00-roadmap.md` — task queue (T-XX) with statuses and dependencies
 - `tasks\README.md` — execution protocol and task-card template
+- `tasks\00-director.md` — the relaunch package (stages 13–14): environment
+  constants and commands, the rules of every card, the acceptance checklist;
+  its current state and baselines in `tasks\00-state.md`
 - `work-plan.md` — overall stage plan; `reports\`, `decisions\`, `questions\` — reports, decisions, open questions
 
 Entry-point skill: **ccn-task**. Related skills: ccn-verify (run after any change,
@@ -30,10 +33,15 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
   free: gettext everywhere, no hardcoded strings, the SEO layer in
   `inc/trp-seo-en.php` (README "Languages").
 - Performance budget (Lighthouse mobile, homepage): score ≥ 99, LCP ≤ 1.9 s,
-  ≤ 370 KB transfer, ≤ 20 requests. Vanilla JS only, everything deferred,
-  fonts self-hosted.
+  ≤ 370 KB transfer, ≤ 20 requests; `theme.css` and the front page document
+  each ≤ 14 600 bytes sent gzip (the first TCP window, smoke "First TCP
+  window"). Vanilla JS only, everything deferred, fonts self-hosted; jQuery
+  only on the WooCommerce pages, for WooCommerce's own scripts.
 - Admin-editable globals: single ACF "Site Settings" options page (tabs), read
   via the cached `ccn_setting()` helper only.
+- Comments: off site-wide, as on production (`inc/disable-comments.php`) — no
+  comments template, no `comments_template()` call, no comment reply script
+  (smoke "Hygiene (T-60)").
 - ACF: field groups sync to `acf-json/` — commit together with templates.
 - Design: every colour/size/space/shadow/duration is a token from `theme.css`
   `:root`, documented in `DESIGN.md`; no raw hex outside `:root`; yellow and
@@ -46,9 +54,11 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
   `DESIGN.md` "Motion", smoke "Motion invariants".
 - Editor: page layouts are patterns in `patterns/` (category «Coin
   Container», German placeholders in brackets, no locks); the block set of
-  pages and posts, core block style removal and the pattern helpers live in
-  `inc/editor.php` — README "Patterns" and "Editor", smoke "Editor patterns
-  and guardrails (T-52)". Editor strings stay English, the brand is «Coin»,
+  pages and posts, the removal of core block styles and of the group's Row /
+  Stack / Grid variations and the pattern helpers live in `inc/editor.php` —
+  README "Patterns" and "Editor", smoke "Editor patterns and guardrails
+  (T-52)". A block without its key content prints nothing on the page, only
+  a hint in the editor. Editor strings stay English, the brand is «Coin»,
   never «COIN».
 - Shop: production's B2B mode lives in `inc/b2b.php` (Site Settings → Shop →
   `b2b_mode`, on by default): its texts are production's (copy changes go
@@ -70,5 +80,9 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 
 ## Tests
 
-`cd tests && node js-smoke.mjs` — Playwright smoke, must be N/N PASS before any
-commit. Add checks for every new interactive block. Base URL override: `CCN_BASE_URL`.
+`cd tests && node js-smoke.mjs` — Playwright smoke (about 12 minutes, one page
+at a time: run nothing else against the site meanwhile), must be N/N PASS
+before any commit. Add checks for every new interactive block.
+`node checkout-e2e.mjs` — checkout end to end, places a real order. Variables
+(`CCN_BASE_URL`, `CCN_E2E_PRODUCT`, `CCN_PATTERN_TEST` + `CCN_WP_AUTH`,
+`CCN_PHP*` / `CCN_WP_*`): README "Tests".

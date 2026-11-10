@@ -22,9 +22,12 @@ Benchmarked against the strongest competitor in the niche (Lighthouse mobile, ho
 | LCP | ≤ 1.9 s |
 | Total transfer | ≤ 370 KB |
 | Requests | ≤ 20 |
+| `theme.css` and the front page document, sent gzip | ≤ 14 600 bytes each (the first TCP window: initcwnd 10 × 1 460) |
 
 Every performance-affecting change is measured before/after (`npx lighthouse`,
-mobile emulation) and the numbers go into the commit body.
+mobile emulation) and the numbers go into the commit body. The smoke test
+holds the byte limits ("First TCP window"); above them every first paint waits
+one more round trip.
 
 ## Stack & conventions
 
@@ -36,22 +39,29 @@ mobile emulation) and the numbers go into the commit body.
   block template lives in `blocks/<category>/<name>.php`, its fields in
   `acf-json/`. Blocks register as block API v3 / ACF Blocks v3 for the
   iframe editor of WP 7.1 (fields in the sidebar, previews in the canvas),
-  and `theme.css` is also the editor style, so previews match the site. Every page is built from these blocks (front page, landings) or
-  rendered by a plain template (legal pages, posts, shop); there is no
-  flexible-content layer any more.
+  and `theme.css` is also the editor style, so previews match the site.
+  Every page is built from these blocks (front page, landings) or rendered by
+  a plain template (legal pages, posts, shop); there is no flexible-content
+  layer any more.
 - Scoped assets: block CSS lives in `assets/css/theme.css` and all theme JS
-  in `assets/js/main.js`, with three exceptions: the request forms' focus
+  in `assets/js/main.js`, with four exceptions: the request forms' focus
   script `assets/js/forms.js` follows Contact Form 7's own assets onto the
   pages with a form, the rare price-table and related-links blocks (plus
   «Ähnliche Beiträge» under posts) share `assets/css/content-cards.css`,
   loaded only where they show (`inc/assets-cleanup.php`; the blocks list the
-  handle under `'assets'` in the registry), and the attribute filters of the
-  product categories bring `assets/css/catalog-filter.css` to the categories
-  that print them (see "Shop"). theme.css blocks every first
-  paint, so sent gzip it stays within the first TCP window (≤ 14 600 bytes,
-  smoke test); a component that only some pages show gets a scoped file.
-- Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks,
-  no jQuery.
+  handle under `'assets'` in the registry), the gallery rail block brings
+  `assets/css/gallery-rail.css` (registered with the block in
+  `blocks/acf-blocks.php`, enqueued through its `'assets'` where it renders),
+  and the attribute filters of the product categories bring
+  `assets/css/catalog-filter.css` to the categories that print them (see
+  "Shop"). theme.css blocks every first paint, so sent gzip it stays within
+  the first TCP window (≤ 14 600 bytes, smoke test); a component that only
+  some pages show gets a scoped file. `assets/css/editor.css` styles the
+  editor canvas only.
+- Vanilla JS only, everything deferred; fonts self-hosted; no CSS frameworks.
+  jQuery loads only on the WooCommerce pages (shop, categories, products,
+  cart, checkout, account), for WooCommerce's own scripts; the theme's code
+  never uses it.
 - Motion: blocks opt in with `data-motion="reveal"` / `data-motion-stagger`;
   one IntersectionObserver in `main.js` and the "Motion" block at the end of
   `theme.css` do the rest. Content is visible without JS and with
@@ -370,7 +380,8 @@ Every page renders:
 - a name on every `<nav>`, unique on the page and without the word
   "navigation" (screen readers add the role): `Hauptmenü` (header),
   `Rechtliches` (footer), `Schnellkontakt` (bottom action bar on phones),
-  `Kategorien` (catalogue filter), the landing
+  `Kategorien` (the category strip of the shop and its categories),
+  `Brotkrumen` (breadcrumbs, `inc/seo.php`), the landing
   sidebar via `aria-labelledby` on its visible heading, the size-page links
   of a product via `aria-labelledby` on their visible title, the
   `related-links` block via `aria-labelledby` on its h2; WordPress and

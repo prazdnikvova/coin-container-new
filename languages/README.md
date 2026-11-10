@@ -26,6 +26,11 @@ wp i18n make-mo languages/de_DE.po languages/
 cp languages/de_DE.mo languages/de_DE_formal.mo
 ```
 
+`update-po` (WP-CLI 2.12) drops the three comment lines at the top of
+`de_DE.po` (the German translation, copyright and licence lines): put them
+back before committing. A string removed from the code leaves the `.po` with
+it, translation included.
+
 ## Rules for the German
 
 - Terms come from the production site or from the standard WordPress,

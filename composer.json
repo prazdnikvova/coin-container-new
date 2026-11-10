@@ -1,6 +1,6 @@
 {
     "name": "prazdnikvova/coin-container",
-    "description": "A lean, opinionated WordPress starter theme",
+    "description": "WordPress/WooCommerce theme of the coin-container.de rebuild; Composer installs its PHPCS tooling (WordPress Coding Standards)",
     "license": "GPL-3.0-or-later",
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.10",
