@@ -1487,7 +1487,11 @@ for reviewing content:
 - Smoke test, "Performance (T-59)": `/favicon.ico` answers 200 with the
   theme's `favicon.ico` (production's site icon at 32×32), no redirect to the
   WordPress logo, and the front page prints no icon tag (its document keeps
-  the first TCP window; Lighthouse counts 13 requests on the front page).
+  the first TCP window; Lighthouse counts 13 requests on the front page);
+  the speculation rules of `/`, `/en/` and `/warenkorb/` (read in the
+  browser with URLPattern, the rule's own matcher): prefetch on press only,
+  core's exclusions once, no link to the cart, checkout or account pages
+  prefetched in either language, an ordinary page still prefetched.
   Lighthouse numbers of the project library: `perf/measure.ps1 -Runs 3`
   (Lighthouse 13 insights: DOM size of the `<body>`, LCP element and
   discovery, render-blocking requests, layout shifts, non-composited

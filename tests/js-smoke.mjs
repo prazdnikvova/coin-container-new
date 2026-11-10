@@ -2963,8 +2963,51 @@ const t59FavFile = (() => { try { return readFileSync(new URL('favicon.ico', the
 ok("Performance (T-59): /favicon.ico answers 200 image/x-icon with the theme's favicon.ico (a 32x32 ICO), no redirect; the front page names no icon and never the WordPress logo",
 	t59Fav.status === 200 && /^image\/(x-icon|vnd\.microsoft\.icon)/.test(t59Fav.headers.get('content-type') || '')
 	&& t59FavFile.length > 6 && t59FavBytes.equals(t59FavFile) && t59FavFile.readUInt32BE(0) === 0x00000100 && t59FavFile[6] === 32 && t59FavFile[7] === 32
-	&& !/rel=["'](shortcut )?icon["']|apple-touch-icon|msapplication-TileImage|w-logo-(gray|blue)-white-bg/.test(homeHtml),
-	JSON.stringify({ status: t59Fav.status, type: t59Fav.headers.get('content-type'), location: t59Fav.headers.get('location'), bytes: t59FavBytes.length, file: t59FavFile.length }));
+	&& homeHtml.includes('class="ccn-hero') && !/rel=["'](shortcut )?icon["']|apple-touch-icon|msapplication-TileImage|w-logo-(gray|blue)-white-bg/.test(homeHtml),
+	JSON.stringify({ status: t59Fav.status, type: t59Fav.headers.get('content-type'), location: t59Fav.headers.get('location'), bytes: t59FavBytes.length, file: t59FavFile.length, home: homeHtml.includes('class="ccn-hero') }));
+// Speculative Loading (core: prefetch when a link is pressed): one document rule on every page for visitors; the theme
+// adds WooCommerce's cart, checkout and account pages, German and English, to core's exclusions (inc/performance.php).
+// Read in the browser with URLPattern, the matcher of the rule itself: no link to those pages is prefetched in either
+// language, an ordinary page still is, a query string (add-to-cart) and wp-admin stay core's exclusions; prefetch only.
+const T59_SHOP = ['/warenkorb/', '/kasse/', '/my-account/'];
+const t59Spec = async (path) => {
+	const p = await browser.newPage();
+	await p.goto(`${BASE}${path}?cb=${Date.now()}`, { waitUntil: 'domcontentloaded' });
+	const r = await p.evaluate((shop) => {
+		const tags = [...document.querySelectorAll('script[type="speculationrules"]')];
+		if (tags.length !== 1) return { tags: tags.length };
+		let json;
+		try { json = JSON.parse(tags[0].textContent); } catch (e) { return { tags: 1, error: String(e) }; }
+		const rule = (json.prefetch || json.prerender || [])[0] || {};
+		const and = (rule.where && rule.where.and) || [];
+		const include = [].concat((and.find((c) => c.href_matches) || {}).href_matches || []);
+		const exclude = [].concat((((and.find((c) => c.not && c.not.href_matches) || {}).not) || {}).href_matches || []);
+		const hit = (patterns, url) => patterns.some((pt) => new URLPattern(pt, location.href).test(url));
+		const prefetched = (u) => { const url = new URL(u, location.href).href; return hit(include, url) && !hit(exclude, url); };
+		const blocked = [...shop, ...shop.map((s) => '/en' + s), '/my-account/lost-password/', '/en/kasse/order-received/1/'].filter((u) => prefetched(u));
+		return {
+			tags: 1, keys: Object.keys(json).join(','), rules: (json.prefetch || []).length, eagerness: rule.eagerness, include: include.join(','),
+			shopPatterns: exclude.filter((x) => /warenkorb|kasse|my-account/.test(x)), dup: exclude.length - new Set(exclude).size,
+			core: ['/wp-admin/*', '/wp-*.php'].every((x) => exclude.includes(x)),
+			blocked, page: prefetched(location.pathname.startsWith('/en/') ? '/en/container-kaufen/' : '/container-kaufen/'),
+			query: prefetched('?add-to-cart=1'), admin: prefetched('/wp-admin/'),
+		};
+	}, T59_SHOP);
+	await p.close();
+	return r;
+};
+const t59SpecDe = await t59Spec('/');
+const t59SpecEn = await t59Spec('/en/');
+const t59SpecCart = await t59Spec('/warenkorb/');
+const t59SpecOk = (s, patterns) => s.tags === 1 && s.keys === 'prefetch' && s.rules === 1 && s.eagerness === 'conservative' && s.core && s.dup === 0
+	&& patterns.every((x) => s.shopPatterns.includes(x)) && s.blocked.length === 0 && s.page === true && s.query === false && s.admin === false;
+ok('Performance (T-59): speculation rules on / and /en/ — prefetch on press only (conservative, no prerender), core exclusions once, the cart, checkout and account pages excluded in both languages (none of them prefetched, an ordinary page still is, ?add-to-cart= and wp-admin not)',
+	t59SpecOk(t59SpecDe, [...T59_SHOP, ...T59_SHOP.map((s) => '/en' + s)].map((s) => s + '*'))
+	&& t59SpecOk(t59SpecEn, T59_SHOP.map((s) => '/en' + s + '*')) && t59SpecDe.include === '/*' && t59SpecEn.include === '/en/*',
+	JSON.stringify({ de: t59SpecDe, en: t59SpecEn }));
+ok('Performance (T-59): on /warenkorb/ the speculation rules prefetch none of the cart, checkout and account pages (German or English)',
+	t59SpecCart.tags === 0 || (t59SpecCart.tags === 1 && t59SpecCart.blocked.length === 0 && t59SpecCart.query === false),
+	JSON.stringify(t59SpecCart));
 
 await browser.close();
 console.log(results.join('\n'));

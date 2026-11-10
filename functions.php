@@ -338,7 +338,7 @@ require_once get_template_directory() . '/inc/editor.php';
 require_once get_template_directory() . '/inc/security.php';
 require_once get_template_directory() . '/inc/disable-comments.php';
 require_once get_template_directory() . '/inc/assets-cleanup.php';
-// Requests the browser makes on its own (T-59): /favicon.ico without a redirect.
+// Requests the browser makes on its own (T-59): /favicon.ico without a redirect, no speculative loading of the shop's session pages.
 require_once get_template_directory() . '/inc/performance.php';
 require_once get_template_directory() . '/inc/site-settings.php';
 require_once get_template_directory() . '/inc/schema.php';

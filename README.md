@@ -66,7 +66,11 @@ one more round trip.
   `/favicon.ico` answers 200 with the theme's `favicon.ico` (production's
   site icon at 32×32) instead of core's redirect to the WordPress logo, so no
   page needs an icon tag (the front page document keeps the first TCP
-  window).
+  window); core's Speculative Loading stays at its default (prefetch when a
+  link is pressed, never prerender) and skips WooCommerce's cart, checkout
+  and account pages in every language (`/warenkorb/*`, `/en/warenkorb/*`, …,
+  from the pages' permalinks), on top of core's own exclusions (wp-admin,
+  wp-login.php, links with a query string such as `?add-to-cart=`).
 - Motion: blocks opt in with `data-motion="reveal"` / `data-motion-stagger`;
   one IntersectionObserver in `main.js` and the "Motion" block at the end of
   `theme.css` do the rest. Content is visible without JS and with
