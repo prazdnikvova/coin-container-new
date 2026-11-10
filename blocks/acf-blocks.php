@@ -129,10 +129,10 @@ function ccn_register_blocks() {
 		array(
 			'name'        => 'services',
 			'title'       => __( 'Services strip', 'coin-container' ),
-			'description' => __( 'Accent heading and a full-width photo strip with numbered service columns.', 'coin-container' ),
+			'description' => __( 'Accent heading and intro, then one card per service (icon, title, text) on a light grey band.', 'coin-container' ),
 			'category'    => 'ccn-banners',
 			'icon'        => 'columns',
-			'keywords'    => array( 'services', 'strip', 'numbers' ),
+			'keywords'    => array( 'services', 'strip', 'cards' ),
 			'template'    => 'blocks/banners/services.php',
 			'example'     => ccn_block_example(
 				array(
@@ -174,7 +174,7 @@ function ccn_register_blocks() {
 		array(
 			'name'        => 'cta-banner',
 			'title'       => __( 'CTA banner', 'coin-container' ),
-			'description' => __( 'Full-width photo banner with logo, heading and a yellow button.', 'coin-container' ),
+			'description' => __( 'Yellow band: heading, optional text line, the button (else the request button of Site Settings) and the phone; with a photo, the photo under a dark overlay and an optional logo.', 'coin-container' ),
 			'category'    => 'ccn-banners',
 			'icon'        => 'megaphone',
 			'keywords'    => array( 'cta', 'banner' ),

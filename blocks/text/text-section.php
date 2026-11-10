@@ -13,8 +13,12 @@ $ccn_accent  = get_field( 'heading_accent' );
 $ccn_after   = get_field( 'heading_after' );
 $ccn_text    = get_field( 'text' );
 
-if ( ! empty( $is_preview ) && ! $ccn_heading && ! $ccn_text ) {
-	echo '<p><em>' . esc_html__( 'Text section: add a heading or text in the block sidebar.', 'coin-container' ) . '</em></p>';
+// Without a photo, a heading or text there is nothing to show (a photo alone is content): the front end prints
+// nothing, the editor a hint.
+if ( ! $ccn_img_id && ! $ccn_heading && ! $ccn_accent && ! $ccn_text ) {
+	if ( ! empty( $is_preview ) ) {
+		echo '<p><em>' . esc_html__( 'Text section: add a heading or text in the block sidebar.', 'coin-container' ) . '</em></p>';
+	}
 	return;
 }
 ?>

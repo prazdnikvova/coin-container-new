@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-11-10T00:56:51+00:00\n"
+"POT-Creation-Date: 2026-11-10T01:23:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: coin-container\n"
@@ -117,7 +117,7 @@ msgid "Services strip"
 msgstr ""
 
 #: blocks/acf-blocks.php:132
-msgid "Accent heading and a full-width photo strip with numbered service columns."
+msgid "Accent heading and intro, then one card per service (icon, title, text) on a light grey band."
 msgstr ""
 
 #: blocks/acf-blocks.php:159
@@ -133,7 +133,7 @@ msgid "CTA banner"
 msgstr ""
 
 #: blocks/acf-blocks.php:177
-msgid "Full-width photo banner with logo, heading and a yellow button."
+msgid "Yellow band: heading, optional text line, the button (else the request button of Site Settings) and the phone; with a photo, the photo under a dark overlay and an optional logo."
 msgstr ""
 
 #: blocks/acf-blocks.php:192
@@ -247,11 +247,11 @@ msgstr ""
 msgid "CTA banner: add a heading in the block sidebar."
 msgstr ""
 
-#: blocks/banners/home-hero.php:22
+#: blocks/banners/home-hero.php:24
 msgid "Home hero: pick a background image and a title in the block sidebar."
 msgstr ""
 
-#: blocks/banners/services.php:16
+#: blocks/banners/services.php:18
 msgid "Services: add a heading and items in the block sidebar."
 msgstr ""
 
@@ -350,7 +350,7 @@ msgstr ""
 msgid "Reviews widget: activate the Google reviews plugin or fill in the Trustpilot business unit ID (Site Settings → Vertrauen)."
 msgstr ""
 
-#: blocks/lists/stats.php:14
+#: blocks/lists/stats.php:16
 msgid "Stats: add a heading and counters in the block sidebar."
 msgstr ""
 
@@ -387,15 +387,15 @@ msgstr ""
 msgid "(öffnet in neuem Tab)"
 msgstr ""
 
-#: blocks/text/intro.php:16
+#: blocks/text/intro.php:18
 msgid "Intro: add a heading in the block sidebar."
 msgstr ""
 
-#: blocks/text/text-image.php:17
+#: blocks/text/text-image.php:19
 msgid "Text + image: add a heading in the block sidebar."
 msgstr ""
 
-#: blocks/text/text-section.php:17
+#: blocks/text/text-section.php:20
 msgid "Text section: add a heading or text in the block sidebar."
 msgstr ""
 

@@ -334,7 +334,14 @@ styles (T-52; [`DESIGN.md`](DESIGN.md) "Editor"):
   `is-style-*` class); core's styles of image, quote, separator and table are
   removed in the editor only (`ccn_editor_block_styles()`: an inline script on
   the post editor screen after `wp-edit-post`), so the Styles panel never
-  offers a look the site does not have. Nothing of it reaches the front end.
+  offers a look the site does not have. The same script drops the Row, Stack
+  and Grid variations of the group block (T-60): the plain group stays, stored
+  groups keep working. Nothing of it reaches the front end.
+- **Empty blocks:** a block without its key content prints nothing on the
+  front end, and its editor preview shows a hint instead — home hero without
+  title and image, intro and text + image without a heading, text section
+  without photo, heading and text, services and stats without heading and
+  items (T-60), like info cards, FAQ and the form card before them.
 - **Inserter examples** (`'example'`, `ccn_block_example()`): placeholder data
   for the ten blocks that render from their own fields or Site Settings
   (intro, text section, text + image, info cards, numbered list, FAQ, CTA

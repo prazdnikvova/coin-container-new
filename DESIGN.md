@@ -206,7 +206,9 @@ all, not hidden by CSS.
   theme.css has no rules for them (core buttons in running text would even be
   invisible, `.entry-content a` beats `.wp-block-button__link`). Custom HTML
   and Shortcode for administrators only. Older posts keep the blocks they
-  already hold.
+  already hold. The group block comes without its Row, Stack and Grid
+  variations (flex and grid layouts the design does not use; Grid would stand
+  in for the columns block), T-60.
 - **Styles:** no block style variations. Core's «Rounded» image, «Plain»
   quote, «Wide» and «Dots» separator and «Stripes» table are removed in the
   editor (the site does not style them), so those blocks show no Styles panel.
@@ -216,7 +218,9 @@ all, not hidden by CSS.
   texts are German placeholders in square brackets: the layout is the design,
   the words come from production or the client (Content & brand rules).
   Images and the form stay empty until picked, and a block without its image
-  prints no `<img>` (all 20 blocks checked with empty data).
+  prints no `<img>` (all 20 blocks checked with empty data). A block without
+  its key content prints nothing at all on the page, only its hint in the
+  editor (T-60; README "Editor").
 - **Page rules, not locked:** at most one CTA banner and one form card per
   page; patterns open with an `h2` block because the template prints the
   `h1` (Markup standard in README).
@@ -1466,3 +1470,17 @@ for reviewing content:
   check), parity with production and screenshots: the T-57c report of the
   project library (`reports/2026-11-10-t57c-report.md`, probes in
   `reports/2026-11-10-data/t57c-scripts/`).
+- Smoke test, "Hygiene (T-60)": the glossary index without a wrapper (its
+  letter h2 and lists direct children of `.entry-content`, the 68ch measure
+  of the hub text at 1440); no comments template, `comments_template()` call
+  or comment reply script in the theme and none of their markup on a post
+  and a page; WooCommerce theme support declared once; no trace of the
+  multilingual plugin planned before TranslatePress; one hero preload on the
+  front page and a landing, equal to the hero image; the company geo from
+  Site Settings (fields in the Contacts tab, the fallback once in the code,
+  one GeoCoordinates on the front page); the group variations dropped by the
+  editor-only script. Read-only. The six blocks without their key content
+  (no `<section>` on the front end, the hint in the preview) are a WP-CLI
+  check of the project library, like T-52's empty-data render; negative runs
+  and numbers: the T-60 report (`reports/2026-11-10-t60-report.md`, scripts
+  in `reports/2026-11-10-data/t60-scripts/`).

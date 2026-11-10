@@ -2944,6 +2944,13 @@ ok('Hygiene (T-60): company geo from Site Settings — text fields geo_lat / geo
 	&& t60HomeGeo.length === 1 && t60HomeGeo[0]['@type'] === 'GeoCoordinates'
 	&& t60HomeGeo[0].latitude === T60_GEO.latitude && t60HomeGeo[0].longitude === T60_GEO.longitude,
 	JSON.stringify({ fields: [t60Tab('geo_lat'), t60Tab('geo_lng')], geo: t60HomeGeo }));
+// Editor: the group block's Row / Stack / Grid variations offer flex and grid layouts the design does not use (Grid
+// stands in for the columns block, which is not offered); the editor-only script of the core block styles drops them.
+ok('Editor (T-60): the Row / Stack / Grid variations of core/group dropped in the editor only (wp.blocks.unregisterBlockVariation in the editor-only inline script of inc/editor.php, after wp-edit-post); nothing of it on the front page or in main.js',
+	/wp\.blocks\.unregisterBlockVariation\(/.test(t52Editor) && /'core\/group'\s*=>\s*array\(\s*'group-row',\s*'group-stack',\s*'group-grid'\s*\)/.test(t52Editor)
+	&& /add_action\(\s*'enqueue_block_editor_assets',\s*'ccn_editor_block_styles'\s*\)/.test(t52Editor) && /'wp-edit-post'/.test(t52Editor)
+	&& !/unregisterBlockVariation|group-stack/.test(homeHtml) && !/unregisterBlockVariation/.test(mainJs),
+	JSON.stringify({ variations: (t52Editor.match(/'group-(row|stack|grid)'/g) || []).length }));
 
 await browser.close();
 console.log(results.join('\n'));

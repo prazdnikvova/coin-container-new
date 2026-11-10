@@ -258,10 +258,14 @@ function ccn_allowed_block_types( $allowed, $context ) {
 /**
  * Core block styles theme.css has no rules for: removed in the editor only, so
  * the Styles panel never offers a look the site does not have (no Styles panel
- * left on these four blocks). An inline script on the post editor screen, run
- * after wp-edit-post has registered the core blocks; the front end and main.js
- * stay untouched. The theme registers no block styles of its own: theme.css
- * has no is-style-* class to map one to.
+ * left on these four blocks). The same goes for the Row, Stack and Grid
+ * variations of the group block (T-60): flex and grid groups are layouts the
+ * page design does not use, and Grid stands in for the columns block, which
+ * the editor does not offer either; the plain group stays. An inline script on
+ * the post editor screen, run after wp-edit-post has registered the core
+ * blocks; stored content keeps working (variations are inserter items only),
+ * the front end and main.js stay untouched. The theme registers no block
+ * styles of its own: theme.css has no is-style-* class to map one to.
  */
 add_action( 'enqueue_block_editor_assets', 'ccn_editor_block_styles' );
 function ccn_editor_block_styles() {
@@ -269,17 +273,22 @@ function ccn_editor_block_styles() {
 	if ( ! $screen || 'post' !== $screen->base ) {
 		return;
 	}
-	$styles = array(
+	$styles     = array(
 		'core/image'     => array( 'default', 'rounded' ),
 		'core/quote'     => array( 'default', 'plain' ),
 		'core/separator' => array( 'default', 'wide', 'dots' ),
 		'core/table'     => array( 'regular', 'stripes' ),
+	);
+	$variations = array(
+		'core/group' => array( 'group-row', 'group-stack', 'group-grid' ),
 	);
 	// No file: the handle only carries the inline script below (no src, no version).
 	wp_register_script( 'ccn-editor-block-styles', false, array( 'wp-blocks', 'wp-dom-ready', 'wp-edit-post' ), null, true );
 	wp_enqueue_script( 'ccn-editor-block-styles' );
 	wp_add_inline_script(
 		'ccn-editor-block-styles',
-		'wp.domReady(function(){var s=' . wp_json_encode( $styles ) . ';Object.keys(s).forEach(function(b){s[b].forEach(function(n){wp.blocks.unregisterBlockStyle(b,n);});});});'
+		'wp.domReady(function(){var s=' . wp_json_encode( $styles ) . ',v=' . wp_json_encode( $variations ) . ';'
+		. 'Object.keys(s).forEach(function(b){s[b].forEach(function(n){wp.blocks.unregisterBlockStyle(b,n);});});'
+		. 'Object.keys(v).forEach(function(b){v[b].forEach(function(n){wp.blocks.unregisterBlockVariation(b,n);});});});'
 	);
 }

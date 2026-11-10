@@ -12,8 +12,11 @@ $ccn_heading = get_field( 'heading' );
 $ccn_accent  = get_field( 'heading_accent' );
 $ccn_intro   = get_field( 'intro' );
 
-if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
-	echo '<p><em>' . esc_html__( 'Services: add a heading and items in the block sidebar.', 'coin-container' ) . '</em></p>';
+// Without a heading and items there is nothing to show: the front end prints nothing, the editor a hint.
+if ( ! $ccn_heading && ! have_rows( 'items' ) ) {
+	if ( ! empty( $is_preview ) ) {
+		echo '<p><em>' . esc_html__( 'Services: add a heading and items in the block sidebar.', 'coin-container' ) . '</em></p>';
+	}
 	return;
 }
 ?>

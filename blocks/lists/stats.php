@@ -10,8 +10,11 @@ $ccn_heading = get_field( 'heading' );
 $ccn_accent  = get_field( 'heading_accent' );
 $ccn_sub     = get_field( 'subtitle' );
 
-if ( ! empty( $is_preview ) && ! $ccn_heading && ! have_rows( 'items' ) ) {
-	echo '<p><em>' . esc_html__( 'Stats: add a heading and counters in the block sidebar.', 'coin-container' ) . '</em></p>';
+// Without a heading and counters there is nothing to show: the front end prints nothing, the editor a hint.
+if ( ! $ccn_heading && ! have_rows( 'items' ) ) {
+	if ( ! empty( $is_preview ) ) {
+		echo '<p><em>' . esc_html__( 'Stats: add a heading and counters in the block sidebar.', 'coin-container' ) . '</em></p>';
+	}
 	return;
 }
 ?>

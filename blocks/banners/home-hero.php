@@ -18,11 +18,13 @@ $ccn_title   = get_field( 'title' );
 $ccn_sub     = get_field( 'subtitle' );
 $ccn_tag     = ( ! $ccn_preview && is_front_page() ) ? 'h1' : 'h2';
 
-if ( $ccn_preview && ! $ccn_title && ! $ccn_img_id ) : ?>
-	<p><em><?php esc_html_e( 'Home hero: pick a background image and a title in the block sidebar.', 'coin-container' ); ?></em></p>
-	<?php
+// Without a title and an image there is nothing to show: the front end prints nothing, the editor a hint.
+if ( ! $ccn_title && ! $ccn_img_id ) {
+	if ( $ccn_preview ) {
+		echo '<p><em>' . esc_html__( 'Home hero: pick a background image and a title in the block sidebar.', 'coin-container' ) . '</em></p>';
+	}
 	return;
-endif;
+}
 ?>
 <section class="ccn-hero"<?php echo ! empty( $block['anchor'] ) ? ' id="' . esc_attr( $block['anchor'] ) . '"' : ''; ?>>
 	<?php

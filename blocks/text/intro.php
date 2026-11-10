@@ -12,8 +12,11 @@ $ccn_text    = get_field( 'text' );
 $ccn_btn_t   = get_field( 'button_text' );
 $ccn_btn_u   = get_field( 'button_url' );
 
-if ( ! empty( $is_preview ) && ! $ccn_heading ) {
-	echo '<p><em>' . esc_html__( 'Intro: add a heading in the block sidebar.', 'coin-container' ) . '</em></p>';
+// Without its heading there is nothing to show: the front end prints nothing, the editor a hint.
+if ( ! $ccn_heading ) {
+	if ( ! empty( $is_preview ) ) {
+		echo '<p><em>' . esc_html__( 'Intro: add a heading in the block sidebar.', 'coin-container' ) . '</em></p>';
+	}
 	return;
 }
 ?>
