@@ -1337,9 +1337,9 @@ for reviewing content:
   (`reports/2026-11-09-data/` there), the probes `t56_probe.cjs` and
   `t56_shots.cjs`. First TCP window: theme.css sent gzip ≤ 14 600 bytes
   (bytes of the response body); the front page makes 12 requests under
-  Lighthouse's mobile emulation (Lighthouse counts 14 with `/favicon.ico` and
-  its redirect) and none to `content-cards.css`, which only pages with the
-  price table or link cards load, after theme.css.
+  Lighthouse's mobile emulation (Lighthouse counts 13 with `/favicon.ico`;
+  14 with core's redirect before T-59) and none to `content-cards.css`, which
+  only pages with the price table or link cards load, after theme.css.
 - Smoke test, "Migration (T-53b)": the 30 converted Elementor records and the
   15 pages of production's `[coin_*]` shortcodes answer 200 without Elementor
   markup, a raw `[coin_` or the donor host; price tables on the 13 pages of
@@ -1484,3 +1484,14 @@ for reviewing content:
   check of the project library, like T-52's empty-data render; negative runs
   and numbers: the T-60 report (`reports/2026-11-10-t60-report.md`, scripts
   in `reports/2026-11-10-data/t60-scripts/`).
+- Smoke test, "Performance (T-59)": `/favicon.ico` answers 200 with the
+  theme's `favicon.ico` (production's site icon at 32×32), no redirect to the
+  WordPress logo, and the front page prints no icon tag (its document keeps
+  the first TCP window; Lighthouse counts 13 requests on the front page).
+  Lighthouse numbers of the project library: `perf/measure.ps1 -Runs 3`
+  (Lighthouse 13 insights: DOM size of the `<body>`, LCP element and
+  discovery, render-blocking requests, layout shifts, non-composited
+  animations) and `perf/budget-check.py` (the budget of this file and the
+  README as PASS/FAIL per page); negative runs and numbers: the T-59 report
+  (`reports/2026-11-10-t59-report.md`, scripts in
+  `reports/2026-11-10-data/t59-scripts/`).

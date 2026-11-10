@@ -62,6 +62,11 @@ one more round trip.
   jQuery loads only on the WooCommerce pages (shop, categories, products,
   cart, checkout, account), for WooCommerce's own scripts; the theme's code
   never uses it.
+- Requests the browser makes on its own live in `inc/performance.php`:
+  `/favicon.ico` answers 200 with the theme's `favicon.ico` (production's
+  site icon at 32×32) instead of core's redirect to the WordPress logo, so no
+  page needs an icon tag (the front page document keeps the first TCP
+  window).
 - Motion: blocks opt in with `data-motion="reveal"` / `data-motion-stagger`;
   one IntersectionObserver in `main.js` and the "Motion" block at the end of
   `theme.css` do the rest. Content is visible without JS and with

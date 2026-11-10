@@ -1806,8 +1806,9 @@ ok('REST (T-56): X-WP-Authorization reaches the Application Password check like 
 // must fit the first window of a new connection (initcwnd 10 x 1 460 = 14 600 bytes; above it Lighthouse adds a round
 // trip: front page FCP 913 -> 1 059 ms in T-56), counted as the bytes of the response body, not its Content-Length.
 // The price table and the link cards keep their rules in assets/css/content-cards.css, loaded after theme.css only
-// where they show: the front page keeps its requests (Lighthouse mobile counts 14 = these 12 plus /favicon.ico and its
-// redirect, which Chrome adds outside Playwright), the product page gets none of it, a post with related posts does.
+// where they show: the front page keeps its requests (Lighthouse mobile counts 13 = these 12 plus /favicon.ico, which
+// Chrome adds outside Playwright; 14 with core's redirect before T-59), the product page gets none of it, a post with
+// related posts does.
 const { get: t56HttpGet } = await import(BASE.startsWith('https') ? 'node:https' : 'node:http');
 const t56HomeHead = (await t56Get('/')).text;
 const t56CssHref = ((t56HomeHead.match(/<link[^>]+id=['"]coin-container-css['"][^>]+href=['"]([^'"]+)['"]/) || [])[1] || '').replace(/&#038;/g, '&');
@@ -1832,7 +1833,7 @@ await t56Lh.close();
 const t56CardsTag = "id='ccn-content-cards-css'";
 const t56ProductHead = (await t56Get('/product/20-fuss-container-gebraucht/')).text;
 const t56PostHead = (await t56Get(t56PostPath || '/iso-container-einfach-erklaert/')).text;
-ok('First TCP window (T-56): front page 12 requests in Lighthouse mobile emulation (Lighthouse: 14 with the favicon pair), none to content-cards.css; product page without it; a post with related posts loads it after theme.css',
+ok('First TCP window (T-56): front page 12 requests in Lighthouse mobile emulation (Lighthouse: 13 with /favicon.ico), none to content-cards.css; product page without it; a post with related posts loads it after theme.css',
 	t56HomeReqs.length === 12 && !t56HomeReqs.some((u) => u.includes('content-cards.css')) && !t56ProductHead.includes(t56CardsTag)
 	&& t56PostHead.indexOf("id='coin-container-css'") > -1 && t56PostHead.indexOf(t56CardsTag) > t56PostHead.indexOf("id='coin-container-css'"),
 	JSON.stringify({ home: t56HomeReqs.length, product: t56ProductHead.includes(t56CardsTag), post: t56PostHead.includes(t56CardsTag) }));
@@ -2951,6 +2952,19 @@ ok('Editor (T-60): the Row / Stack / Grid variations of core/group dropped in th
 	&& /add_action\(\s*'enqueue_block_editor_assets',\s*'ccn_editor_block_styles'\s*\)/.test(t52Editor) && /'wp-edit-post'/.test(t52Editor)
 	&& !/unregisterBlockVariation|group-stack/.test(homeHtml) && !/unregisterBlockVariation/.test(mainJs),
 	JSON.stringify({ variations: (t52Editor.match(/'group-(row|stack|grid)'/g) || []).length }));
+
+// Performance (T-59, DESIGN.md "How to measure"). /favicon.ico: a browser asks for it when the page names no icon.
+// Core answered with a redirect to the WordPress logo; the theme answers with the icon itself (inc/performance.php,
+// favicon.ico in the theme root: production's site icon at 32x32), and the front page prints no icon tag, so its
+// document keeps the first TCP window. Lighthouse counts /favicon.ico as the 13th request of the front page.
+const t59Fav = await fetch(`${BASE}/favicon.ico`, { redirect: 'manual' });
+const t59FavBytes = Buffer.from(await t59Fav.arrayBuffer());
+const t59FavFile = (() => { try { return readFileSync(new URL('favicon.ico', themeDir)); } catch { return Buffer.alloc(0); } })();
+ok("Performance (T-59): /favicon.ico answers 200 image/x-icon with the theme's favicon.ico (a 32x32 ICO), no redirect; the front page names no icon and never the WordPress logo",
+	t59Fav.status === 200 && /^image\/(x-icon|vnd\.microsoft\.icon)/.test(t59Fav.headers.get('content-type') || '')
+	&& t59FavFile.length > 6 && t59FavBytes.equals(t59FavFile) && t59FavFile.readUInt32BE(0) === 0x00000100 && t59FavFile[6] === 32 && t59FavFile[7] === 32
+	&& !/rel=["'](shortcut )?icon["']|apple-touch-icon|msapplication-TileImage|w-logo-(gray|blue)-white-bg/.test(homeHtml),
+	JSON.stringify({ status: t59Fav.status, type: t59Fav.headers.get('content-type'), location: t59Fav.headers.get('location'), bytes: t59FavBytes.length, file: t59FavFile.length }));
 
 await browser.close();
 console.log(results.join('\n'));
