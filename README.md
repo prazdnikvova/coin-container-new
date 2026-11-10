@@ -430,10 +430,11 @@ template; a new template adds its page there.
 ## Tests
 
 Two Playwright scripts in `tests/`, run against a local WordPress with this
-theme (`npm install` in `tests/` once):
+theme (`npm install` in `tests/` once), and one static check of the source:
 
 ```bash
 cd tests
+node static-checks.mjs       # source rules, no WordPress or npm install, under a second
 npm install                  # first time only
 node js-smoke.mjs            # smoke test, about 12 minutes
 node checkout-e2e.mjs        # checkout end to end, places a real order
@@ -441,6 +442,14 @@ node checkout-e2e.mjs        # checkout end to end, places a real order
 CCN_BASE_URL=http://your-site.local CCN_E2E_PRODUCT=20-fuss-container-gebraucht node checkout-e2e.mjs
 ```
 
+- **Static checks** (`static-checks.mjs`): the rules of this README and
+  `DESIGN.md` that the source itself shows — no `transition: all`, reduced
+  motion handled in theme.css and main.js, one `<header>` (header.php),
+  `fetchpriority` set only by the hero, landing hero, hero preload and
+  product gallery code, no comment reply script, no block styles of the
+  theme, WooCommerce theme support declared once, no trace of the
+  multilingual plugin planned before TranslatePress. Run it before a commit;
+  CI runs it on every push.
 - **Smoke test** (`js-smoke.mjs`): rendering, markup structure, accessibility
   basics, design tokens, motion, security hardening, SEO, translations, the
   production features of the theme and zero JS errors. Any FAIL blocks the
@@ -462,9 +471,9 @@ CCN_BASE_URL=http://your-site.local CCN_E2E_PRODUCT=20-fuss-container-gebraucht 
 | `CCN_PHP` | both | PHP binary — smoke: `php -l` of the patterns (default: the newest PHP 8 of Local by Flywheel); e2e: WP-CLI (default: the PHP of the Local site) |
 | `CCN_PHP_INI`, `CCN_WP_CLI`, `CCN_WP_PATH` | e2e | php.ini, `wp-cli.phar` and WordPress folder for WP-CLI; default: those of the Local by Flywheel site whose domain is the host of `CCN_BASE_URL` |
 
-CI (GitHub Actions) runs `php -l` on PHP 8.2/8.3 and PHPCS (security + i18n
-ruleset) on every push; the Playwright scripts need a live site and run
-locally.
+CI (GitHub Actions) runs `php -l` on PHP 8.2/8.3, PHPCS (security + i18n
+ruleset) and `node tests/static-checks.mjs` on Node 20/22 on every push; the
+Playwright scripts need a live site and run locally.
 
 ## Author
 

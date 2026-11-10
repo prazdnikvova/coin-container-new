@@ -1492,6 +1492,11 @@ for reviewing content:
   browser with URLPattern, the rule's own matcher): prefetch on press only,
   core's exclusions once, no link to the cart, checkout or account pages
   prefetched in either language, an ordinary page still prefetched.
+  Source rules without a site: `node tests/static-checks.mjs` (also in CI) —
+  no `transition: all`, reduced motion in theme.css and main.js, one
+  `<header>`, `fetchpriority` only in the hero, landing hero, hero preload
+  and product gallery code, no comment reply script, no block styles, one
+  WooCommerce theme support, no trace of the old multilingual plugin.
   Lighthouse numbers of the project library: `perf/measure.ps1 -Runs 3`
   (Lighthouse 13 insights: DOM size of the `<body>`, LCP element and
   discovery, render-blocking requests, layout shifts, non-composited

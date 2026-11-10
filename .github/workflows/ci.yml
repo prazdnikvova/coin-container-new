@@ -38,3 +38,17 @@ jobs:
         run: composer install --no-interaction --no-progress
       - name: Run PHPCS
         run: vendor/bin/phpcs
+
+  static-checks:
+    name: Static checks (Node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Source rules of README and DESIGN.md (no WordPress, no npm install)
+        run: node tests/static-checks.mjs

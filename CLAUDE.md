@@ -80,6 +80,8 @@ always before commit), ccn-perf (before/after every perf change), ccn-commit
 
 ## Tests
 
+`node tests/static-checks.mjs` — source rules without WordPress (CI runs it
+too), N/N PASS before any commit.
 `cd tests && node js-smoke.mjs` — Playwright smoke (about 12 minutes, one page
 at a time: run nothing else against the site meanwhile), must be N/N PASS
 before any commit. Add checks for every new interactive block.
